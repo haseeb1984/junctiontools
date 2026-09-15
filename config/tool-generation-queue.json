@@ -4,32 +4,11 @@
   "methodology": {
     "priority_policy": "Rank demand clusters using reported search volume, breadth of related queries, competition notes, and implementation feasibility.",
     "volume_policy": "Use only source-reported search volumes; rankings are directional and are not traffic forecasts.",
-    "existing_tool_policy": "Prefer new tools where the current 35-tool registry has no direct functional match."
+    "existing_tool_policy": "Do not generate a new tool when the current registry already provides the same core capability; route that demand to an enhancement instead."
   },
   "queue": [
     {
       "rank": 1,
-      "cluster_id": "image-resizing",
-      "core_query": "image resizer",
-      "decision": "build",
-      "priority_score": 94,
-      "demand_signal": 290000,
-      "signal_count": 4,
-      "existing_tool_match": null,
-      "implementation": "client-side-image-resizer",
-      "recommended_slug": "image-resizer",
-      "seo_page_cluster": [
-        "image-resizer",
-        "resize-image-online",
-        "resize-jpg",
-        "resize-photo",
-        "resize-image-to-50kb",
-        "resize-image-to-100kb"
-      ],
-      "rationale": "Multiple strong related queries support one reusable browser-based image resizing capability, creating a broad long-tail page cluster."
-    },
-    {
-      "rank": 2,
       "cluster_id": "timestamp",
       "core_query": "timestamp converter",
       "decision": "build",
@@ -48,7 +27,7 @@
       "rationale": "A focused utility with a reported 48K search-demand signal and low implementation complexity is a strong next build."
     },
     {
-      "rank": 3,
+      "rank": 2,
       "cluster_id": "qr-code",
       "core_query": "qr code generator",
       "decision": "research",
@@ -64,6 +43,29 @@
         "qr-code-maker"
       ],
       "rationale": "Demand is exceptionally strong, but the evidence explicitly indicates entrenched competition; validate differentiation and SERP feasibility before implementation."
+    }
+  ],
+  "enhancements": [
+    {
+      "cluster_id": "image-resizing",
+      "core_query": "image resizer",
+      "decision": "enhancement",
+      "priority_score": 94,
+      "demand_signal": 290000,
+      "signal_count": 4,
+      "existing_tool_match": "image_compressor",
+      "target_tool_slug": "image-compressor",
+      "implementation": "enhance-existing-image-tool",
+      "recommended_slug": "image-compressor",
+      "seo_page_cluster": [
+        "image-resizer",
+        "resize-image-online",
+        "resize-jpg",
+        "resize-photo",
+        "resize-image-to-50kb",
+        "resize-image-to-100kb"
+      ],
+      "rationale": "The existing Image Compressor already covers the image-tool capability; capture image-resizing demand by extending that tool rather than generating a duplicate standalone tool."
     }
   ]
 }
