@@ -30,7 +30,7 @@ if (!is_dir($outputDir) && !mkdir($outputDir, 0775, true) && !is_dir($outputDir)
 
 $root = dirname(__DIR__);
 $php = PHP_BINARY;
-$run = static function (string $script, array $args): void use ($root, $php): void {
+$run = static function (string $script, array $args) use ($root, $php): void {
     $command = escapeshellarg($php) . ' ' . escapeshellarg($root . '/' . ltrim($script, '/'));
     foreach ($args as $arg) {
         $command .= ' ' . escapeshellarg((string) $arg);
