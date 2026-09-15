@@ -25,8 +25,8 @@ foreach ($approvals['approvals'] as $item) {
 }
 if (!is_dir($outputDir) && !mkdir($outputDir, 0775, true) && !is_dir($outputDir)) { fwrite(STDERR, "Unable to create output directory.\n"); exit(1); }
 
-function html_shell(string $title, string $description, string $body, string $script): string {
-    return "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>" . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "</title>\n<meta name=\"description\" content=\"" . htmlspecialchars($description, ENT_QUOTES, 'UTF-8') . "\">\n<link rel=\"canonical\" href=\"https://junctiontools.com/" . rawurlencode(strtolower((string)preg_replace('/[^a-z0-9]+/i','-',trim($title)))) . "\">\n</head>\n<body>\n<main>\n" . $body . "\n</main>\n<script>\n" . $script . "\n</script>\n</body>\n</html>\n";
+function html_shell(string $slug, string $title, string $description, string $body, string $script): string {
+    return "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>" . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "</title>\n<meta name=\"description\" content=\"" . htmlspecialchars($description, ENT_QUOTES, 'UTF-8') . "\">\n<link rel=\"canonical\" href=\"https://junctiontools.com/" . htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') . "\">\n</head>\n<body>\n<main>\n" . $body . "\n</main>\n<script>\n" . $script . "\n</script>\n</body>\n</html>\n";
 }
 
 $generated = 0;
@@ -78,7 +78,7 @@ JS;
 })();
 JS;
     }
-    $html = html_shell($title, $description, $body, $script);
+    $html = html_shell($slug, $title, $description, $body, $script);
     $path = rtrim($outputDir, '/\\') . '/' . $slug . '.html';
     if (file_put_contents($path, $html, LOCK_EX) === false) { fwrite(STDERR, "Unable to write {$path}.\n"); exit(1); }
     $generated++;
