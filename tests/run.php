@@ -111,14 +111,15 @@ function jt_suite_ssl(): array
         $c=$r['certificate']??null;
         jt_test_assert(is_array($c),'Certificate metadata missing.');
         jt_test_assert(trim((string)($c['issuer']??''))!=='','Certificate issuer missing.');
-        jt_test_assert(strtotime((string)($c['expires']??''))!==false,'Certificate expiry invalid.');
+        $expiry=(string)($c['expires']??'');
+        jt_test_assert(strtotime($expiry)!==false,'Certificate expiry invalid. Debug: '.json_encode($r['certificate_debug']??[],JSON_UNESCAPED_SLASHES));
         jt_test_assert(is_int($c['daysRemaining']??null),'daysRemaining is not an integer.');
     });
     jt_test_case($results,'SSL daysRemaining matches expiry',static function()use($sslUrl):void{
         $r=jt_safe_http_get($sslUrl,['certificate_info'=>true,'timeout'=>12,'connect_timeout'=>5,'max_bytes'=>262144]);
         jt_test_assert(($r['success']??false)===true,'HTTPS request failed.');
         $c=$r['certificate']; $expected=(int)floor((strtotime((string)$c['expires'])-time())/86400);
-        jt_test_assert(abs($expected-(int)$c['daysRemaining'])<=1,'daysRemaining mismatch.');
+        jt_test_assert(abs($expected-(int)$c['daysRemaining'])<=1,'daysRemaining mismatch. Debug: '.json_encode($r['certificate_debug']??[],JSON_UNESCAPED_SLASHES));
     });
     return $results;
 }
@@ -143,45 +144,3 @@ function jt_suite_redirects(): array
 function jt_suite_limits(array $options): array
 {
     global $fixtureBase;
-    $results=[];
-    $slow=(string)($options['slow-url']??$fixtureBase.'/timeout.php?delay=10');
-    $large=(string)($options['large-url']??$fixtureBase.'/large-response.php?bytes=3145728');
-    jt_test_case($results,'Committed timeout fixture exceeds 1-second client timeout',static function()use($slow):void{$started=microtime(true);$r=jt_safe_http_get($slow,['timeout'=>1,'connect_timeout'=>1,'max_bytes'=>65536]);$elapsed=microtime(true)-$started;jt_test_assert(($r['success']??true)===false,'Timeout fixture unexpectedly succeeded.');jt_test_assert($elapsed<5,sprintf('Timeout took %.2fs.',$elapsed));});
-    jt_test_case($results,'Committed response-size fixture exceeds 2 MiB limit',static function()use($large):void{$r=jt_safe_http_get($large,['timeout'=>5,'connect_timeout'=>2,'max_bytes'=>2097152]);jt_test_assert(($r['success']??true)===false,'Oversized fixture unexpectedly succeeded.');});
-    return $results;
-}
-
-function jt_suite_rate_limit(): array
-{
-    $results=[];$bucket='ci-'.bin2hex(random_bytes(8));
-    for($i=1;$i<=10;$i++){jt_test_case($results,"Rate limit request {$i}/10 is allowed",static function()use($bucket):void{jt_test_assert(jt_rate_limit($bucket,10,300),'Expected request to be allowed.');});}
-    jt_test_case($results,'Rate limit request 11/10 is rejected',static function()use($bucket):void{jt_test_assert(jt_rate_limit($bucket,10,300)===false,'Expected rate-limit rejection.');});
-    return $results;
-}
-
-function jt_suite_contact(array $options): array
-{
-    global $fixtureBase;
-    $results=[];$url=(string)($options['contact-url']??getenv('JUNCTIONTOOLS_CONTACT_TEST_URL')?:$fixtureBase.'/contact-endpoint.php');
-    $headers=['Origin: https://junctiontools.com'];
-    jt_test_case($results,'Contact fixture rejects GET',static function()use($url,$headers):void{$r=jt_run_http($url,'GET',null,$headers);jt_test_assert($r['status']===405,'Expected GET 405, got '.$r['status']);});
-    jt_test_case($results,'Contact fixture rejects invalid email',static function()use($url,$headers):void{$b=http_build_query(['name'=>'CI Test','email'=>'invalid','message'=>'test']);$r=jt_run_http($url,'POST',$b,array_merge($headers,['Content-Type: application/x-www-form-urlencoded']));jt_test_assert($r['status']===422,'Expected invalid email 422, got '.$r['status']);});
-    jt_test_case($results,'Contact fixture rejects oversized request',static function()use($url,$headers):void{$b='message='.str_repeat('A',40000);$r=jt_run_http($url,'POST',$b,array_merge($headers,['Content-Type: application/x-www-form-urlencoded']));jt_test_assert($r['status']===413,'Expected oversized request 413, got '.$r['status']);});
-    jt_test_case($results,'Contact fixture rejects honeypot',static function()use($url,$headers):void{$b=http_build_query(['name'=>'CI Test','email'=>'ci@example.test','message'=>'test','website'=>'bot']);$r=jt_run_http($url,'POST',$b,array_merge($headers,['Content-Type: application/x-www-form-urlencoded']));jt_test_assert($r['status']===422,'Expected honeypot 422, got '.$r['status']);});
-    jt_test_case($results,'Contact fixture accepts valid submission without side effects',static function()use($url,$headers):void{$b=http_build_query(['name'=>'CI Test','email'=>'ci@example.test','message'=>'fixture test']);$r=jt_run_http($url,'POST',$b,array_merge($headers,['Content-Type: application/x-www-form-urlencoded']));jt_test_assert($r['status']===200,'Expected valid submission 200, got '.$r['status']);$j=jt_test_json($r['body']);jt_test_assert(($j['success']??false)===true,'Valid fixture submission did not return success=true.');});
-    return $results;
-}
-
-function jt_suite_http_security(): array
-{
-    $results=[];$url=jt_test_scanner_url().'/scanner.php';
-    jt_test_case($results,'Scanner rejects GET',static function()use($url):void{$r=jt_run_http($url,'GET');jt_test_assert($r['status']===405,'Scanner GET returned '.$r['status']);});
-    jt_test_case($results,'Scanner rejects malformed JSON',static function()use($url):void{$r=jt_run_http($url,'POST','{bad-json',['Content-Type: application/json']);jt_test_assert($r['status']===400,'Malformed JSON returned '.$r['status']);});
-    return $results;
-}
-
-$dispatch=['compatibility'=>'jt_suite_compatibility','ssl'=>'jt_suite_ssl','ssrf'=>'jt_suite_ssrf','redirects'=>'jt_suite_redirects','limits'=>static fn():array=>jt_suite_limits($options),'rate-limit'=>'jt_suite_rate_limit','contact'=>static fn():array=>jt_suite_contact($options),'http-security'=>'jt_suite_http_security'];
-
-if($suite==='all'){$all=[];foreach($dispatch as $name=>$runner){echo "\n=== {$name} ===\n";$all=array_merge($all,$runner());}jt_test_finish('all',$all,$reportPath);}
-if(!isset($dispatch[$suite])){fwrite(STDERR,"Unknown suite: {$suite}\n");exit(2);}
-jt_test_finish($suite,$dispatch[$suite](),$reportPath);
