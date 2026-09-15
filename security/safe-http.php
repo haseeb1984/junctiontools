@@ -115,6 +115,36 @@ function jt_parse_certificate_info(array $certInfo): array
     ];
 }
 
+function jt_certificate_debug_info(array $certInfo): array
+{
+    $debug = [];
+    foreach ($certInfo as $index => $entry) {
+        if (!is_array($entry)) {
+            $debug[] = ['index' => $index, 'type' => get_debug_type($entry), 'value' => is_scalar($entry) ? (string)$entry : get_debug_type($entry)];
+            continue;
+        }
+
+        $item = ['index' => $index, 'fields' => []];
+        foreach ($entry as $key => $value) {
+            if (!is_scalar($value)) {
+                $item['fields'][$key] = get_debug_type($value);
+                continue;
+            }
+            $text = trim((string)$value);
+            if (preg_match('/BEGIN CERTIFICATE|END CERTIFICATE/i', $text)) {
+                $item['fields'][$key] = '[PEM REDACTED]';
+                continue;
+            }
+            if (strlen($text) > 512) {
+                $text = substr($text, 0, 512) . '...[truncated]';
+            }
+            $item['fields'][$key] = $text;
+        }
+        $debug[] = $item;
+    }
+    return $debug;
+}
+
 function jt_fetch_url(string $url, array $options = []): array
 {
     [$valid, $normalized] = jt_validate_external_url($url);
@@ -167,18 +197,27 @@ function jt_fetch_url(string $url, array $options = []): array
     curl_close($ch);
 
     $certificate = is_array($certInfo) ? jt_parse_certificate_info($certInfo) : [];
+    $certificateDebug = (is_array($certInfo) && getenv('JUNCTIONTOOLS_DEBUG_CERT') === '1') ? jt_certificate_debug_info($certInfo) : [];
 
     if ($raw === false) {
-        return ['ok' => false, 'error' => $error ?: 'HTTP request failed.', 'status' => $status, 'body' => '', 'headers' => '', 'content_type' => $contentType, 'certificate' => $certificate];
+        $result = ['ok' => false, 'error' => $error ?: 'HTTP request failed.', 'status' => $status, 'body' => '', 'headers' => '', 'content_type' => $contentType, 'certificate' => $certificate];
+        if ($certificateDebug !== []) {
+            $result['certificate_debug'] = $certificateDebug;
+        }
+        return $result;
     }
 
     $headers = substr($raw, 0, $headerSize);
     $body = substr($raw, $headerSize);
     if (strlen($body) > $maxBytes) {
-        return ['ok' => false, 'error' => 'Remote response is too large.', 'status' => $status, 'body' => '', 'headers' => $headers, 'content_type' => $contentType, 'certificate' => $certificate];
+        $result = ['ok' => false, 'error' => 'Remote response is too large.', 'status' => $status, 'body' => '', 'headers' => $headers, 'content_type' => $contentType, 'certificate' => $certificate];
+        if ($certificateDebug !== []) {
+            $result['certificate_debug'] = $certificateDebug;
+        }
+        return $result;
     }
 
-    return [
+    $result = [
         'ok' => ($status >= 200 && $status < 400),
         'error' => ($status >= 200 && $status < 400) ? '' : 'Remote server returned HTTP ' . $status . '.',
         'status' => $status,
@@ -187,6 +226,10 @@ function jt_fetch_url(string $url, array $options = []): array
         'body' => $body,
         'certificate' => $certificate,
     ];
+    if ($certificateDebug !== []) {
+        $result['certificate_debug'] = $certificateDebug;
+    }
+    return $result;
 }
 
 function jt_safe_http_get(string $url, array $options = []): array
@@ -200,5 +243,6 @@ function jt_safe_http_get(string $url, array $options = []): array
         'headers' => $result['headers'],
         'body' => $result['body'],
         'certificate' => $result['certificate'] ?? [],
+        'certificate_debug' => $result['certificate_debug'] ?? [],
     ];
 }
