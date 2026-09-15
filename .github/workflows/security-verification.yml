@@ -14,10 +14,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: phase-0-security-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   COMPOSER_CACHE_DIR: ${{ github.workspace }}/.composer-cache
   JUNCTIONTOOLS_TEST_BASE_URL: http://127.0.0.1:8080
@@ -77,6 +73,8 @@ jobs:
         run: php tests/validate-search-demand.php
       - name: Validate Phase 3 generation queue
         run: php tests/validate-generation-queue.php
+      - name: Validate Google Keyword Planner importer
+        run: php tests/validate-google-keyword-planner.php
       - name: Upload static verification artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -129,7 +127,9 @@ jobs:
           test -f tests/validate-opportunities.php
           test -f tests/validate-search-demand.php
           test -f tests/validate-generation-queue.php
+          test -f tests/validate-google-keyword-planner.php
           test -f tools/generate-sitemap.php
+          test -f tools/import-google-keyword-planner.php
           test -d tests/fixtures
           test -f tests/fixtures/compatibility-page.html
           test -f tests/fixtures/timeout.php
@@ -190,6 +190,7 @@ jobs:
             echo '- Phase 3 search-demand opportunity registry validation'
             echo '- Phase 3 search-demand evidence registry validation'
             echo '- Phase 3 ranked generation queue validation'
+            echo '- Google Keyword Planner importer validation'
             echo 'Manual: contact form validation, DB insertion, SMTP/email delivery'
           } > artifacts/summary.md
       - name: Upload security-suite artifacts
