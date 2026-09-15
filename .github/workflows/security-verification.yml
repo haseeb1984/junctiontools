@@ -63,6 +63,8 @@ jobs:
         run: php tests/validate-registry.php
       - name: Validate timestamp converter tool
         run: php tests/validate-timestamp-converter.php
+      - name: Validate QR code generator tool
+        run: php tests/validate-qr-code-generator.php
       - name: Validate registry-driven sitemap
         run: php tests/validate-sitemap.php
       - name: Validate Phase 3 opportunity registry
@@ -115,6 +117,7 @@ jobs:
           test -f tests/router.php
           test -f tests/validate-registry.php
           test -f tests/validate-timestamp-converter.php
+          test -f tests/validate-qr-code-generator.php
           test -f tests/validate-sitemap.php
           test -f tests/validate-opportunities.php
           test -f tests/validate-search-demand.php
@@ -165,6 +168,7 @@ jobs:
             echo "Run: $GITHUB_RUN_ID"
             echo '- 35-tool compatibility'
             echo '- Timestamp Converter static/registry validation'
+            echo '- QR Code Generator static/registry validation'
             echo '- SSL issuer / expiry / days remaining'
             echo '- SSRF / private IP / metadata / IPv6'
             echo '- Redirect blocking'
