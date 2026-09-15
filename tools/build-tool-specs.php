@@ -22,21 +22,33 @@ foreach($data['queue'] as $entry){
  $outputContract=['name'=>'result','type'=>'text'];
  $privacy='Process data locally in the browser whenever technically feasible; do not upload user input by default.';
  $functional=['valid input produces a deterministic result','invalid input produces an actionable validation message','reset clears user-entered data'];
+ $howTo=['Enter or select the required information.','Choose the available options that match your needs.','Run the tool and review the result before copying or downloading it.'];
+ $useCases=['Quick everyday calculations or conversions','Preparing content or values for websites and digital work','Checking a result without creating an account'];
+ $tips=['Use valid, complete input for the most accurate result.','Review the result before using it in production or sharing it.'];
  if(str_contains($lower,'age calculator')){
   $category='calculators'; $template='date-age-calculator';
   $inputContract=['fields'=>[['name'=>'birth_date','type'=>'date','required'=>true],['name'=>'as_of_date','type'=>'date','required'=>true]]];
   $outputContract=['fields'=>['years','months','days','total_days']];
   $functional=['birth date must not be in the future','as-of date must not precede birth date','leap years and month lengths are handled correctly'];
+  $howTo=['Choose the date of birth.','Choose the date to calculate the age on, or use today’s date.','Review the exact age in years, months and days and the total elapsed days.'];
+  $useCases=['Checking someone’s exact age for forms or applications','Calculating age for birthdays, milestones or eligibility checks','Finding the exact elapsed days between two dates'];
+  $tips=['Use the person’s actual date of birth rather than an approximate year.','Change the calculation date when you need a historical or future age.'];
  }elseif(str_contains($lower,'qr code')){
   $category='generators'; $template='qr-generator';
   $inputContract=['fields'=>[['name'=>'content','type'=>'text','required'=>true],['name'=>'error_correction','type'=>'enum','required'=>true],['name'=>'size','type'=>'integer','required'=>true]]];
   $outputContract=['fields'=>['qr_canvas','png_download']];
   $functional=['empty content is rejected','size is constrained to a safe range','PNG export matches the rendered QR code'];
+  $howTo=['Enter the text, URL or other content you want to encode.','Choose the error-correction level and output size.','Generate the QR code, scan it to verify the content, then download the PNG.'];
+  $useCases=['Sharing website links without typing long URLs','Creating QR codes for menus, flyers, labels or signs','Generating a QR code locally without uploading the encoded content'];
+  $tips=['Test the downloaded QR code with more than one device when it will be printed.','Use a clear foreground/background contrast for reliable scanning.'];
  }elseif(str_contains($lower,'timestamp')||str_contains($lower,'unix')){
   $category='developer'; $template='timestamp-converter';
   $inputContract=['fields'=>[['name'=>'value','type'=>'text','required'=>true],['name'=>'unit','type'=>'enum','required'=>true,'values'=>['seconds','milliseconds']]]];
   $outputContract=['fields'=>['timestamp','iso_datetime','local_datetime']];
   $functional=['seconds and milliseconds are distinguished explicitly','invalid timestamps are rejected','conversion is deterministic for the same input'];
+  $howTo=['Enter the Unix timestamp value.','Choose whether the value is in seconds or milliseconds.','Run the conversion and copy the resulting date/time values.'];
+  $useCases=['Debugging API and application logs','Converting Unix timestamps while working with databases or developer tools','Checking event times across systems'];
+  $tips=['Confirm whether your source system uses seconds or milliseconds before converting.','Use the ISO result when you need an unambiguous machine-readable date.'];
  }elseif(str_contains($lower,'calculator')){
   $category='calculators'; $template='calculator-form';
   $outputContract=['fields'=>['calculation_result']];
@@ -50,10 +62,11 @@ foreach($data['queue'] as $entry){
   'source'=>['cluster_id'=>(string)($entry['cluster_id']??$slug),'query'=>$query,'rank'=>(int)($entry['rank']??0),'priority_score'=>(int)($entry['priority_score']??0),'demand_signal'=>(int)($entry['demand_signal']??0),'country'=>$entry['country']??'unspecified','language'=>$entry['language']??null,'confidence'=>$entry['confidence']??'low','source_registry'=>$entry['source']??'unknown'],
   'tool'=>['name'=>ucwords(str_replace('-',' ',$slug)),'slug'=>$slug,'category'=>$category,'implementation'=>$implementation,'implementation_template'=>$template,'page'=>'/'.$slug,'frontend'=>$slug.'.html'],
   'purpose'=>'Provide a focused, fast, privacy-conscious browser utility for the query intent: '.$query.'.','inputs'=>$inputContract,'outputs'=>$outputContract,
-  'ux'=>['layout'=>'single-purpose tool with clear primary input and result area','mobile'=>'responsive and keyboard accessible','actions'=>['primary_action'=>'Run','secondary_action'=>'Reset','copy_or_download'=>true],'error_handling'=>'Inline, human-readable validation errors; never expose stack traces.'],
+  'content'=>['how_to_use'=>$howTo,'use_cases'=>$useCases,'tips'=>$tips],
+  'ux'=>['layout'=>'standard JunctionTools layout: title and description, How to Use, then the primary tool form/result area','mobile'=>'responsive and keyboard accessible','actions'=>['primary_action'=>'Run','secondary_action'=>'Reset','copy_or_download'=>true],'error_handling'=>'Inline, human-readable validation errors; never expose stack traces.'],
   'seo'=>['indexable'=>true,'canonical'=>'https://junctiontools.com/'.$slug,'title'=>ucwords(str_replace('-',' ',$slug)).' | Free Online Tool | JunctionTools','description'=>'Free '.$query.' with fast, privacy-conscious browser processing. No account required.'],
   'privacy_security'=>['processing'=>'browser_only','network_requests'=>false,'external_dependencies'=>false,'privacy_note'=>$privacy,'security_requirements'=>['no eval or dynamic code execution','escape rendered user-controlled text','validate numeric and date ranges','do not persist sensitive input without explicit user action']],
-  'acceptance_criteria'=>$functional,'quality_gates'=>['syntax_validation','spec_schema_validation','functional_test','security_scan','seo_validation','manual_review_before_publish'],'publication_policy'=>'Draft specification only. Code generation, registry activation, sitemap publication, and deployment require later approval gates.'
+  'acceptance_criteria'=>$functional,'quality_gates'=>['syntax_validation','spec_schema_validation','functional_test','security_scan','seo_validation','content_how_to_use_validation','manual_review_before_publish'],'publication_policy'=>'Draft specification only. Code generation, registry activation, sitemap publication, and deployment require later approval gates.'
  ];
 }
 $result=['schema_version'=>'1.0.0','generated_at'=>gmdate('Y-m-d'),'methodology'=>['purpose'=>'Compile demand candidates into structured implementation specifications before code generation.','automation_policy'=>'Specifications are drafts and never authorize code generation or publication by themselves.'],'specifications'=>$specs];
