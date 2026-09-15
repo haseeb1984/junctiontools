@@ -60,6 +60,8 @@ jobs:
           for file in "${PHP_FILES[@]}"; do php -l "${file}"; done
       - name: Validate Phase 1 tool registry
         run: php tests/validate-registry.php
+      - name: Validate registry-driven sitemap
+        run: php tests/validate-sitemap.php
       - name: Upload static verification artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -103,6 +105,8 @@ jobs:
           test -f tests/bootstrap.php
           test -f tests/router.php
           test -f tests/validate-registry.php
+          test -f tests/validate-sitemap.php
+          test -f tools/generate-sitemap.php
           test -d tests/fixtures
           test -f tests/fixtures/timeout.php
           test -f tests/fixtures/large-response.php
@@ -154,6 +158,7 @@ jobs:
             echo '- Rate limiting'
             echo '- HTTP methods / security headers'
             echo '- Phase 1 tool registry schema and file-reference validation'
+            echo '- Registry-driven sitemap generation and validation'
             echo 'Manual: contact form validation, DB insertion, SMTP/email delivery'
           } > artifacts/summary.md
       - name: Upload security-suite artifacts
