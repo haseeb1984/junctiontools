@@ -1,5 +1,30 @@
 RewriteEngine On
 
+# Security headers for the public site.
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+# Do not expose directory listings or common sensitive files.
+Options -Indexes
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|.*\.(sql|bak|old|orig|log|ini))$">
+    Require all denied
+</FilesMatch>
+
+# Block direct access to internal security helpers and other PHP source helpers.
+<IfModule mod_authz_core.c>
+    <FilesMatch "^(url-validator|safe-http|rate-limit)\.php$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+# Only allow normal web methods. Individual endpoints can further restrict POST.
+<LimitExcept GET POST HEAD OPTIONS>
+    Require all denied
+</LimitExcept>
+
 # 1. Redirect browser from /page.html to /page (Prevents duplicate content)
 RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
 RewriteRule ^ %1 [R=301,L]
