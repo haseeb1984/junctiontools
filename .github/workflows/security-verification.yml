@@ -58,6 +58,8 @@ jobs:
           mapfile -d '' PHP_FILES < <(find . -path './vendor' -prune -o -path './.git' -prune -o -name '*.php' -print0)
           if [ "${#PHP_FILES[@]}" -eq 0 ]; then echo 'No PHP files found.' >&2; exit 1; fi
           for file in "${PHP_FILES[@]}"; do php -l "${file}"; done
+      - name: Validate Phase 1 tool registry
+        run: php tests/validate-registry.php
       - name: Upload static verification artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -100,6 +102,7 @@ jobs:
           test -f tests/run.php
           test -f tests/bootstrap.php
           test -f tests/router.php
+          test -f tests/validate-registry.php
           test -d tests/fixtures
           test -f tests/fixtures/timeout.php
           test -f tests/fixtures/large-response.php
@@ -150,6 +153,7 @@ jobs:
             echo '- Timeout / response-size / request-size limits'
             echo '- Rate limiting'
             echo '- HTTP methods / security headers'
+            echo '- Phase 1 tool registry schema and file-reference validation'
             echo 'Manual: contact form validation, DB insertion, SMTP/email delivery'
           } > artifacts/summary.md
       - name: Upload security-suite artifacts
