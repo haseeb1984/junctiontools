@@ -67,6 +67,8 @@ jobs:
         run: php tests/validate-google-demand-opportunities.php
       - name: Validate demand-to-generation queue builder
         run: php tests/validate-generation-queue-builder.php
+      - name: Validate tool specification compiler
+        run: php tests/validate-tool-specs.php
 
   security-suite:
     name: Compatibility and security integration suite
@@ -90,7 +92,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in tests/run.php tests/compatibility-fixture-suite.php tests/bootstrap.php tests/router.php tests/validate-registry.php tests/validate-timestamp-converter.php tests/validate-qr-code-generator.php tests/validate-age-calculator.php tests/validate-image-compressor-enhancement.php tests/validate-sitemap.php tests/validate-opportunities.php tests/validate-search-demand.php tests/validate-generation-queue.php tests/validate-google-keyword-planner.php tests/validate-google-demand-opportunities.php tests/validate-generation-queue-builder.php tools/generate-sitemap.php tools/import-google-keyword-planner.php tools/build-demand-opportunities.php tools/build-generation-queue.php; do test -f "$file"; done
+          for file in tests/run.php tests/compatibility-fixture-suite.php tests/bootstrap.php tests/router.php tests/validate-registry.php tests/validate-timestamp-converter.php tests/validate-qr-code-generator.php tests/validate-age-calculator.php tests/validate-image-compressor-enhancement.php tests/validate-sitemap.php tests/validate-opportunities.php tests/validate-search-demand.php tests/validate-generation-queue.php tests/validate-google-keyword-planner.php tests/validate-google-demand-opportunities.php tests/validate-generation-queue-builder.php tests/validate-tool-specs.php tools/generate-sitemap.php tools/import-google-keyword-planner.php tools/build-demand-opportunities.php tools/build-generation-queue.php tools/build-tool-specs.php; do test -f "$file"; done
           test -d tests/fixtures
       - name: Start local PHP server with committed fixtures
         shell: bash
