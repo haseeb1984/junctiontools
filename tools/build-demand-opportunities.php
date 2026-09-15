@@ -54,7 +54,13 @@ foreach ($keywords as $row) {
     $demand = $row['search_volume'] >= 100000 ? 5 : ($row['search_volume'] >= 25000 ? 4 : ($row['search_volume'] >= 5000 ? 3 : ($row['search_volume'] >= 1000 ? 2 : 1)));
     $competition = strtolower((string)($row['competition'] ?? ''));
     $competitionScore = str_contains($competition, 'high') ? 5 : (str_contains($competition, 'medium') ? 3 : (str_contains($competition, 'low') ? 1 : 3));
-    $score = (int)round((($demand * 6) + 5*4 + 5*5 + 5*4 + 5*3 - $competitionScore*3) * 100 / 107);
+
+    // Preserve search-volume ordering while applying a modest competition penalty.
+    // This avoids coarse demand buckets causing a lower-volume keyword to outrank
+    // a materially higher-volume keyword merely because it has lower competition.
+    $volumeScore = 50 + (50 * $ratio);
+    $score = (int)round(max(1, min(100, $volumeScore - ($competitionScore * 2))));
+
     $opportunities[] = [
         'query' => $row['query'],
         'normalized_query' => $row['normalized_query'],
@@ -65,7 +71,7 @@ foreach ($keywords as $row) {
         'competition_index' => $row['competition_index'],
         'demand_factor' => $demand,
         'competition_factor' => $competitionScore,
-        'score' => max(1, min(100, $score)),
+        'score' => $score,
         'source' => $row['source'],
         'confidence' => $ratio >= 0.25 ? 'high' : ($ratio >= 0.05 ? 'medium' : 'low'),
         'status' => 'candidate'
