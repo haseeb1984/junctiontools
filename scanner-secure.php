@@ -1,11 +1,4 @@
 <?php
-/**
- * JunctionTools secure scanner endpoint.
- *
- * This endpoint intentionally does not execute the legacy scanner.php code.
- * All outbound requests go through security/safe-http.php, which performs
- * SSRF validation, TLS verification, no redirects, timeouts and size limits.
- */
 declare(strict_types=1);
 
 ini_set('display_errors', '0');
@@ -104,6 +97,15 @@ function jt_domain_from_input(array $input): string
     return strtolower($value);
 }
 
+function jt_text_input(array $input, string $field, string $label, int $maxLength = 50000): string
+{
+    $text = trim((string)($input[$field] ?? ''));
+    if (strlen($text) > $maxLength) {
+        jt_json(['success' => false, 'message' => $label . ' is too large.'], 413);
+    }
+    return $text;
+}
+
 switch ($scanType) {
     case 'trust_inspector':
         $elements = $input['trust_elements'] ?? [];
@@ -112,20 +114,19 @@ switch ($scanType) {
         jt_json([
             'success' => true,
             'confidenceIndex' => $confidenceIndex,
+            'activeElements' => $count,
             'message' => 'Buyer Confidence Index: <strong>' . $confidenceIndex . '%</strong><br>Active Elements Detected: ' . $count . '/4'
         ]);
 
     case 'copy_analyzer':
-        $text = trim((string)($input['copy_text'] ?? ''));
-        if (strlen($text) > 50000) jt_json(['success' => false, 'message' => 'Copy is too large.'], 413);
+        $text = jt_text_input($input, 'copy_text', 'Copy');
         $wordCount = str_word_count(strip_tags($text));
         $charCount = mb_strlen($text);
         $status = $wordCount >= 50 ? "Good ({$wordCount} words)" : "Too Short ({$wordCount} words - aim for 50+)";
-        jt_json(['success' => true, 'wordCount' => $wordCount, 'message' => "Word Count: {$status}<br>Character Count: <strong>{$charCount} characters</strong><br>Readability & Copy Strength: <strong>Analyzed Successfully</strong>"]);
+        jt_json(['success' => true, 'wordCount' => $wordCount, 'characterCount' => $charCount, 'message' => "Word Count: {$status}<br>Character Count: <strong>{$charCount} characters</strong><br>Readability & Copy Strength: <strong>Analyzed Successfully</strong>"]);
 
     case 'readability_evaluator':
-        $text = trim((string)($input['text_content'] ?? ''));
-        if (strlen($text) > 50000) jt_json(['success' => false, 'message' => 'Text is too large.'], 413);
+        $text = jt_text_input($input, 'text_content', 'Text');
         $plain = strip_tags($text);
         $words = str_word_count($plain);
         $sentences = max(1, preg_match_all('/[.!?]+/', $plain, $matches));
