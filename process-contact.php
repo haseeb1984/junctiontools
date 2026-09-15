@@ -7,9 +7,9 @@ require 'vendor/autoload.php';
 
 // Database Configuration
 $host = 'localhost';
-$db   = 'u805331253_JunctionTools';
-$user = 'u805331253_admin'; 
-$pass = '=Xr|+;p4|V';
+$db   = 'xxxxxx';
+$user = 'xxxxx'; 
+$pass = 'xxxxxxx';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -57,16 +57,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Server settings
         $mail->isSMTP();
-        $mail->Host       = 'smtp.hostinger.com';     // Apni hosting ka SMTP server (e.g., mail.junctiontools.com)
+        $mail->Host       = 'xxxxx';     // Apni hosting ka SMTP server (e.g., mail.junctiontools.com)
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'suggestions@junctiontools.com';    // Aapki cPanel/Professional Email
-        $mail->Password   = 'fDI|xok9;';     // Email ka password
+        $mail->Username   = 'xxxx';    // Aapki cPanel/Professional Email
+        $mail->Password   = 'xxxxxx';     // Email ka password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // ya PHPMailer::ENCRYPTION_SMTPS (Port 465 ke liye)
         $mail->Port       = 587;                       // Port 587 ya 465
 
         // Recipients
-        $mail->setFrom('suggestions@junctiontools.com', 'Junction Tools Suggestions');
-        $mail->addAddress('suggestions@junctiontools.com', 'Junction Tools'); // Jahan email receive karni hai
+        $mail->setFrom('xxxx', 'Junction Tools Suggestions');
+        $mail->addAddress('xxxxx', 'Junction Tools'); // Jahan email receive karni hai
         $mail->addReplyTo($email, $name);                    // Taake 'Reply' click karne par user ko jaye
 
         // Content
