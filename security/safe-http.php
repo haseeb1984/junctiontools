@@ -20,10 +20,10 @@ function jt_parse_certificate_info(array $certInfo): array
     // Prefer parsing the PEM certificate supplied by cURL. This is still the
     // certificate from the same TLS-verified cURL connection and is more
     // reliable across libcurl/OpenSSL builds than textual field formatting.
-    $scan = static function ($value) use (&$scan, &$issuer, &$expiresAt, &$expiresTimestamp): void {
+    $scan = static function ($value, ?string $key = null) use (&$scan, &$issuer, &$expiresAt, &$expiresTimestamp): void {
         if (is_array($value)) {
-            foreach ($value as $item) {
-                $scan($item);
+            foreach ($value as $entryKey => $item) {
+                $scan($item, is_string($entryKey) ? $entryKey : null);
             }
             return;
         }
@@ -33,6 +33,19 @@ function jt_parse_certificate_info(array $certInfo): array
         }
 
         $line = trim($value);
+        $normalizedKey = strtolower(trim((string)$key));
+
+        // libcurl's CURLINFO_CERTINFO returns certificate fields as associative
+        // entries such as "Issuer" and "Expire date". The values themselves
+        // contain only the DN/date, so matching the scalar text alone cannot
+        // recover the field name.
+        if ($issuer === '' && $normalizedKey === 'issuer' && $line !== '') {
+            $issuer = $line;
+        }
+        if ($expiresAt === '' && in_array($normalizedKey, ['expire date', 'not after', 'validto'], true) && $line !== '') {
+            $expiresAt = $line;
+        }
+
         if ($issuer === '' && preg_match('/^Issuer\s*:\s*(.+)$/i', $line, $m)) {
             $issuer = trim($m[1]);
         }
@@ -48,18 +61,15 @@ function jt_parse_certificate_info(array $certInfo): array
                     $parsedIssuer = $parsed['issuer'] ?? [];
                     if ($issuer === '' && is_array($parsedIssuer)) {
                         $issuerParts = [];
-                        foreach ($parsedIssuer as $key => $part) {
+                        foreach ($parsedIssuer as $parsedKey => $part) {
                             if (is_array($part)) {
                                 $part = implode(', ', array_map('strval', $part));
                             }
-                            $issuerParts[] = $key . '=' . (string)$part;
+                            $issuerParts[] = $parsedKey . '=' . (string)$part;
                         }
                         $issuer = implode(', ', $issuerParts);
                     }
 
-                    // OpenSSL normally exposes validTo_time as an integer, but
-                    // some PHP/OpenSSL combinations return a numeric string or
-                    // another numeric scalar. Accept all safe numeric forms.
                     $validToTime = $parsed['validTo_time'] ?? null;
                     if (is_int($validToTime) || is_float($validToTime)) {
                         $expiresTimestamp = (int)$validToTime;
