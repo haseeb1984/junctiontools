@@ -2,8 +2,9 @@ name: Phase 0 Security Verification
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
+  push:
+    branches: [security/phase-0-hardening, phase-3/search-demand-discovery, main]
   workflow_dispatch:
 
 permissions:
@@ -19,6 +20,7 @@ env:
   JUNCTIONTOOLS_TEST_TIMEOUT: '12'
   JUNCTIONTOOLS_TEST_CONNECT_TIMEOUT: '5'
   JUNCTIONTOOLS_TEST_MAX_BYTES: '2097152'
+  JUNCTIONTOOLS_DEBUG_CERT: '1'
 
 jobs:
   php-static:
@@ -28,8 +30,7 @@ jobs:
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+        with: {fetch-depth: 1}
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -37,15 +38,6 @@ jobs:
           extensions: curl, dom, mbstring, openssl, pdo, pdo_mysql
           coverage: none
           tools: composer:v2
-      - name: Cache Composer downloads
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.COMPOSER_CACHE_DIR }}
-          key: composer-${{ runner.os }}-php8.2-${{ hashFiles('composer.lock', 'composer.json') }}
-          restore-keys: |
-            composer-${{ runner.os }}-php8.2-
-      - name: Validate Composer configuration
-        run: composer validate
       - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
       - name: PHP syntax check
@@ -53,16 +45,40 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -d '' PHP_FILES < <(find . -path './vendor' -prune -o -path './.git' -prune -o -name '*.php' -print0)
-          if [ "${#PHP_FILES[@]}" -eq 0 ]; then echo 'No PHP files found.' >&2; exit 1; fi
-          for file in "${PHP_FILES[@]}"; do php -l "${file}"; done
-      - name: Upload static verification artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase-0-static-verification
-          path: .
-          retention-days: 14
-          if-no-files-found: ignore
+          test "${#PHP_FILES[@]}" -gt 0
+          for file in "${PHP_FILES[@]}"; do php -l "$file"; done
+      - name: Validate Phase 1 tool registry
+        run: php tests/validate-registry.php
+      - name: Validate timestamp converter tool
+        run: php tests/validate-timestamp-converter.php
+      - name: Validate QR code generator tool
+        run: php tests/validate-qr-code-generator.php
+      - name: Validate age calculator tool
+        run: php tests/validate-age-calculator.php
+      - name: Validate image compressor enhancement
+        run: php tests/validate-image-compressor-enhancement.php
+      - name: Validate registry-driven sitemap
+        run: php tests/validate-sitemap.php
+      - name: Validate Phase 3 opportunity registry
+        run: php tests/validate-opportunities.php
+      - name: Validate Phase 3 search-demand registry
+        run: php tests/validate-search-demand.php
+      - name: Validate Phase 3 generation queue
+        run: php tests/validate-generation-queue.php
+      - name: Validate Google Keyword Planner importer
+        run: php tests/validate-google-keyword-planner.php
+      - name: Validate Google demand opportunity builder
+        run: php tests/validate-google-demand-opportunities.php
+      - name: Validate demand-to-generation queue builder
+        run: php tests/validate-generation-queue-builder.php
+      - name: Validate tool specification compiler
+        run: php tests/validate-tool-specs.php
+      - name: Validate approval-gated tool code generator
+        run: php tests/validate-approved-tool-generator.php
+      - name: Validate generated tool quality and security
+        run: php tests/validate-generated-tool.php
+      - name: Validate generated runtime harness
+        run: php tests/validate-generated-runtime.php
 
   security-suite:
     name: Compatibility and security integration suite
@@ -72,8 +88,7 @@ jobs:
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+        with: {fetch-depth: 1}
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -81,27 +96,14 @@ jobs:
           extensions: curl, dom, mbstring, openssl, pdo, pdo_mysql
           coverage: none
           tools: composer:v2
-      - name: Restore Composer cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.COMPOSER_CACHE_DIR }}
-          key: composer-${{ runner.os }}-php8.2-${{ hashFiles('composer.lock', 'composer.json') }}
-          restore-keys: |
-            composer-${{ runner.os }}-php8.2-
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
-      - name: Verify test suite and committed fixtures exist
+      - name: Verify committed test and generation files
         shell: bash
         run: |
           set -euo pipefail
-          test -f tests/run.php
-          test -f tests/bootstrap.php
-          test -f tests/router.php
+          for file in tests/run.php tests/compatibility-fixture-suite.php tests/bootstrap.php tests/router.php tests/validate-registry.php tests/validate-timestamp-converter.php tests/validate-qr-code-generator.php tests/validate-age-calculator.php tests/validate-image-compressor-enhancement.php tests/validate-sitemap.php tests/validate-opportunities.php tests/validate-search-demand.php tests/validate-generation-queue.php tests/validate-google-keyword-planner.php tests/validate-google-demand-opportunities.php tests/validate-generation-queue-builder.php tests/validate-tool-specs.php tests/validate-approved-tool-generator.php tests/validate-generated-tool.php tests/validate-generated-runtime.php tools/generate-sitemap.php tools/import-google-keyword-planner.php tools/build-demand-opportunities.php tools/build-generation-queue.php tools/build-tool-specs.php tools/generate-approved-tools.php config/tool-generation-approvals.json; do test -f "$file"; done
           test -d tests/fixtures
-          test -f tests/fixtures/timeout.php
-          test -f tests/fixtures/large-response.php
-          test -f tests/fixtures/redirect.php
-          test -f tests/fixtures/ssrf-target.php
       - name: Start local PHP server with committed fixtures
         shell: bash
         run: |
@@ -116,7 +118,7 @@ jobs:
           cat artifacts/php-server.log >&2 || true
           exit 1
       - name: Run 35-tool compatibility suite
-        run: php tests/run.php --suite=compatibility --report=artifacts/35-tool-compatibility.json
+        run: php tests/compatibility-fixture-suite.php
       - name: Run SSL issuer and expiry tests
         run: php tests/run.php --suite=ssl --report=artifacts/ssl.json
       - name: Run SSRF protection tests
@@ -129,26 +131,6 @@ jobs:
         run: php tests/run.php --suite=rate-limit --report=artifacts/rate-limit.json
       - name: Run HTTP method and security-header tests
         run: php tests/run.php --suite=http-security --report=artifacts/http-security.json
-      - name: Build consolidated test summary
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts
-          {
-            echo '# JunctionTools Phase 0 Security Verification'
-            echo "Commit: $GITHUB_SHA"
-            echo "Workflow: $GITHUB_WORKFLOW"
-            echo "Run: $GITHUB_RUN_ID"
-            echo '- 35-tool compatibility'
-            echo '- SSL issuer / expiry / days remaining'
-            echo '- SSRF / private IP / metadata / IPv6'
-            echo '- Redirect blocking'
-            echo '- Timeout / response-size / request-size limits'
-            echo '- Rate limiting'
-            echo '- HTTP methods / security headers'
-            echo 'Manual: contact form validation, DB insertion, SMTP/email delivery'
-          } > artifacts/summary.md
       - name: Upload security-suite artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -170,6 +152,6 @@ jobs:
       - name: Require all Phase 0 checks to pass
         run: |
           set -euo pipefail
-          if [ "${{ needs.php-static.result }}" != 'success' ]; then echo 'PHP/static verification failed.' >&2; exit 1; fi
-          if [ "${{ needs.security-suite.result }}" != 'success' ]; then echo 'Security/compatibility verification failed.' >&2; exit 1; fi
+          if [ "${{ needs.php-static.result }}" != success ]; then exit 1; fi
+          if [ "${{ needs.security-suite.result }}" != success ]; then exit 1; fi
           echo 'Phase 0 verification gate: PASS'
