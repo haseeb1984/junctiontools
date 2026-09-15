@@ -9,6 +9,25 @@
   "queue": [
     {
       "rank": 1,
+      "cluster_id": "age-calculator",
+      "core_query": "age calculator",
+      "decision": "build",
+      "priority_score": 92,
+      "demand_signal": 220000,
+      "signal_count": 1,
+      "existing_tool_match": null,
+      "implementation": "client-side-age-calculator",
+      "recommended_slug": "age-calculator",
+      "seo_page_cluster": [
+        "age-calculator",
+        "calculate-age",
+        "age-calculator-by-date-of-birth",
+        "exact-age-calculator"
+      ],
+      "rationale": "A reported 220K monthly-search signal plus deterministic browser-only implementation makes this a strong low-risk build candidate."
+    },
+    {
+      "rank": 2,
       "cluster_id": "timestamp",
       "core_query": "timestamp converter",
       "decision": "build",
@@ -27,7 +46,7 @@
       "rationale": "A focused utility with a reported 48K search-demand signal and low implementation complexity is a strong build."
     },
     {
-      "rank": 2,
+      "rank": 3,
       "cluster_id": "qr-code",
       "core_query": "qr code generator",
       "decision": "build",
