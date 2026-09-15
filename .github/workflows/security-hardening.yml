@@ -22,7 +22,6 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
 
           p = Path('scanner.php')
           text = p.read_text(encoding='utf-8')
@@ -78,13 +77,11 @@ if ($scanType === 'ssl_audit') {
 '''
               text = text.replace(validation_marker, validation, 1)
 
-          # Strengthen all cURL calls with certificate hostname verification and a response-size ceiling.
           text = text.replace(
               "CURLOPT_SSL_VERIFYPEER, true",
               "CURLOPT_SSL_VERIFYPEER, true,\n    CURLOPT_SSL_VERIFYHOST, 2,\n    CURLOPT_MAXFILESIZE, 5000000"
           )
 
-          # Make the TLS stream used by ssl_audit verify the remote certificate and hostname.
           text = text.replace(
               '$g = stream_context_create(["ssl" => ["capture_peer_cert" => true]]);',
               '$g = stream_context_create(["ssl" => ["capture_peer_cert" => true, "verify_peer" => true, "verify_peer_name" => true, "peer_name" => $domain]]);'
@@ -104,3 +101,6 @@ if ($scanType === 'ssl_audit') {
           fi
           git commit -m "security: harden scanner against SSRF and unsafe HTTP [skip ci]"
           git push origin "$BRANCH_NAME"
+
+          # Triggered by a normal branch push; the generated commit uses [skip ci]
+          # so the hardening job runs exactly once for each new scanner version.
