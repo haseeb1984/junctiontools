@@ -25,6 +25,10 @@ Options -Indexes
     Require all denied
 </LimitExcept>
 
+# SECURITY: keep the legacy monolithic scanner as a backup only. All public
+# requests to scanner.php are internally routed to the hardened endpoint.
+RewriteRule ^scanner\.php$ scanner-secure.php [END]
+
 # 1. Redirect browser from /page.html to /page (Prevents duplicate content)
 RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
 RewriteRule ^ %1 [R=301,L]
