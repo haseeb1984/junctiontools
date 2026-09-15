@@ -29,10 +29,15 @@ jobs:
       - name: PHP syntax checks
         run: |
           php -l tools/run-tool-factory.php
+          php -l tools/run-demand-refresh.php
           php -l tests/validate-tool-factory-pipeline.php
+          php -l tests/validate-demand-refresh.php
 
       - name: Validate Phase 10 pipeline contract
         run: php tests/validate-tool-factory-pipeline.php
+
+      - name: Validate demand refresh chain
+        run: php tests/validate-demand-refresh.php
 
       - name: Verify production publishing remains disabled
         run: |
