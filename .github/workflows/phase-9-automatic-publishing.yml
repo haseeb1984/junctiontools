@@ -1,0 +1,36 @@
+name: Phase 9 Automatic Publishing Gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [phase-9/automatic-publishing-gate, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automatic-publishing-gate:
+    name: Automatic publishing gate validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP syntax checks
+        run: |
+          php -l tools/evaluate-automatic-publishing.php
+          php -l tests/validate-automatic-publishing.php
+      - name: Validate automatic publishing gate
+        run: php tests/validate-automatic-publishing.php
+      - name: Verify policy is deny-by-default
+        run: |
+          php -r '$p=json_decode(file_get_contents("config/automatic-publishing-policy.json"),true); if(($p["automatic_publish"]["enabled"]??true)!==false) exit(1); if(($p["default_decision"]??"")!=="review") exit(1); echo "Policy is deny-by-default.\n";'
+      - name: Verify no secrets are committed
+        run: |
+          ! grep -RniE 'client_secret|refresh_token|authorization: bearer|developer_token' tools config --exclude-dir=.git
