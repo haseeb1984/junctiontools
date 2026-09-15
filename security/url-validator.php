@@ -9,19 +9,11 @@
 function jt_is_private_or_reserved_ip(string $ip): bool
 {
     if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-        return filter_var(
-            $ip,
-            FILTER_VALIDATE_IP,
-            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-        ) === false;
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
     }
 
     if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-        return filter_var(
-            $ip,
-            FILTER_VALIDATE_IP,
-            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-        ) === false;
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
     }
 
     return true;
@@ -33,7 +25,8 @@ function jt_resolves_to_public_ip(string $host): bool
         return !jt_is_private_or_reserved_ip($host);
     }
 
-    if ($host === '' || strtolower($host) === 'localhost' || str_ends_with(strtolower($host), '.localhost')) {
+    $host = strtolower(rtrim($host, '.'));
+    if ($host === '' || $host === 'localhost' || str_ends_with($host, '.localhost')) {
         return false;
     }
 
@@ -42,14 +35,16 @@ function jt_resolves_to_public_ip(string $host): bool
         return false;
     }
 
+    $resolved = 0;
     foreach ($records as $record) {
         $ip = $record['ip'] ?? ($record['ipv6'] ?? null);
         if ($ip === null || jt_is_private_or_reserved_ip($ip)) {
             return false;
         }
+        $resolved++;
     }
 
-    return true;
+    return $resolved > 0;
 }
 
 function jt_validate_external_url(string $url, bool $httpsOnly = false): array
@@ -83,7 +78,6 @@ function jt_validate_external_url(string $url, bool $httpsOnly = false): array
         return [false, 'Invalid hostname.'];
     }
 
-    // Explicitly block well-known metadata/service targets.
     $blockedHosts = [
         '169.254.169.254',
         'metadata.google.internal',
@@ -106,11 +100,11 @@ function jt_validate_domain(string $domain): array
     $domain = trim($domain);
     $domain = preg_replace('#^https?://#i', '', $domain);
     $domain = rtrim($domain, '/');
+
     if ($domain === '' || strlen($domain) > 253 || str_contains($domain, '@')) {
         return [false, 'Invalid domain.'];
     }
 
-    // ssl_audit intentionally permits only a hostname, never a path/query/port.
     if (str_contains($domain, '/') || str_contains($domain, '?') || str_contains($domain, '#') || str_contains($domain, ':')) {
         return [false, 'Please provide a hostname only.'];
     }
