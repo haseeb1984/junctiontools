@@ -1,241 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Advanced Image Compressor & Format Converter | JunctionTools</title>
-    
-    <meta name="description" content="Free online image compressor and format converter tool. Instantly optimize PNG, JPG, WebP, and AVIF images with custom quality settings in your browser.">
-    <meta name="keywords" content="free image compressor, image format converter, webp converter, avif compression tool, shrink image size online, bulk photo optimizer">
-    <link rel="canonical" href="https://junctiontools.com/image-compressor">
-
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://junctiontools.com/image-compressor">
-    <meta property="og:title" content="Free Advanced Image Compressor & Format Converter | JunctionTools">
-    <meta property="og:description" content="Compress and convert your images to WebP, AVIF, and JPG instantly for free with zero server uploads required.">
-    <meta property="og:image" content="https://junctiontools.com/assets/og-image-compressor.png">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Free Advanced Image Compressor & Format Converter | JunctionTools">
-    <meta name="twitter:description" content="Easily compress, optimize, and convert image formats directly in your browser for free.">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Free Advanced Image Compressor & Format Converter",
-      "operatingSystem": "All",
-      "applicationCategory": "MultimediaApplication, UtilitiesApplication, SEOTool",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "description": "Free browser-based utility tool to compress photos and convert image formats like WebP, AVIF, and JPEG."
-    }
-    </script>
-
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>[x-cloak] { display: none !important; }</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Image Compressor & Resizer | JunctionTools</title>
+<meta name="description" content="Free browser-based image compressor and resizer. Resize images by pixels or percentage, target 50KB or 100KB, and convert JPG, PNG, WebP and AVIF without uploading files.">
+<meta name="keywords" content="image compressor, image resizer, resize image online, resize jpg, resize photo, resize image to 50kb, resize image to 100kb, webp converter">
+<link rel="canonical" href="https://junctiontools.com/image-compressor">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://junctiontools.com/image-compressor">
+<meta property="og:title" content="Free Image Compressor & Resizer | JunctionTools">
+<meta property="og:description" content="Resize, compress and convert images directly in your browser. No uploads, no signup.">
+<meta property="og:image" content="https://junctiontools.com/assets/og-image-compressor.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free Image Compressor & Resizer | JunctionTools">
+<meta name="twitter:description" content="Resize and compress images to custom dimensions or target sizes such as 50KB and 100KB, entirely in your browser.">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"Free Image Compressor & Resizer",
+  "operatingSystem":"All",
+  "applicationCategory":"MultimediaApplication, UtilitiesApplication",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+  "description":"Free browser-based image compression, resizing and format conversion tool."
+}
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>[x-cloak]{display:none!important}</style>
 </head>
 <body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="imageOptimizer()">
-    <div id="header-container"></div>
-
-    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
-        <div class="mb-4">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
-                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Online Media Tool
-            </span>
-            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight flex items-center gap-3">
-                <i class="fa-solid fa-file-image text-emerald-400"></i>
-                Free Advanced Image Compressor & Converter
-            </h1>
-            <p class="text-slate-400 text-sm">Upload images first, then customize quality and select from multiple modern formats instantly with our free online utility.</p>
-        </div>
-
-        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5">
-            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
-                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
-            </h3>
-            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed">
-                <li>Drag and drop or browse to upload your images into the free queue.</li>
-                <li>Adjust your preferred compression quality and target format below.</li>
-                <li>Download your free optimized and converted images instantly.</li>
-            </ol>
-        </div>
-
-        <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 shadow-xl">
-            <div @dragover.prevent @drop.prevent="handleDrop($event)" 
-                 @click="$refs.fileInput.click()"
-                 class="border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-xl p-8 text-center cursor-pointer transition bg-[#090d14]/50 group">
-                <input type="file" x-ref="fileInput" @change="handleSelect($event)" multiple accept="image/*" class="hidden">
-                <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-500 group-hover:text-emerald-400 mb-3 transition"></i>
-                <p class="text-sm font-medium text-slate-200">Drag & drop your images here, or <span class="text-emerald-400 underline">browse free files</span></p>
-                <p class="text-xs text-slate-500 mt-1">Supports PNG, JPG, JPEG, WebP, AVIF, GIF</p>
-            </div>
-        </div>
-
-        <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-emerald-400"></i> Free Conversion & Compression Settings
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2 flex justify-between">
-                        <span>Compression Quality</span>
-                        <span class="text-emerald-400 font-bold" x-text="quality + '%'"></span>
-                    </label>
-                    <input type="range" min="10" max="100" x-model.number="quality" @input="reprocessFiles()" class="w-full accent-emerald-500 cursor-pointer">
-                    <p class="text-xs text-slate-500 mt-1">Lower quality = smaller file size (Ignored for PNG).</p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Target Popular Extension / Format</label>
-                    <select x-model="outputFormat" @change="reprocessFiles()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-emerald-500 text-sm transition">
-                        <option value="image/avif">AVIF (Ultra High Compression)</option>
-                        <option value="image/webp">WebP (Best for Web)</option>
-                        <option value="image/jpeg">JPEG (Standard JPG)</option>
-                        <option value="image/png">PNG (Lossless)</option>
-                        <option value="image/gif">GIF (Graphics Interchange)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div x-cloak x-show="images.length > 0" class="space-y-4">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-bold text-white">Free Compressed Queue (<span x-text="images.length"></span>)</h2>
-                <button @click="rawFiles = []; images = []" class="text-xs text-red-400 hover:underline"><i class="fa-solid fa-trash mr-1"></i> Clear All</button>
-            </div>
-
-            <template x-for="(img, index) in images" :key="index">
-                <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
-                    <div class="flex items-center gap-4 w-full md:w-auto">
-                        <img :src="img.compressedUrl" class="w-16 h-16 object-cover rounded-lg border border-slate-800 bg-[#090d14]">
-                        <div>
-                            <p class="text-sm font-semibold text-white truncate max-w-xs" x-text="img.name"></p>
-                            <div class="flex items-center gap-3 text-xs text-slate-400 mt-1">
-                                <span class="line-through" x-text="img.originalSize"></span>
-                                <i class="fa-solid fa-arrow-right text-[10px] text-emerald-400"></i>
-                                <span class="text-emerald-400 font-bold" x-text="img.compressedSize"></span>
-                                <span class="bg-emerald-950/80 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30 font-semibold" x-text="'-' + img.savings"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <a :href="img.compressedUrl" :download="img.downloadName" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition text-center shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-download"></i> Download Free Compressed
-                    </a>
-                </div>
-            </template>
-        </div>
-    </main>
-
-    <div id="footer-container"></div>
-
-    <script>
-        function imageOptimizer() {
-            return {
-                quality: 80,
-                outputFormat: 'image/webp',
-                rawFiles: [],
-                images: [],
-                handleDrop(e) {
-                    this.addFiles(e.dataTransfer.files);
-                },
-                handleSelect(e) {
-                    this.addFiles(e.target.files);
-                },
-                addFiles(files) {
-                    Array.from(files).forEach(file => {
-                        if (!file.type.match('image.*')) return;
-                        this.rawFiles.push(file);
-                    });
-                    this.reprocessFiles();
-                },
-                reprocessFiles() {
-                    if (this.rawFiles.length === 0) return;
-                    this.images = [];
-
-                    this.rawFiles.forEach(file => {
-                        let reader = new FileReader();
-                        reader.onload = (e) => {
-                            let img = new Image();
-                            img.onload = () => {
-                                let canvas = document.createElement('canvas');
-                                let ctx = canvas.getContext('2d');
-                                canvas.width = img.width;
-                                canvas.height = img.height;
-                                ctx.drawImage(img, 0, 0);
-
-                                let chosenFormat = this.outputFormat;
-                                let qualityParam = chosenFormat === 'image/png' ? undefined : (this.quality / 100);
-
-                                canvas.toBlob((blob) => {
-                                    let formatToUse = chosenFormat;
-                                    let finalBlob = blob;
-
-                                    if (!finalBlob && chosenFormat === 'image/avif') {
-                                        formatToUse = 'image/webp';
-                                        canvas.toBlob((wbBlob) => {
-                                            this.finalizeImage(file, wbBlob, formatToUse, '.webp');
-                                        }, formatToUse, qualityParam);
-                                        return;
-                                    } else if (!finalBlob) {
-                                        formatToUse = 'image/jpeg';
-                                        canvas.toBlob((jpgBlob) => {
-                                            this.finalizeImage(file, jpgBlob, formatToUse, '.jpg');
-                                        }, formatToUse, qualityParam);
-                                        return;
-                                    }
-
-                                    let ext = '.webp';
-                                    if (formatToUse === 'image/jpeg') ext = '.jpg';
-                                    else if (formatToUse === 'image/png') ext = '.png';
-                                    else if (formatToUse === 'image/avif') ext = '.avif';
-                                    else if (formatToUse === 'image/gif') ext = '.gif';
-
-                                    this.finalizeImage(file, finalBlob, formatToUse, ext);
-                                }, chosenFormat, qualityParam);
-                            };
-                            img.src = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                },
-                finalizeImage(file, blob, format, ext) {
-                    let compressedUrl = URL.createObjectURL(blob);
-                    let origSizeKb = file.size / 1024;
-                    let compSizeKb = blob.size / 1024;
-                    let savings = Math.max(0, (1 - blob.size / file.size) * 100);
-                    let baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-
-                    this.images.push({
-                        name: file.name,
-                        originalSize: origSizeKb > 1024 ? (origSizeKb / 1024).toFixed(2) + ' MB' : origSizeKb.toFixed(1) + ' KB',
-                        compressedSize: compSizeKb > 1024 ? (compSizeKb / 1024).toFixed(2) + ' MB' : compSizeKb.toFixed(1) + ' KB',
-                        savings: savings.toFixed(1) + '%',
-                        compressedUrl: compressedUrl,
-                        downloadName: baseName + '-compressed' + ext
-                    });
-                }
-            }
-        }
-
-        function loadComponent(id, file) {
-            fetch(file)
-                .then(res => res.text())
-                .then(data => {
-                    document.getElementById(id).innerHTML = data;
-                })
-                .catch(err => console.error(`Error loading ${file}:`, err));
-        }
-
-        loadComponent('header-container', 'header.html');
-        loadComponent('footer-container', 'footer.html');
-    </script>
+<div id="header-container"></div>
+<main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
+<section>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3"><i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Browser Tool</span>
+<h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight flex items-center gap-3"><i class="fa-solid fa-file-image text-emerald-400"></i> Free Image Compressor & Resizer</h1>
+<p class="text-slate-400 text-sm">Resize photos by dimensions or percentage, compress them, convert formats, or target common file sizes such as 50KB and 100KB. Your files stay in your browser.</p>
+</section>
+<section class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5">
+<h2 class="text-sm font-semibold text-slate-200 mb-2"><i class="fa-solid fa-circle-info text-emerald-400 mr-2"></i>How to use</h2>
+<ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed"><li>Upload one or more images.</li><li>Choose resize mode, dimensions and compression settings.</li><li>Download the optimized files. Processing happens locally in your browser.</li></ol>
+</section>
+<section class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 shadow-xl">
+<div @dragover.prevent @drop.prevent="handleDrop($event)" @click="$refs.fileInput.click()" class="border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-xl p-8 text-center cursor-pointer transition bg-[#090d14]/50 group">
+<input type="file" x-ref="fileInput" @change="handleSelect($event)" multiple accept="image/*" class="hidden">
+<i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-500 group-hover:text-emerald-400 mb-3 transition"></i>
+<p class="text-sm font-medium text-slate-200">Drag & drop images here, or <span class="text-emerald-400 underline">browse files</span></p>
+<p class="text-xs text-slate-500 mt-1">PNG, JPG, JPEG, WebP, AVIF and GIF</p>
+</div>
+</section>
+<section class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+<h2 class="text-base font-bold text-white"><i class="fa-solid fa-sliders text-emerald-400 mr-2"></i>Resize & Compression Settings</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div><label class="block text-sm font-medium text-slate-300 mb-2">Resize Mode</label><select x-model="resizeMode" @change="reprocessFiles()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 text-sm"><option value="original">Keep original dimensions</option><option value="width">Set width (px)</option><option value="height">Set height (px)</option><option value="dimensions">Set width & height (px)</option><option value="percent">Scale by percentage</option><option value="max">Fit inside maximum dimensions</option></select></div>
+<div x-show="resizeMode==='width' || resizeMode==='dimensions' || resizeMode==='max'"><label class="block text-sm font-medium text-slate-300 mb-2">Width (px)</label><input type="number" min="1" max="10000" x-model.number="targetWidth" @input="reprocessFiles()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 text-sm"></div>
+<div x-show="resizeMode==='height' || resizeMode==='dimensions' || resizeMode==='max'"><label class="block text-sm font-medium text-slate-300 mb-2">Height (px)</label><input type="number" min="1" max="10000" x-model.number="targetHeight" @input="reprocessFiles()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 text-sm"></div>
+<div x-show="resizeMode==='percent'"><label class="block text-sm font-medium text-slate-300 mb-2">Scale (%)</label><input type="number" min="1" max="1000" x-model.number="scalePercent" @input="reprocessFiles()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 text-sm"></div>
+<div><label class="block text-sm font-medium text-slate-300 mb-2">Target File Size</label><select x-model="targetSize" @change="reprocessFiles()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 text-sm"><option value="0">No target</option><option value="51200">50 KB</option><option value="102400">100 KB</option><option value="204800">200 KB</option><option value="512000">500 KB</option></select><p class="text-xs text-slate-500 mt-1">For best results use JPEG or WebP.</p></div>
+<div><label class="block text-sm font-medium text-slate-300 mb-2 flex justify-between"><span>Compression Quality</span><span class="text-emerald-400 font-bold" x-text="quality + '%'">80%</span></label><input type="range" min="10" max="100" x-model.number="quality" @input="reprocessFiles()" class="w-full accent-emerald-500 cursor-pointer"></div>
+<div><label class="block text-sm font-medium text-slate-300 mb-2">Output Format</label><select x-model="outputFormat" @change="reprocessFiles()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 text-sm"><option value="image/webp">WebP (Best for web)</option><option value="image/avif">AVIF (High compression)</option><option value="image/jpeg">JPEG / JPG</option><option value="image/png">PNG</option></select></div>
+</div>
+<p class="text-xs text-slate-500">Aspect ratio is preserved for width, height, percentage and maximum-dimension modes. Exact target sizes can vary slightly because image encoding is format-dependent.</p>
+</section>
+<section x-cloak x-show="images.length > 0" class="space-y-4">
+<div class="flex items-center justify-between"><h2 class="text-lg font-bold text-white">Optimized Queue (<span x-text="images.length"></span>)</h2><button @click="clearAll()" class="text-xs text-red-400 hover:underline"><i class="fa-solid fa-trash mr-1"></i>Clear All</button></div>
+<template x-for="(img,index) in images" :key="index"><div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg"><div class="flex items-center gap-4 w-full md:w-auto"><img :src="img.url" class="w-16 h-16 object-cover rounded-lg border border-slate-800 bg-[#090d14]"><div><p class="text-sm font-semibold text-white truncate max-w-xs" x-text="img.name"></p><div class="text-xs text-slate-400 mt-1"><span x-text="img.originalSize"></span><i class="fa-solid fa-arrow-right text-[10px] text-emerald-400 mx-2"></i><span class="text-emerald-400 font-bold" x-text="img.outputSize"></span><span class="ml-2 text-slate-500" x-text="img.dimensions"></span></div></div></div><a :href="img.url" :download="img.downloadName" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition text-center flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i>Download</a></div></template>
+</section>
+</main>
+<div id="footer-container"></div>
+<script>
+function imageOptimizer(){
+ return {
+  quality:80, outputFormat:'image/webp', resizeMode:'original', targetWidth:1200, targetHeight:1200, scalePercent:50, targetSize:0, rawFiles:[], images:[], processingToken:0,
+  handleDrop(e){this.addFiles(e.dataTransfer.files)}, handleSelect(e){this.addFiles(e.target.files)},
+  addFiles(files){Array.from(files).forEach(file=>{if(file.type.startsWith('image/'))this.rawFiles.push(file)});this.reprocessFiles()},
+  clearAll(){this.rawFiles=[];this.images=[];this.processingToken++},
+  getDimensions(width,height){
+   if(this.resizeMode==='width')return [Math.max(1,Math.round(this.targetWidth)),Math.max(1,Math.round(height*this.targetWidth/width))];
+   if(this.resizeMode==='height')return [Math.max(1,Math.round(width*this.targetHeight/height)),Math.max(1,Math.round(this.targetHeight))];
+   if(this.resizeMode==='dimensions')return [Math.max(1,Math.round(this.targetWidth)),Math.max(1,Math.round(this.targetHeight))];
+   if(this.resizeMode==='percent'){let s=Math.max(.01,this.scalePercent/100);return [Math.max(1,Math.round(width*s)),Math.max(1,Math.round(height*s))]}
+   if(this.resizeMode==='max'){let w=Math.max(1,this.targetWidth),h=Math.max(1,this.targetHeight),s=Math.min(1,w/width,h/height);return [Math.max(1,Math.round(width*s)),Math.max(1,Math.round(height*s))]}
+   return [width,height];
+  },
+  encode(canvas,format,quality){return new Promise(resolve=>canvas.toBlob(resolve,format,quality))},
+  async fitTargetSize(canvas,format,initialQuality,targetBytes){
+   if(!targetBytes || !canvas || (format==='image/png'))return {blob:await this.encode(canvas,format,format==='image/png'?undefined:initialQuality),canvas};
+   let low=.05,high=1,best=null;
+   for(let i=0;i<8;i++){let q=(low+high)/2,b=await this.encode(canvas,format,q);if(!b)break;if(b.size<=targetBytes){best=b;low=q}else{high=q}}
+   if(!best)best=await this.encode(canvas,format,.05);
+   return {blob:best,canvas};
+  },
+  async reprocessFiles(){
+   if(!this.rawFiles.length)return;
+   const token=++this.processingToken,files=[...this.rawFiles];this.images=[];
+   for(const file of files){
+    const result=await this.processFile(file);
+    if(token!==this.processingToken)return;
+    if(result)this.images.push(result);
+   }
+  },
+  processFile(file){return new Promise(resolve=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=async()=>{if(this.processingToken<0)return;let [w,h]=this.getDimensions(img.width,img.height);const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d',{alpha:true});ctx.drawImage(img,0,0,w,h);let format=this.outputFormat,quality=this.quality/100;let packed=await this.fitTargetSize(canvas,format,quality,Number(this.targetSize));if(!packed.blob && format==='image/avif'){format='image/webp';packed=await this.fitTargetSize(canvas,format,quality,Number(this.targetSize))}if(!packed.blob){format='image/jpeg';packed=await this.fitTargetSize(canvas,format,quality,Number(this.targetSize))}const ext=format==='image/jpeg'?'.jpg':format==='image/png'?'.png':format==='image/avif'?'.avif':'.webp';const base=file.name.replace(/\.[^.]+$/,'')||file.name;resolve({name:file.name,originalSize:this.formatBytes(file.size),outputSize:this.formatBytes(packed.blob.size),dimensions:w+' × '+h+' px',url:URL.createObjectURL(packed.blob),downloadName:base+'-optimized'+ext})};img.src=e.target.result};reader.readAsDataURL(file)})
+  },
+  formatBytes(bytes){if(bytes<1024)return bytes+' B';let kb=bytes/1024;if(kb<1024)return kb.toFixed(1)+' KB';return (kb/1024).toFixed(2)+' MB'}
+ }
+}
+function loadComponent(id,file){fetch(file).then(res=>res.text()).then(data=>{document.getElementById(id).innerHTML=data}).catch(err=>console.error('Component load error:',err))}
+loadComponent('header-container','header.html');loadComponent('footer-container','footer.html');
+</script>
 </body>
 </html>
