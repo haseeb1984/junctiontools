@@ -1,0 +1,43 @@
+name: Phase 10 Continuous Tool Factory
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - phase-10/continuous-tool-factory
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tool-factory-contract:
+    name: Tool factory contract validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: PHP syntax checks
+        run: |
+          php -l tools/run-tool-factory.php
+          php -l tests/validate-tool-factory-pipeline.php
+
+      - name: Validate Phase 10 pipeline contract
+        run: php tests/validate-tool-factory-pipeline.php
+
+      - name: Verify production publishing remains disabled
+        run: |
+          php -r '$p=json_decode(file_get_contents("config/tool-factory-pipeline.json"), true); if (($p["automatic_production_publish"] ?? true) !== false) { exit(1); } echo "Production publishing: disabled\n";'
+
+      - name: Verify no credentials are committed
+        run: |
+          ! grep -RniE 'client_secret|refresh_token|authorization: bearer|developer_token' tools config tests --exclude-dir=.git
