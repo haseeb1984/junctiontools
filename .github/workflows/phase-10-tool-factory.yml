@@ -30,14 +30,21 @@ jobs:
         run: |
           php -l tools/run-tool-factory.php
           php -l tools/run-demand-refresh.php
+          php -l tools/build-search-console-feedback.php
+          php -l tools/build-search-console-generation-queue.php
+          php -l tools/evaluate-automatic-publishing.php
           php -l tests/validate-tool-factory-pipeline.php
           php -l tests/validate-demand-refresh.php
+          php -l tests/validate-tool-factory-e2e.php
 
       - name: Validate Phase 10 pipeline contract
         run: php tests/validate-tool-factory-pipeline.php
 
       - name: Validate demand refresh chain
         run: php tests/validate-demand-refresh.php
+
+      - name: Validate full factory dry-run
+        run: php tests/validate-tool-factory-e2e.php
 
       - name: Verify production publishing remains disabled
         run: |
