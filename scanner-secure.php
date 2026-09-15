@@ -202,13 +202,38 @@ switch ($scanType) {
     case 'ssl_audit':
         $domain = jt_domain_from_input($input);
         $url = 'https://' . $domain;
-        $result = jt_fetch_html($url);
+        $result = jt_safe_http_get($url, [
+            'timeout' => 12,
+            'connect_timeout' => 5,
+            'max_bytes' => 256 * 1024,
+            'certificate_info' => true,
+            'user_agent' => 'JunctionTools-SSLChecker/1.0 (+https://junctiontools.com)'
+        ]);
+        if (!$result['success']) {
+            jt_json(['success'=>false,'message'=>$result['message'] ?? 'Unable to establish a verified HTTPS connection.'],422);
+        }
         $headers = strtolower((string)($result['headers'] ?? ''));
         $hsts = strpos($headers, 'strict-transport-security') !== false;
         $csp = strpos($headers, 'content-security-policy') !== false;
         $xFrame = strpos($headers, 'x-frame-options') !== false;
-        jt_json(['success'=>true,'sslValid'=>true,'daysRemaining'=>null,'hsts'=>$hsts,'csp'=>$csp,'xFrame'=>$xFrame,'score'=>40+($hsts?15:0)+($xFrame?15:0)+30,'message'=>"HTTPS connection succeeded. HSTS: " . ($hsts?'Yes':'No') . "; CSP: " . ($csp?'Yes':'No') . "; X-Frame-Options: " . ($xFrame?'Present':'Missing') . "."]);
+        $certificate = is_array($result['certificate'] ?? null) ? $result['certificate'] : [];
+        $issuer = (string)($certificate['issuer'] ?? '');
+        $expiryDate = (string)($certificate['expires_at'] ?? '');
+        $daysRemaining = $certificate['days_remaining'] ?? null;
+        $score = 40 + ($hsts?15:0) + ($xFrame?15:0) + 30;
+        jt_json([
+            'success'=>true,
+            'sslValid'=>true,
+            'issuer'=>$issuer !== '' ? $issuer : null,
+            'expiryDate'=>$expiryDate !== '' ? $expiryDate : null,
+            'daysRemaining'=>$daysRemaining,
+            'hsts'=>$hsts,
+            'csp'=>$csp,
+            'xFrame'=>$xFrame,
+            'score'=>$score,
+            'message'=>"Verified HTTPS connection succeeded. Certificate issuer: " . ($issuer !== '' ? $issuer : 'Unavailable') . "; expiry: " . ($expiryDate !== '' ? $expiryDate : 'Unavailable') . "; HSTS: " . ($hsts?'Yes':'No') . "; CSP: " . ($csp?'Yes':'No') . "; X-Frame-Options: " . ($xFrame?'Present':'Missing') . "."
+        ]);
 
     default:
-        jt_json(['success'=>false,'message'=>'Unsupported scan type.'], 400);
+        jt_json(['success'=>false,'message'=>'Unsupported scan type.'],400);
 }
