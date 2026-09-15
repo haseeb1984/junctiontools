@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JunctionTools - 100% Free E-Commerce & Developer Utilities</title>
+    
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-emerald-500 selection:text-black" x-data="{ search: '' }">
+
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10 flex-grow space-y-12 w-full">
+        
+        <!-- Hero Section -->
+        <div class="text-center space-y-4 max-w-3xl mx-auto">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> Free Online Production-Grade Utilities
+            </span>
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Free E-Commerce & Developer Toolkit</h1>
+            <p class="text-slate-400 text-base sm:text-lg">Access 35 completely free online tools for store performance, accessibility, SEO, design audits, and code calculations without registration.</p>
+            
+            <!-- Dynamic Search Filter Input -->
+            <div class="relative max-w-xl mx-auto pt-2">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input 
+                    type="text" 
+                    x-model="search" 
+                    placeholder="Search free tools (e.g., free SEO audit, free JSON formatter)..." 
+                    class="w-full pl-11 pr-4 py-3 bg-[#0f172a] border border-emerald-900/40 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition shadow-inner"
+                >
+                <template x-if="search !== ''">
+                    <button @click="search = ''" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <!-- CATEGORY 1: Speed, Performance & Analytics -->
+        <section class="space-y-4 tool-category" x-show="['speed', 'performance', 'analytics', 'pagespeed', 'image', 'pixel', 'ga4', 'minifier', 'free'].some(k => search === '' || $el.innerText.toLowerCase().includes(search.toLowerCase()))">
+            <h2 class="text-xl font-bold text-emerald-400 border-b border-emerald-900/40 pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-gauge-high"></i> Free Speed, Performance & Analytics Tools
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="pagespeed" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-bolt text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free PageSpeed Analyzer</h3><p class="text-xs text-slate-400">Core Web Vitals audit</p></div>
+                </a>
+                <a href="asset-optimizer" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-file-image text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Image Compressor</h3><p class="text-xs text-slate-400">Oversized media converter</p></div>
+                </a>
+                <a href="pixel-diagnostic" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-crosshairs text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Pixel Diagnostic</h3><p class="text-xs text-slate-400">Tracking tags check</p></div>
+                </a>
+                <a href="ga4-verifier" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-magnifying-glass-chart text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free GA4 Code Generator</h3><p class="text-xs text-slate-400">Data Layer generator</p></div>
+                </a>
+                <a href="css-js-minifier" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-compress text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free CSS/JS Minifier</h3><p class="text-xs text-slate-400">Asset compression tool</p></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- CATEGORY 2: UX, Accessibility & SEO -->
+        <section class="space-y-4 tool-category" x-show="['ux', 'accessibility', 'seo', 'aria', 'mobile', 'browser', 'robots', 'schema', 'free'].some(k => search === '' || $el.innerText.toLowerCase().includes(search.toLowerCase()))">
+            <h2 class="text-xl font-bold text-emerald-400 border-b border-emerald-900/40 pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-universal-access"></i> Free UX, Accessibility & SEO Tools
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="aria-audit" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-eye text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free ARIA & Alt Audit</h3><p class="text-xs text-slate-400">Screen reader checker</p></div>
+                </a>
+                <a href="mobile-ux" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-mobile-screen text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Mobile Viewport UX</h3><p class="text-xs text-slate-400">Responsive layout test</p></div>
+                </a>
+                <a href="ux-evaluator" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-compass-drafting text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free UX Layout Evaluator</h3><p class="text-xs text-slate-400">Heuristic store audit</p></div>
+                </a>
+                <a href="cross-browser" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-window-restore text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Cross-Browser Check</h3><p class="text-xs text-slate-400">Compatibility validator</p></div>
+                </a>
+                <a href="meta-seo" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-robot text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Meta SEO Checker</h3><p class="text-xs text-slate-400">Inspect tags & indexability</p></div>
+                </a>
+                <a href="schema-validator" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-diagram-project text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Schema Validator</h3><p class="text-xs text-slate-400">Structured data testing</p></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- CATEGORY 3: E-Commerce, Conversion & Trust -->
+        <section class="space-y-4 tool-category" x-show="['ecommerce', 'conversion', 'trust', 'checkout', 'cart', 'cta', 'ssl', 'invoice', 'discount', 'free'].some(k => search === '' || $el.innerText.toLowerCase().includes(search.toLowerCase()))">
+            <h2 class="text-xl font-bold text-emerald-400 border-b border-emerald-900/40 pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-cart-shopping"></i> Free E-Commerce Conversion Tools
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="checkout-funnel" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-filter-circle-dollar text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Checkout Funnel Analyzer</h3><p class="text-xs text-slate-400">Friction audit</p></div>
+                </a>
+                <a href="cart-abandonment" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-cart-arrow-down text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Cart Loss Calculator</h3><p class="text-xs text-slate-400">Abandonment rate tool</p></div>
+                </a>
+                <a href="cta-analyzer" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-bullhorn text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free CTA & Headline Analyzer</h3><p class="text-xs text-slate-400">Value prop test</p></div>
+                </a>
+                <a href="trust-inspector" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-shield-cat text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Trust Badge Inspector</h3><p class="text-xs text-slate-400">Payment verification</p></div>
+                </a>
+                <a href="ssl-checker" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-lock text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free SSL & Security Checker</h3><p class="text-xs text-slate-400">HTTPS header check</p></div>
+                </a>
+                <a href="invoice-generator" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-file-invoice-dollar text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Invoice Generator</h3><p class="text-xs text-slate-400">Order receipts maker</p></div>
+                </a>
+                <a href="discount-calculator" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-tags text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Discount Calculator</h3><p class="text-xs text-slate-400">Sales savings calculator</p></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- CATEGORY 4: Design, Media & Content -->
+        <section class="space-y-4 tool-category" x-show="['design', 'media', 'content', 'aspect', 'color', 'contrast', 'social', 'product', 'readability', 'bio', 'text', 'case', 'word', 'free'].some(k => search === '' || $el.innerText.toLowerCase().includes(search.toLowerCase()))">
+            <h2 class="text-xl font-bold text-emerald-400 border-b border-emerald-900/40 pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-palette"></i> Free Design, Media & Content Tools
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="aspect-ratio-calculator" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-expand text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Aspect Ratio Calculator</h3><p class="text-xs text-slate-400">Video dimensions tool</p></div>
+                </a>
+                <a href="color-palette-generator" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-droplet text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Color Palette Generator</h3><p class="text-xs text-slate-400">Color scheme builder</p></div>
+                </a>
+                <a href="contrast-checker" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-circle-half-stroke text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Button Contrast Tool</h3><p class="text-xs text-slate-400">WCAG color checker</p></div>
+                </a>
+                <a href="social-asset-optimizer" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-image text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Social Asset Optimizer</h3><p class="text-xs text-slate-400">Banner resizer</p></div>
+                </a>
+                <a href="product-copy" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-pen-nib text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Product Copy Analyzer</h3><p class="text-xs text-slate-400">SEO & readability check</p></div>
+                </a>
+                <a href="readability" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-book-open-reader text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Readability Evaluator</h3><p class="text-xs text-slate-400">Tone & grade level check</p></div>
+                </a>
+                <a href="bio-font-generator" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-font text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Bio Font Generator</h3><p class="text-xs text-slate-400">Unicode text styler</p></div>
+                </a>
+                <a href="clean-text" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-align-left text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Clean Text Tool</h3><p class="text-xs text-slate-400">Strip HTML formatting</p></div>
+                </a>
+                <a href="case-converter" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-text-height text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Case Converter</h3><p class="text-xs text-slate-400">Upper/Lower/Title changer</p></div>
+                </a>
+                <a href="word-counter" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-calculator text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Word Counter</h3><p class="text-xs text-slate-400">Word & character tool</p></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- CATEGORY 5: Developer Utilities & Integrations -->
+        <section class="space-y-4 tool-category" x-show="['developer', 'utilities', 'integrations', 'px', 'rem', 'base64', 'json', 'regex', 'sha256', 'uuid', 'whatsapp', 'free'].some(k => search === '' || $el.innerText.toLowerCase().includes(search.toLowerCase()))">
+            <h2 class="text-xl font-bold text-emerald-400 border-b border-emerald-900/40 pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-code-compare"></i> Free Developer Utilities & Integrations
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="px-to-rem" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-ruler-combined text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free PX to REM Converter</h3><p class="text-xs text-slate-400">CSS unit calculator</p></div>
+                </a>
+                <a href="base64-converter" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-file-code text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Base64 Converter</h3><p class="text-xs text-slate-400">Encode/decode string tool</p></div>
+                </a>
+                <a href="json-formatter" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-code text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free JSON Formatter</h3><p class="text-xs text-slate-400">Validate & format code</p></div>
+                </a>
+                <a href="regex-tester" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-terminal text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free Regex Pattern Tester</h3><p class="text-xs text-slate-400">Regular expressions utility</p></div>
+                </a>
+                <a href="sha256-hash" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-hashtag text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free SHA-256 Hash Tool</h3><p class="text-xs text-slate-400">Cryptographic hashes</p></div>
+                </a>
+                <a href="uuid-generator" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid fa-fingerprint text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free UUID v4 Generator</h3><p class="text-xs text-slate-400">Unique identifier generator</p></div>
+                </a>
+                <a href="whatsapp-direct" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group">
+                    <div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-brands fa-whatsapp text-lg"></i></div>
+                    <div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">Free WhatsApp Link Maker</h3><p class="text-xs text-slate-400">Direct click-to-chat links</p></div>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+    <script>
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('#mobile-menu-btn')) {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('menu-icon');
+            if (menu) {
+                menu.classList.toggle('hidden');
+                if (icon) {
+                    icon.className = menu.classList.contains('hidden') ? "fa-solid fa-bars" : "fa-solid fa-xmark";
+                }
+            }
+        }
+
+        if (e.target.closest('#mobile-tools-btn')) {
+            const list = document.getElementById('mobile-tools-list');
+            const arrow = document.getElementById('tools-arrow');
+            if (list) {
+                list.classList.toggle('hidden');
+            }
+            if (arrow) {
+                arrow.classList.toggle('rotate-180');
+            }
+        }
+    });
+</script>
+</body>
+</html>

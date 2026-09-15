@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free GA4 & Data Layer Code Generator | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online Google Analytics 4 (GA4) and Data Layer code generator. Instantly create view_item, add_to_cart, and purchase tracking scripts for your website.">
+    <meta name="keywords" content="free ga4 code generator, data layer builder, ecommerce tracking snippet, google analytics 4 script generator, add to cart event code, purchase tag generator">
+    <link rel="canonical" href="https://junctiontools.com/ga4-generator">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/ga4-generator">
+    <meta property="og:title" content="Free GA4 & Data Layer Code Generator | JunctionTools">
+    <meta property="og:description" content="Generate standard Google Analytics 4 e-commerce tracking code snippets instantly for free. Copy and paste into your website or Google Tag Manager.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-ga4-generator.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free GA4 & Data Layer Code Generator | JunctionTools">
+    <meta name="twitter:description" content="Instantly generate custom GA4 e-commerce data layer events like view_item, add_to_cart, and purchase for free.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free GA4 & Data Layer Code Generator",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, MarketingApplication, SEOTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility to generate Google Analytics 4 and Google Tag Manager e-commerce data layer code snippets."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="ga4Generator()">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
+        <div class="mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Tracking Snippet Generator
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-magnifying-glass-chart text-emerald-400"></i>
+                Free GA4 & Data Layer Code Generator
+            </h1>
+            <p class="text-slate-400 text-sm">Instantly generate free standard Google Analytics 4 e-commerce tracking code snippets (<code class="text-emerald-400 bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800">view_item</code>, <code class="text-emerald-400 bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800">add_to_cart</code>, <code class="text-emerald-400 bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800">purchase</code>) to paste into your website.</p>
+        </div>
+
+        <!-- HOW TO USE INSTRUCTIONS -->
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use This Generator:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed">
+                <li>Enter your target page URL or product name for reference label.</li>
+                <li>Provide your GA4 Measurement ID or GTM Container ID.</li>
+                <li>Select your required e-commerce event and click <strong class="text-slate-200">Generate Free Tracking Snippet</strong>.</li>
+                <li>Copy the generated code and place it into your website template or Google Tag Manager configuration.</li>
+            </ol>
+        </div>
+
+        <!-- FORM CONTROLS -->
+        <form @submit.prevent="generateCode()" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Page URL / Reference Label</label>
+                <input type="text" x-model="pageUrl" required placeholder="https://example.com/product-page" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm transition">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">GA4 / GTM ID Reference</label>
+                    <input type="text" x-model="measurementId" required placeholder="G-A1B2C3D4E5 or GTM-XXXXXX" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 font-mono placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Select E-Commerce Event</label>
+                    <select x-model="targetEvent" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 font-mono focus:outline-none focus:border-emerald-500 text-sm transition">
+                        <option value="view_item">view_item</option>
+                        <option value="add_to_cart">add_to_cart</option>
+                        <option value="begin_checkout">begin_checkout</option>
+                        <option value="purchase">purchase</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" :disabled="loading" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                <i :class="loading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-code'"></i>
+                <span x-text="loading ? 'Generating Code Snippet...' : 'Generate Free Tracking Snippet'"></span>
+            </button>
+        </form>
+
+        <!-- GENERATION RESULTS SECTION -->
+        <div x-cloak x-show="generated" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-file-code text-emerald-400"></i> Free Generated Data Layer Snippet for: <span class="text-emerald-400 font-mono" x-text="targetEvent"></span>
+                </h2>
+                <span class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-semibold">Ready to Use</span>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div class="bg-[#090d14] p-4 rounded-lg border border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Copy and Paste Code into Your Website</p>
+                        <span class="text-xs text-emerald-400 font-mono" x-text="'Target ID: ' + measurementId"></span>
+                    </div>
+                    <pre class="text-xs text-emerald-300 font-mono overflow-x-auto p-3 bg-slate-950 rounded border border-slate-900 select-all" x-text="payloadSnippet"></pre>
+                </div>
+
+                <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-800 text-slate-400 text-xs leading-relaxed">
+                    <strong class="text-slate-200">Implementation Note:</strong> Ensure this script executes on your website right when the user triggers the action (e.g., page load for <code class="text-emerald-400">view_item</code> or button click for <code class="text-emerald-400">add_to_cart</code>) so Google Tag Manager can pick up the data layer payload.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        function ga4Generator() {
+            return {
+                pageUrl: '',
+                measurementId: '',
+                targetEvent: 'view_item',
+                loading: false,
+                generated: false,
+                payloadSnippet: '',
+                generateCode() {
+                    if (!this.pageUrl || !this.measurementId) return;
+                    this.loading = true;
+                    this.generated = false;
+
+                    setTimeout(() => {
+                        this.loading = false;
+                        this.generated = true;
+
+                        let payloads = {
+                            'view_item': `window.dataLayer = window.dataLayer || [];\nwindow.dataLayer.push({\n  'event': 'view_item',\n  'ecommerce': {\n    'currency': 'USD',\n    'value': 29.99,\n    'items': [{\n      'item_id': 'SKU_12345',\n      'item_name': 'Sample Product Item',\n      'price': 29.99,\n      'quantity': 1\n    }]\n  }\n});`,
+                            'add_to_cart': `window.dataLayer = window.dataLayer || [];\nwindow.dataLayer.push({\n  'event': 'add_to_cart',\n  'ecommerce': {\n    'currency': 'USD',\n    'value': 29.99,\n    'items': [{\n      'item_id': 'SKU_12345',\n      'item_name': 'Sample Product Item',\n      'price': 29.99,\n      'quantity': 1\n    }]\n  }\n});`,
+                            'begin_checkout': `window.dataLayer = window.dataLayer || [];\nwindow.dataLayer.push({\n  'event': 'begin_checkout',\n  'ecommerce': {\n    'currency': 'USD',\n    'value': 59.98,\n    'items': [{\n      'item_id': 'SKU_12345',\n      'item_name': 'Sample Product Item',\n      'price': 29.99,\n      'quantity': 2\n    }]\n  }\n});`,
+                            'purchase': `window.dataLayer = window.dataLayer || [];\nwindow.dataLayer.push({\n  'event': 'purchase',\n  'ecommerce': {\n    'transaction_id': 'T_987654321',\n    'value': 89.99,\n    'tax': 4.50,\n    'shipping': 0.00,\n    'currency': 'USD',\n    'items': [{\n      'item_id': 'SKU_12345',\n      'item_name': 'Sample Product Item',\n      'price': 89.99,\n      'quantity': 1\n    }]\n  }\n});`
+                        };
+
+                        this.payloadSnippet = payloads[this.targetEvent] || payloads['view_item'];
+                    }, 600);
+                }
+            }
+        }
+
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

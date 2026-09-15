@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Payment Gateway & Trust Badge Inspector | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online Payment Gateway & Trust Badge Inspector tool. Audit visible credit card logos, SSL badges, money-back guarantees, and buyer confidence score for free.">
+    <meta name="keywords" content="free trust badge inspector, payment gateway auditor, ecommerce trust elements checker, SSL badge analyzer, cart security scanner, checkout optimization">
+    <link rel="canonical" href="https://junctiontools.com/trust-badge-inspector">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/trust-badge-inspector">
+    <meta property="og:title" content="Free Payment Gateway & Trust Badge Inspector | JunctionTools">
+    <meta property="og:description" content="Audit visible credit card logos, SSL badges, and money-back guarantees above the fold for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-trust-inspector.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Payment Gateway & Trust Badge Inspector | JunctionTools">
+    <meta name="twitter:description" content="Calculate your store buyer confidence index and inspect checkout trust elements instantly with our free tool.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Payment Gateway & Trust Badge Inspector",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication, SEOTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to audit store checkout security signals, payment badges, and buyer confidence metrics."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <div class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full">
+        <div class="mb-8">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Security Audit Tool
+            </span>
+            <h1 class="text-2xl md:text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                <i class="fa-solid fa-shield-cat text-emerald-400"></i>
+                Free Payment Gateway & Trust Badge Inspector
+            </h1>
+            <p class="text-slate-400 text-sm">Audit visible credit card logos, SSL badges, money-back guarantees, and trust elements above the fold instantly.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>Provide product page or cart URL.</li>
+                <li>Select active trust elements currently enabled on store.</li>
+                <li>Click <strong class="text-slate-200">Inspect Trust Factors</strong> to calculate buyer confidence index.</li>
+            </ol>
+        </div>
+
+        <form id="trust-form" class="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-6 space-y-6 shadow-xl">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2 flex items-center space-x-2">
+                    <span>Store Page Link</span>
+                    <i class="fa-solid fa-circle-question text-slate-500 text-xs" title="Cart or Product Page link"></i>
+                </label>
+                <input type="url" id="store_url" name="store_url" required placeholder="https://example.com/cart" class="w-full bg-[#090d14] border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm transition">
+                <p class="text-xs text-slate-500 mt-2">Example: Cart page or direct product page URL.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Active Trust Elements</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-300">
+                    <label class="flex items-center space-x-3 bg-[#090d14] p-3 rounded-xl border border-slate-800 hover:border-slate-700 cursor-pointer transition">
+                        <input type="checkbox" name="trust_elements[]" value="payment_icons" class="rounded border-slate-700 bg-[#090d14] text-emerald-600 focus:ring-emerald-500">
+                        <span>Payment Method Icons</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-[#090d14] p-3 rounded-xl border border-slate-800 hover:border-slate-700 cursor-pointer transition">
+                        <input type="checkbox" name="trust_elements[]" value="money_back" class="rounded border-slate-700 bg-[#090d14] text-emerald-600 focus:ring-emerald-500">
+                        <span>Money-Back Guarantee Seal</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-[#090d14] p-3 rounded-xl border border-slate-800 hover:border-slate-700 cursor-pointer transition">
+                        <input type="checkbox" name="trust_elements[]" value="ssl_badge" class="rounded border-slate-700 bg-[#090d14] text-emerald-600 focus:ring-emerald-500">
+                        <span>SSL Lock / Security Badge</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-[#090d14] p-3 rounded-xl border border-slate-800 hover:border-slate-700 cursor-pointer transition">
+                        <input type="checkbox" name="trust_elements[]" value="reviews_summary" class="rounded border-slate-700 bg-[#090d14] text-emerald-600 focus:ring-emerald-500">
+                        <span>Customer Reviews Summary</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-magnifying-glass-chart text-xs"></i> Inspect Trust Factors
+            </button>
+        </form>
+
+        <!-- Result Container -->
+        <div id="result-container" class="mt-6 hidden bg-slate-900 border border-slate-800 rounded-xl p-5 text-sm text-slate-300"></div>
+    </div>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER & AJAX SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+
+        // Form Submit Handler
+        document.getElementById('trust-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const checkboxes = document.querySelectorAll('input[name="trust_elements[]"]:checked');
+            const selectedElements = Array.from(checkboxes).map(cb => cb.value);
+
+            const formData = {
+                type: 'trust_inspector',
+                store_url: document.getElementById('store_url').value,
+                trust_elements: selectedElements
+            };
+
+            fetch('scanner.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result-container');
+                resultDiv.classList.remove('hidden');
+                if(data.success) {
+                    resultDiv.innerHTML = `<p class="text-emerald-400 font-semibold text-base mb-1">Inspection Results:</p><p>${data.message}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="text-rose-400 font-semibold">Error:</p><p>${data.message}</p>`;
+                }
+            })
+            .catch(err => {
+                const resultDiv = document.getElementById('result-container');
+                resultDiv.classList.remove('hidden');
+                resultDiv.innerHTML = `<p class="text-rose-400 font-semibold mb-1">Server Connection Error:</p><p>Please ensure scanner.php is running properly.</p>`;
+                console.error('Error:', err);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Regex Tester & Matcher Tool - Real-Time Regular Expression Debugger | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online Regex tester and matcher tool. Test, debug, and validate regular expression patterns against custom text inputs in real-time client-side.">
+    <meta name="keywords" content="free regex tester, regular expression matcher, regex debug tool, test regex online, regex syntax validator, developer utility">
+    <link rel="canonical" href="https://junctiontools.com/regex-tester-matcher">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/regex-tester-matcher">
+    <meta property="og:title" content="Free Regex Tester & Matcher Tool - Real-Time Regular Expression Debugger | JunctionTools">
+    <meta property="og:description" content="Test and debug regular expressions in real-time with instant pattern matching client-side for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-regex-tester.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Regex Tester & Matcher Tool | JunctionTools">
+    <meta name="twitter:description" content="Instantly test, debug, and evaluate regular expression rules against text strings.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Regex Tester & Matcher Tool",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, UtilitiesApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to test and debug regular expressions in real-time with instant pattern matching."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full space-y-6" 
+        x-data="{ 
+            pattern: '[a-z]+', 
+            text: 'hello 123 world', 
+            matches: [], 
+            error: '',
+            hasRun: false,
+            test() { 
+                this.hasRun = true;
+                this.error = '';
+                this.matches = [];
+                if (!this.pattern) {
+                    this.error = 'Pattern cannot be empty.';
+                    return;
+                }
+                try { 
+                    const re = new RegExp(this.pattern, 'g'); 
+                    this.matches = this.text.match(re) || []; 
+                } catch(e) { 
+                    this.error = e.message;
+                    this.matches = []; 
+                } 
+            }
+        }">
+        
+        <div class="space-y-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-1">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Developer Utility
+            </span>
+            <h1 class="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+                <i class="fa-solid fa-terminal text-emerald-400"></i>
+                Free Regex Pattern Tester
+            </h1>
+            <p class="text-slate-400 text-sm">
+                Validate and debug regular expression rules against custom string inputs instantly.
+            </p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>Enter your Regular Expression pattern into the <strong>Regex Pattern</strong> input box.</li>
+                <li>Paste or type the target text you want to test inside the <strong>Test String Input</strong> box.</li>
+                <li>Click <strong class="text-slate-200">Run Matcher</strong> to evaluate expression syntax and see results inside the output box.</li>
+            </ol>
+        </div>
+
+        <div class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-4 shadow-xl">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Regex Pattern</label>
+                    <input type="text" x-model="pattern" placeholder="e.g. [a-z]+" class="w-full p-3 border border-slate-800 rounded-xl bg-[#090d14] text-emerald-400 font-mono text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Test String Input</label>
+                    <textarea x-model="text" placeholder="Enter text to match against" class="w-full p-3 border border-slate-800 rounded-xl bg-[#090d14] text-slate-200 font-mono text-xs h-28 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition"></textarea>
+                </div>
+            </div>
+
+            <button @click="test()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-play text-xs"></i> Run Matcher
+            </button>
+
+            <!-- Unified Result / Output Box -->
+            <div x-show="hasRun" x-cloak class="space-y-2 pt-2">
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Matcher Output</label>
+                <div class="p-4 bg-[#090d14] border border-slate-800 rounded-xl font-mono text-xs">
+                    
+                    <!-- Error State inside Result Box -->
+                    <template x-if="error">
+                        <div class="text-red-400 flex items-center gap-2 p-2 bg-red-950/40 border border-red-900/60 rounded-lg">
+                            <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+                            <span x-text="'Invalid Regex Error: ' + error"></span>
+                        </div>
+                    </template>
+
+                    <!-- Success State inside Result Box -->
+                    <template x-if="!error">
+                        <div>
+                            <div class="text-slate-400 mb-2">Matched Results (<span x-text="matches.length"></span>):</div>
+                            <div class="flex flex-wrap gap-2 items-center min-h-[40px]">
+                                <template x-if="matches.length === 0">
+                                    <span class="text-slate-500 italic">No matches found for the given pattern.</span>
+                                </template>
+                                <template x-for="(match, index) in matches" :key="index">
+                                    <span class="bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 px-2.5 py-1 rounded-md" x-text="match"></span>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+
+</body>
+</html>

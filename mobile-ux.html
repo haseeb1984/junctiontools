@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Mobile Viewport & UX Tester | JunctionTools</title>
+    
+    <meta name="description" content="Free online mobile viewport and UX tester. Check mobile touch target sizes, sticky add-to-cart bars, font legibility, and viewport scalability instantly.">
+    <meta name="keywords" content="free mobile ux tester, viewport checker online, mobile responsiveness audit, touch target size tool, mobile usability scanner, responsive design tester">
+    <link rel="canonical" href="https://junctiontools.com/mobile-ux-tester">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/mobile-ux-tester">
+    <meta property="og:title" content="Free Mobile Viewport & UX Tester | JunctionTools">
+    <meta property="og:description" content="Inspect mobile layouts, viewport tags, touch targets, and mobile usability metrics for free on any web page.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-mobile-tester.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Mobile Viewport & UX Tester | JunctionTools">
+    <meta name="twitter:description" content="Test your website's mobile responsiveness, viewport scaling, and UX compliance instantly for free.">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Mobile Viewport & UX Tester",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, MobileTool, SEOTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility to test mobile viewports, responsive touch targets, and user experience metrics."
+    }
+    </script>
+
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="mobileTester()">
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
+        <div class="mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Mobile UX Audit Tool
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
+                Free Mobile Viewport & UX Tester
+            </h1>
+            <p class="text-slate-400 text-sm">Check mobile touch target sizes, sticky add-to-cart bars, font legibility, and viewport scalability.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed">
+                <li>Paste product page link for mobile viewport inspection.</li>
+                <li>Select target screen width (e.g., iPhone 14/15, Pixel, Galaxy).</li>
+                <li>Click <strong class="text-slate-200">Run Mobile UX Test</strong> to audit tap spacing and mobile button sizes.</li>
+            </ol>
+        </div>
+
+        <form @submit.prevent="runMobileTest()" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Mobile Page URL</label>
+                <input type="url" x-model="pageUrl" required placeholder="https://example.com/product/shoes" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm transition">
+                <p class="text-xs text-slate-500 mt-2">Example: Direct product URL for mobile layout checks.</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Target Viewport Screen Width</label>
+                <select x-model="viewportWidth" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-emerald-500 text-sm transition">
+                    <option value="390">iPhone 14 / 15 Pro (390px width)</option>
+                    <option value="412">Samsung Galaxy S23 (412px width)</option>
+                    <option value="360">Compact Android (360px width)</option>
+                </select>
+            </div>
+
+            <button type="submit" :disabled="loading" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                <i :class="loading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-play'"></i>
+                <span x-text="loading ? 'Inspecting Viewport & Meta Tags...' : 'Run Mobile UX Test'"></span>
+            </button>
+        </form>
+
+        <template x-if="errorMessage">
+            <div class="bg-red-950/60 border border-red-900/50 rounded-xl p-4 text-red-300 text-sm flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                <span x-text="errorMessage"></span>
+            </div>
+        </template>
+
+        <div x-cloak x-show="tested" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-mobile text-emerald-400"></i> Mobile UX Audit for: <span class="text-emerald-400 font-mono text-xs" x-text="viewportWidth + 'px Width'"></span>
+                </h2>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="hasViewportTag ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-red-950 text-red-300 border border-red-500/30'" x-text="hasViewportTag ? 'Viewport Optimized' : 'Viewport Missing'"></span>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-[#090d14] p-4 rounded-lg border border-slate-800">
+                        <p class="text-xs text-slate-400">Viewport Meta Tag Status</p>
+                        <p class="text-base font-bold mt-1" :class="hasViewportTag ? 'text-emerald-400' : 'text-red-400'" x-text="hasViewportTag ? 'Present & Correct' : 'Missing or Misconfigured'"></p>
+                    </div>
+                    <div class="bg-[#090d14] p-4 rounded-lg border border-slate-800">
+                        <p class="text-xs text-slate-400">Mobile UX Score</p>
+                        <p class="text-lg font-bold text-emerald-400 mt-1" x-text="mobileScore + '/100'"></p>
+                    </div>
+                </div>
+
+                <div class="bg-[#090d14] p-4 rounded-lg border border-slate-800 text-slate-400 text-xs leading-relaxed">
+                    <p class="font-semibold text-slate-200 mb-1"><i class="fa-solid fa-circle-info text-emerald-400 mr-1.5"></i> Server Analysis Log:</p>
+                    <p x-text="recommendationText"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script>
+        function mobileTester() {
+            return {
+                pageUrl: '',
+                viewportWidth: '390',
+                loading: false,
+                tested: false,
+                hasViewportTag: false,
+                mobileScore: 0,
+                recommendationText: '',
+                errorMessage: '',
+                async runMobileTest() {
+                    if (!this.pageUrl) return;
+                    this.loading = true;
+                    this.tested = false;
+                    this.errorMessage = '';
+
+                    try {
+                        let response = await fetch('scanner.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: this.pageUrl, type: 'mobile_audit' })
+                        });
+
+                        let data = await response.json();
+                        
+                        if (data.success) {
+                            this.hasViewportTag = data.hasViewportTag;
+                            this.mobileScore = data.mobileScore;
+                            this.recommendationText = data.message;
+                            this.tested = true;
+                        } else {
+                            this.errorMessage = data.message || 'Failed to scan target URL.';
+                        }
+                    } catch (err) {
+                        this.errorMessage = 'Server connection error. Please ensure scanner.php is accessible.';
+                        console.error(err);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

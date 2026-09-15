@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Base64 Encoder & Decoder Tool | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online Base64 encoder and decoder tool. Encode plain text to Base64 or decode Base64 strings safely and instantly client-side in your browser.">
+    <meta name="keywords" content="free base64 encoder, base64 decoder tool, encode text to base64, decode base64 string, online base64 converter, developer utility tool">
+    <link rel="canonical" href="https://junctiontools.com/base64-encoder-decoder">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/base64-encoder-decoder">
+    <meta property="og:title" content="Free Base64 Encoder & Decoder Tool | JunctionTools">
+    <meta property="og:description" content="Encode plain text or decode Base64 strings safely client-side for free right in your browser.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-base64.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Base64 Encoder & Decoder Tool | JunctionTools">
+    <meta name="twitter:description" content="Instantly encode and decode strings using our secure client-side Base64 tool.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Base64 Encoder & Decoder Tool",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, UtilitiesApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to encode plain text and decode Base64 strings instantly client-side."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="{ input: '', output: '', encode() { try { this.output = btoa(this.input); } catch(e) { this.output = 'Error Encoding String'; } }, decode() { try { this.output = atob(this.input); } catch(e) { this.output = 'Invalid Base64 Input'; } } }">
+
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow space-y-8 w-full">
+        <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Developer Utility
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mt-1 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-file-code text-emerald-400"></i>
+                Free Base64 Encoder & Decoder
+            </h1>
+            <p class="text-slate-400 text-sm mt-2">Encode plain text or decode Base64 strings safely client-side.</p>
+        </div>
+
+        <!-- How to Use Section -->
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed space-y-1">
+                <li>Paste or type your string into the input text box.</li>
+                <li>Click <strong class="text-slate-200">Encode to Base64</strong> to convert plain text, or click <strong class="text-slate-200">Decode from Base64</strong> to convert encoded text back.</li>
+                <li>View and copy your generated result directly from the output box below.</li>
+            </ol>
+        </div>
+
+        <div class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-4 shadow-xl">
+            <textarea x-model="input" rows="4" placeholder="Enter input text..." class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"></textarea>
+
+            <div class="flex flex-wrap gap-3">
+                <button @click="encode()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg text-xs font-semibold transition shadow-md shadow-emerald-950/40 flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-lock text-xs"></i> Encode to Base64
+                </button>
+                <button @click="decode()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-5 py-2.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-unlock text-xs"></i> Decode from Base64
+                </button>
+            </div>
+
+            <textarea x-model="output" readonly rows="4" placeholder="Output will appear here..." class="w-full bg-[#090d14]/60 border border-slate-800 rounded-lg p-3 text-sm text-emerald-400 font-mono focus:outline-none shadow-inner"></textarea>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

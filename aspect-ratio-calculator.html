@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Aspect Ratio Calculator | Image & Video Dimension Resizer | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online aspect ratio calculator tool. Calculate matching proportions, scaling dimensions, and resolutions for videos, photos, and web designs instantly.">
+    <meta name="keywords" content="free aspect ratio calculator, image dimension calculator, video resolution resizer, scaling calculator, proportions calculator, web design tool">
+    <link rel="canonical" href="https://junctiontools.com/aspect-ratio-calculator">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/aspect-ratio-calculator">
+    <meta property="og:title" content="Free Aspect Ratio Calculator | Image & Video Dimension Resizer | JunctionTools">
+    <meta property="og:description" content="Calculate matching proportions and dimensions for video, photos, and web designs instantly for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-aspect-ratio-calculator.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Aspect Ratio Calculator | JunctionTools">
+    <meta name="twitter:description" content="Quickly compute proportional dimensions for images and videos with our free aspect ratio tool.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Aspect Ratio Calculator",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, MultimediaApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to calculate image and video aspect ratios, scaling dimensions, and proportions automatically."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="{ w1: 1920, h1: 1080, w2: 1280, get h2() { return Math.round((this.h1 / this.w1) * this.w2) || 0; } }">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow space-y-8 w-full">
+        <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Design Utility
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mt-1 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-expand text-emerald-400"></i>
+                Free Aspect Ratio Calculator
+            </h1>
+            <p class="text-slate-400 text-sm mt-2">Calculate matching proportions and dimensions for video, photos, and web designs.</p>
+        </div>
+
+        <!-- How to Use Section -->
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed space-y-1">
+                <li>Enter your source dimensions in <strong class="text-slate-200">Original Width</strong> and <strong class="text-slate-200">Original Height</strong>.</li>
+                <li>Type your desired width into the <strong class="text-slate-200">Target Width</strong> field.</li>
+                <li>The <strong class="text-slate-200">Calculated Height</strong> will automatically adjust to preserve the exact aspect ratio.</li>
+            </ol>
+        </div>
+
+        <div class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-6 shadow-xl">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Original Width</label>
+                    <input type="number" x-model.number="w1" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Original Height</label>
+                    <input type="number" x-model.number="h1" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                </div>
+            </div>
+
+            <hr class="border-slate-800">
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Target Width</label>
+                    <input type="number" x-model.number="w2" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Calculated Height</label>
+                    <div class="w-full bg-[#090d14] border border-emerald-500/50 text-emerald-400 font-bold rounded-lg p-3 text-sm flex items-center shadow-inner" x-text="h2"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

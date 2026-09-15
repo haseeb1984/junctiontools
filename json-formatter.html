@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free JSON Formatter & Validator Tool - Beautify JSON Online | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online JSON formatter and validator tool. Beautify, parse, and validate minified JSON strings instantly with error checking in your browser.">
+    <meta name="keywords" content="free json formatter, json validator online, beautify json string, parse json code, check json syntax, developer utility tool">
+    <link rel="canonical" href="https://junctiontools.com/json-formatter-validator">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/json-formatter-validator">
+    <meta property="og:title" content="Free JSON Formatter & Validator Tool - Beautify JSON Online | JunctionTools">
+    <meta property="og:description" content="Validate and beautify minified JSON strings instantly for free right in your browser.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-json-formatter.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free JSON Formatter & Validator Tool | JunctionTools">
+    <meta name="twitter:description" content="Instantly format, validate, and debug JSON data structures with zero server storage.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free JSON Formatter & Validator Tool",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, UtilitiesApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to validate and beautify minified JSON strings instantly."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="{ json: '', output: '', format() { try { this.output = JSON.stringify(JSON.parse(this.json), null, 4); } catch(e) { this.output = 'Invalid JSON Structure: ' + e.message; } } }">
+
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow space-y-8 w-full">
+        <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Developer Utility
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mt-1 flex items-center gap-3">
+                <i class="fa-solid fa-code text-emerald-400"></i>
+                Free JSON Formatter & Validator
+            </h1>
+            <p class="text-slate-400 text-sm mt-2">Validate and beautify minified JSON strings.</p>
+        </div>
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>Paste your unformatted or minified JSON code into the top input area.</li>
+                <li>Click <strong class="text-slate-200">Format & Validate JSON</strong> to check syntax and structure the code with proper indentation.</li>
+                <li>View the beautified JSON or error breakdown in the read-only output box below.</li>
+            </ol>
+        </div>
+        <div class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-4 shadow-xl">
+            <textarea x-model="json" rows="6" placeholder="Paste unformatted JSON here..." class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-xs text-white font-mono focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"></textarea>
+
+            <button @click="format()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-square-check text-sm"></i>
+                Format & Validate JSON
+            </button>
+
+            <textarea x-model="output" readonly rows="8" placeholder="Formatted output..." class="w-full bg-[#090d14]/70 border border-slate-800 rounded-lg p-3 text-xs text-emerald-400 font-mono focus:outline-none"></textarea>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

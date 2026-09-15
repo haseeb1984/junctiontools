@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Social Image Resizer & Asset Optimizer | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free browser-based social image resizer and optimizer. Crop, resize, and compress images for Instagram, Facebook, LinkedIn, and Web without uploading to any server.">
+    <meta name="keywords" content="free social image resizer, image optimizer tool, instagram image resizer, youtube thumbnail resizer, client side image compressor, web asset resizer">
+    <link rel="canonical" href="https://junctiontools.com/social-image-resizer">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/social-image-resizer">
+    <meta property="og:title" content="Free Social Image Resizer & Asset Optimizer | JunctionTools">
+    <meta property="og:description" content="Crop, resize, and compress images locally for Instagram, Facebook, and Web instantly for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-social-resizer.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Social Image Resizer & Asset Optimizer | JunctionTools">
+    <meta name="twitter:description" content="Resize and optimize your social media graphics instantly in your browser with zero data loss.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Social Image Resizer & Asset Optimizer",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, MultimediaApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free client-side web utility tool to crop, resize, and compress images for social media platforms securely."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+        
+        <!-- Tool Title Header -->
+        <div class="space-y-2 text-center md:text-left">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-1">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Client-Side Utility
+            </span>
+            <h1 class="text-2xl md:text-3xl font-bold text-white flex items-center justify-center md:justify-start gap-3">
+                <i class="fa-solid fa-image text-emerald-400"></i>
+                Free Social Image Resizer & Asset Optimizer
+            </h1>
+            <p class="text-slate-400 text-sm">
+                100% Client-Side Processing. Crop, resize, and compress media assets locally for social platforms with zero data loss or privacy concerns.
+            </p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>Click <strong class="text-slate-200">Upload Image</strong> to select any local image file from your device.</li>
+                <li>Select a social media preset from <strong class="text-slate-200">Platform Preset</strong> or manually adjust the target <strong class="text-slate-200">Width</strong> and <strong class="text-slate-200">Height</strong> in pixels.</li>
+                <li>Choose your output <strong class="text-slate-200">Format</strong> (JPEG, PNG, WEBP) and adjust the <strong class="text-slate-200">Quality</strong> slider as needed.</li>
+                <li>Click <strong class="text-slate-200">Process & Resize Image</strong> to generate the live preview, then click <strong class="text-slate-200">Download Optimized Image</strong> to save it.</li>
+            </ol>
+        </div>
+
+        <!-- Tool Workspace -->
+        <div class="grid lg:grid-cols-12 gap-8">
+            
+            <!-- Input & Settings Panel -->
+            <div class="lg:col-span-5 space-y-6 bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl shadow-xl">
+                
+                <!-- File Input -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Upload Image</label>
+                    <input type="file" id="imageInput" accept="image/*" class="w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer border border-slate-800 rounded-xl bg-[#090d14] p-1 transition">
+                </div>
+
+                <!-- Presets -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Platform Preset</label>
+                    <select id="presetSelect" class="w-full bg-[#090d14] border border-slate-800 text-slate-200 text-sm rounded-xl px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
+                        <option value="custom">Custom Dimensions</option>
+                        <option value="ig-square">Instagram Square (1080 x 1080)</option>
+                        <option value="ig-story">Instagram Story / Reel (1080 x 1920)</option>
+                        <option value="fb-post">Facebook Post (1200 x 630)</option>
+                        <option value="tw-header">Twitter / X Header (1500 x 500)</option>
+                        <option value="yt-thumb">YouTube Thumbnail (1280 x 720)</option>
+                        <option value="li-banner">LinkedIn Banner (1584 x 396)</option>
+                    </select>
+                </div>
+
+                <!-- Dimensions -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Width (px)</label>
+                        <input type="number" id="widthInput" value="1080" class="w-full bg-[#090d14] border border-slate-800 text-white text-sm rounded-xl px-3 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Height (px)</label>
+                        <input type="number" id="heightInput" value="1080" class="w-full bg-[#090d14] border border-slate-800 text-white text-sm rounded-xl px-3 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <!-- Output Format & Quality -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Format</label>
+                        <select id="formatSelect" class="w-full bg-[#090d14] border border-slate-800 text-slate-200 text-sm rounded-xl px-3 py-2 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition cursor-pointer">
+                            <option value="image/jpeg">JPEG</option>
+                            <option value="image/png">PNG</option>
+                            <option value="image/webp">WEBP</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Quality (<span id="qualityVal">85</span>%)</label>
+                        <input type="range" id="qualityInput" min="10" max="100" value="85" class="w-full accent-emerald-500 mt-2 cursor-pointer">
+                    </div>
+                </div>
+
+                <button id="processBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> Process & Resize Image
+                </button>
+            </div>
+
+            <!-- Preview & Download Panel -->
+            <div class="lg:col-span-7 bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl flex flex-col justify-between shadow-xl">
+                <div class="space-y-4">
+                    <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Preview Canvas</h3>
+                    
+                    <div id="previewContainer" class="bg-[#090d14] border border-slate-800 rounded-xl p-4 flex items-center justify-center min-h-[300px] max-h-[450px] overflow-hidden relative">
+                        <span id="placeholderText" class="text-slate-500 text-xs">Upload an image to see live preview</span>
+                        <canvas id="canvas" class="max-w-full max-h-[400px] object-contain hidden rounded-lg"></canvas>
+                    </div>
+
+                    <div id="statsBox" class="hidden text-xs text-slate-400 flex justify-between bg-[#090d14] p-3 rounded-xl border border-slate-800">
+                        <span>Output Size: <strong id="outputSize" class="text-white">0 KB</strong></span>
+                        <span>Dimensions: <strong id="outputDims" class="text-white">0 x 0</strong></span>
+                    </div>
+                </div>
+
+                <button id="downloadBtn" disabled class="w-full mt-6 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-900 disabled:text-slate-600 text-white font-semibold text-sm py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-download text-xs"></i> Download Optimized Image
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const presetSelect = document.getElementById('presetSelect');
+        const widthInput = document.getElementById('widthInput');
+        const heightInput = document.getElementById('heightInput');
+        const formatSelect = document.getElementById('formatSelect');
+        const qualityInput = document.getElementById('qualityInput');
+        const qualityVal = document.getElementById('qualityVal');
+        const processBtn = document.getElementById('processBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const placeholderText = document.getElementById('placeholderText');
+        const statsBox = document.getElementById('statsBox');
+        const outputSize = document.getElementById('outputSize');
+        const outputDims = document.getElementById('outputDims');
+
+        let rawImage = null;
+
+        const presets = {
+            'ig-square': { w: 1080, h: 1080 },
+            'ig-story': { w: 1080, h: 1920 },
+            'fb-post': { w: 1200, h: 630 },
+            'tw-header': { w: 1500, h: 500 },
+            'yt-thumb': { w: 1280, h: 720 },
+            'li-banner': { w: 1584, h: 396 }
+        };
+
+        presetSelect.addEventListener('change', () => {
+            const val = presetSelect.value;
+            if (val !== 'custom' && presets[val]) {
+                widthInput.value = presets[val].w;
+                heightInput.value = presets[val].h;
+            }
+        });
+
+        qualityInput.addEventListener('input', () => {
+            qualityVal.textContent = qualityInput.value;
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                rawImage = new Image();
+                rawImage.onload = () => {
+                    if (presetSelect.value === 'custom') {
+                        widthInput.value = rawImage.width;
+                        heightInput.value = rawImage.height;
+                    }
+                    processImage();
+                };
+                rawImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        processBtn.addEventListener('click', processImage);
+
+        function processImage() {
+            if (!rawImage) return;
+
+            const targetW = parseInt(widthInput.value) || rawImage.width;
+            const targetH = parseInt(heightInput.value) || rawImage.height;
+
+            canvas.width = targetW;
+            canvas.height = targetH;
+
+            ctx.clearRect(0, 0, targetW, targetH);
+            ctx.drawImage(rawImage, 0, 0, targetW, targetH);
+
+            canvas.classList.remove('hidden');
+            placeholderText.classList.add('hidden');
+            statsBox.classList.remove('hidden');
+
+            const mimeType = formatSelect.value;
+            const quality = parseFloat(qualityInput.value) / 100;
+            const dataUrl = canvas.toDataURL(mimeType, quality);
+
+            outputDims.textContent = `${targetW} x ${targetH}px`;
+            
+            const head = `data:${mimeType};base64,`;
+            const sizeInBytes = Math.round((dataUrl.length - head.length) * 3 / 4);
+            outputSize.textContent = `${(sizeInBytes / 1024).toFixed(1)} KB`;
+
+            downloadBtn.disabled = false;
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                const ext = mimeType.split('/')[1];
+                link.download = `optimized-asset.${ext}`;
+                link.href = dataUrl;
+                link.click();
+            };
+        }
+    </script>
+</body>
+</html>

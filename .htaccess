@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# 1. Redirect browser from /page.html to /page (Prevents duplicate content)
+RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# 2. Internally map /page to /page.html so the server can find it
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.*)$ $1.html [L]

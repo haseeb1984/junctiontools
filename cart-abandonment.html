@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Cart Abandonment Rate Calculator | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online Cart Abandonment Rate Calculator tool. Instantly calculate eCommerce lost revenue, abandonment percentages, and forecast recovery improvements for free.">
+    <meta name="keywords" content="free cart abandonment calculator, ecommerce lost revenue calculator, shopping cart abandonment rate, conversion rate tool, checkout optimization calculator">
+    <link rel="canonical" href="https://junctiontools.com/cart-abandonment-calculator">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/cart-abandonment-calculator">
+    <meta property="og:title" content="Free Cart Abandonment Rate Calculator | JunctionTools">
+    <meta property="og:description" content="Calculate revenue lost to abandoned shopping carts and target recovery projections for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-cart-calculator.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Cart Abandonment Rate Calculator | JunctionTools">
+    <meta name="twitter:description" content="Measure shopping cart abandonment rates and identify potential recovery revenue instantly with our free tool.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Cart Abandonment Rate Calculator",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication, SEOTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to calculate online store cart abandonment rates, financial losses, and revenue recovery forecasts."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full">
+        <div class="mb-8">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free eCommerce Calculator
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-cart-arrow-down text-emerald-400"></i> Free Cart Abandonment Rate Calculator
+            </h1>
+            <p class="text-slate-400 text-sm">Calculate revenue lost to abandoned carts and forecast recovery improvements instantly.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed space-y-1">
+                <li>Input total carts created in selected time period.</li>
+                <li>Input total completed transactions during the same period.</li>
+                <li>Input Average Order Value (AOV).</li>
+                <li>Click <strong class="text-slate-200">Calculate Lost Revenue</strong> to inspect abandonment percentages and target recovery projections.</li>
+            </ol>
+        </div>
+
+        <form id="cart-form" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Total Carts Created</label>
+                    <input type="number" id="total_carts" name="total_carts" required placeholder="1500" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm transition">
+                    <p class="text-xs text-slate-500 mt-2">Example: 1,500 carts initiated monthly.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Completed Orders</label>
+                    <input type="number" id="completed_orders" name="completed_orders" required placeholder="420" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm transition">
+                    <p class="text-xs text-slate-500 mt-2">Example: 420 successful purchases.</p>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Average Order Value (AOV $)</label>
+                <input type="number" id="aov" name="aov" required step="0.01" placeholder="65.50" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm transition">
+                <p class="text-xs text-slate-500 mt-2">Example: $65.50 average cart value.</p>
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-calculator text-sm"></i>
+                Calculate Lost Revenue
+            </button>
+        </form>
+
+        <!-- Result Container -->
+        <div id="result-container" class="mt-6 hidden bg-slate-900 border border-slate-800 rounded-xl p-5 text-sm text-slate-300"></div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- SCRIPT HANDLER -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+
+        // Form Submit Handler
+        document.getElementById('cart-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                type: 'cart_abandonment',
+                total_carts: document.getElementById('total_carts').value,
+                completed_orders: document.getElementById('completed_orders').value,
+                aov: document.getElementById('aov').value
+            };
+
+            fetch('scanner.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result-container');
+                resultDiv.classList.remove('hidden');
+                if(data.success) {
+                    resultDiv.innerHTML = `<p class="text-emerald-400 font-semibold text-base mb-1">Calculation Results:</p><p>${data.message}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="text-rose-400 font-semibold">Error:</p><p>${data.message}</p>`;
+                }
+            })
+            .catch(err => {
+                const resultDiv = document.getElementById('result-container');
+                resultDiv.classList.remove('hidden');
+                resultDiv.innerHTML = `<p class="text-rose-400 font-semibold mb-1">Server Connection Error:</p><p>Please ensure scanner.php is running properly.</p>`;
+                console.error('Error:', err);
+            });
+        });
+    </script>    
+</body>
+</html>

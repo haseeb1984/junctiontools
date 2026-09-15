@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Word & Character Counter Tool | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online word and character counter tool. Get real-time text stats including word counts, character counts, and sentence metrics instantly in your browser.">
+    <meta name="keywords" content="free word counter, character count tool, online word frequency checker, text statistics calculator, article word counter, writing metrics tool">
+    <link rel="canonical" href="https://junctiontools.com/word-counter">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/word-counter">
+    <meta property="og:title" content="Free Word & Character Counter Tool | JunctionTools">
+    <meta property="og:description" content="Monitor word counts, character counts, and text stats instantly for free right in your browser.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-word-counter.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Word & Character Counter Tool | JunctionTools">
+    <meta name="twitter:description" content="Instantly analyze text with real-time word and character counters with zero server storage.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Word & Character Counter Tool",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, UtilitiesApplication, EducationalApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to calculate real-time word counts, character counts, and text metrics instantly."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="{ text: '', get words() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; }, get chars() { return this.text.length; } }">
+
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-10 flex-grow space-y-6 w-full">
+        <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Text Statistics Utility
+            </span>
+            <h1 class="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+                <i class="fa-solid fa-calculator text-emerald-400"></i>
+                Free Word & Character Counter
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">Real-time stats for word counts, character counts, and sentence lengths.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>Type or paste your content directly into the text area provided.</li>
+                <li>Monitor the <strong class="text-slate-200">Words</strong> and <strong class="text-slate-200">Characters</strong> metric cards above the text box for instant, real-time counters.</li>
+                <li>Edit or clear the text freely to automatically update the word and character metrics.</li>
+            </ol>
+        </div>
+
+        <div class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-6 shadow-xl">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-[#090d14] border border-slate-800 p-4 rounded-xl text-center">
+                    <span class="block text-2xl font-bold text-emerald-400" x-text="words"></span>
+                    <span class="text-xs text-slate-400 uppercase tracking-wider">Words</span>
+                </div>
+                <div class="bg-[#090d14] border border-slate-800 p-4 rounded-xl text-center">
+                    <span class="block text-2xl font-bold text-emerald-400" x-text="chars"></span>
+                    <span class="text-xs text-slate-400 uppercase tracking-wider">Characters</span>
+                </div>
+            </div>
+
+            <textarea x-model="text" rows="6" placeholder="Start typing here..." class="w-full bg-[#090d14] border border-slate-800 rounded-xl p-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"></textarea>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

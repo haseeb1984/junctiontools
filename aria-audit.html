@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Screen Reader & ARIA Attribute Audit Tool | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online screen reader and ARIA attribute audit tool. Instantly scan missing alt tags on product images, missing aria-labels, and unannounced modal dialogs to improve web accessibility.">
+    <meta name="keywords" content="free accessibility audit tool, aria attribute checker, screen reader test tool, missing alt tags scanner, web compliance checker, wcag auditor online">
+    <link rel="canonical" href="https://junctiontools.com/aria-audit">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/aria-audit">
+    <meta property="og:title" content="Free Screen Reader & ARIA Attribute Audit Tool | JunctionTools">
+    <meta property="og:description" content="Audit your website for accessibility compliance instantly. Check alt text, ARIA roles, and attributes for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-accessibility-audit.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Screen Reader & ARIA Attribute Audit Tool | JunctionTools">
+    <meta name="twitter:description" content="Scan missing alt tags, aria-labels, and accessibility issues on any web page instantly for free.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Screen Reader & ARIA Attribute Audit",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, AccessibilityTool, SEOTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web-based accessibility audit utility to check screen reader compatibility, missing alt attributes, and ARIA tags."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="ariaAudit()">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
+        <div class="mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Accessibility Audit Tool
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-eye text-emerald-400"></i>
+                Free Screen Reader & ARIA Attribute Audit
+            </h1>
+            <p class="text-slate-400 text-sm">Scan missing <code class="text-emerald-400 bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800">alt</code> tags on product images, missing <code class="text-emerald-400 bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800">aria-label</code>s, and unannounced modal dialogs for free.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed">
+                <li>Input live page URL to scan actual HTML tags.</li>
+                <li>Click <strong class="text-slate-200">Audit ARIA & Alt Tags</strong> to parse target server response.</li>
+            </ol>
+        </div>
+
+        <form @submit.prevent="runAudit()" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Page Link to Audit</label>
+                <input type="url" x-model="pageUrl" required placeholder="https://example.com/products/sample" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm transition">
+            </div>
+
+            <button type="submit" :disabled="loading" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                <i :class="loading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-magnifying-glass'"></i>
+                <span x-text="loading ? 'Fetching & Parsing Live URL...' : 'Audit ARIA & Alt Tags'"></span>
+            </button>
+        </form>
+
+        <!-- ERROR NOTIFICATION -->
+        <template x-if="errorMessage">
+            <div class="bg-red-950/60 border border-red-900/50 rounded-xl p-4 text-red-300 text-sm flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                <span x-text="errorMessage"></span>
+            </div>
+        </template>
+
+        <!-- AUDIT RESULTS SECTION -->
+        <div x-cloak x-show="audited" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-emerald-400"></i> Live Audit Report for: <span class="text-emerald-400 truncate max-w-xs" x-text="pageUrl"></span>
+                </h2>
+                <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="hasIssues ? 'bg-amber-950 text-amber-300 border border-amber-500/30' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/30'" x-text="hasIssues ? 'Issues Found' : 'Fully Accessible'"></span>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-[#090d14] p-4 rounded-lg border border-slate-800">
+                        <p class="text-xs text-slate-400">Missing Alt Attributes</p>
+                        <p class="text-lg font-bold text-amber-400 mt-1" x-text="missingAltCount + ' Images'"></p>
+                    </div>
+                    <div class="bg-[#090d14] p-4 rounded-lg border border-slate-800">
+                        <p class="text-xs text-slate-400">Missing ARIA Labels</p>
+                        <p class="text-lg font-bold text-amber-400 mt-1" x-text="missingAriaCount + ' Elements'"></p>
+                    </div>
+                    <div class="bg-[#090d14] p-4 rounded-lg border border-slate-800">
+                        <p class="text-xs text-slate-400">Accessibility Score</p>
+                        <p class="text-lg font-bold text-emerald-400 mt-1" x-text="accessibilityScore + '/100'"></p>
+                    </div>
+                </div>
+
+                <div class="bg-[#090d14] p-4 rounded-lg border border-slate-800 text-slate-400 text-xs leading-relaxed">
+                    <p class="font-semibold text-slate-200 mb-1"><i class="fa-solid fa-circle-info text-emerald-400 mr-1.5"></i> Server Analysis Log:</p>
+                    <p x-text="recommendationText"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        function ariaAudit() {
+            return {
+                pageUrl: '',
+                loading: false,
+                audited: false,
+                hasIssues: false,
+                missingAltCount: 0,
+                missingAriaCount: 0,
+                accessibilityScore: 100,
+                recommendationText: '',
+                errorMessage: '',
+                async runAudit() {
+                    if (!this.pageUrl) return;
+                    this.loading = true;
+                    this.audited = false;
+                    this.errorMessage = '';
+
+                    try {
+                        let response = await fetch('scanner.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: this.pageUrl, type: 'aria_audit' })
+                        });
+
+                        let data = await response.json();
+                        
+                        if (data.success) {
+                            this.missingAltCount = data.missingAltCount;
+                            this.missingAriaCount = data.missingAriaCount;
+                            this.accessibilityScore = data.accessibilityScore;
+                            this.hasIssues = data.hasIssues;
+                            this.recommendationText = data.message;
+                            this.audited = true;
+                        } else {
+                            this.errorMessage = data.message || 'Failed to scan target URL.';
+                        }
+                    } catch (err) {
+                        this.errorMessage = 'Server connection error. Please ensure scanner.php is accessible.';
+                        console.error(err);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

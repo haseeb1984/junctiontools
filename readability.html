@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Content Readability & Tone Evaluator | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online content readability and tone evaluator. Measure Flesch-Kincaid Reading Ease, grade level readability, and sentiment consistency instantly.">
+    <meta name="keywords" content="free readability checker, flesch kincaid score calculator, tone evaluator tool, content readability analyzer, SEO text audit, grade level checker">
+    <link rel="canonical" href="https://junctiontools.com/readability-evaluator">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/readability-evaluator">
+    <meta property="og:title" content="Free Content Readability & Tone Evaluator | JunctionTools">
+    <meta property="og:description" content="Measure Flesch-Kincaid reading ease and tone consistency for your web copy and policies for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-readability-evaluator.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Content Readability & Tone Evaluator | JunctionTools">
+    <meta name="twitter:description" content="Instantly analyze text readability scores, grade levels, and sentiment tone with zero server storage.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Content Readability & Tone Evaluator",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, EducationalApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to calculate readability metrics, reading ease, and tone consistency for content."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full">
+        <div class="mb-8">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Readability Utility
+            </span>
+            <h1 class="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                <i class="fa-solid fa-book-open-reader text-emerald-400"></i>
+                Free Content Readability & Tone Evaluator
+            </h1>
+            <p class="text-slate-400 text-sm">Measure Flesch-Kincaid Reading Ease, grade level readability, and sentiment tone consistency.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>Paste store body copy, policy text, or about page content.</li>
+                <li>Click <strong class="text-slate-200">Evaluate Readability</strong> to get readability score and reading grade level.</li>
+            </ol>
+        </div>
+
+        <form id="readability-form" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Body Text Content</label>
+                <textarea id="readability-text" rows="6" required placeholder="We ship worldwide within 3-5 business days. Returns are accepted within 30 days of purchase for a full refund..." class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm transition"></textarea>
+            </div>
+
+            <button type="submit" id="submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-spell-check text-sm"></i>
+                Evaluate Readability
+            </button>
+        </form>
+
+        <!-- Result Display Container -->
+        <div id="result-container" class="hidden mt-6 bg-[#0f172a] border border-slate-800 rounded-xl p-6 shadow-xl">
+            <h3 class="text-lg font-bold text-white mb-3">Evaluation Results</h3>
+            <div id="result-content" class="text-sm text-slate-300 space-y-2"></div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+
+    <!-- AJAX SCRIPT -->
+    <script>
+    document.getElementById('readability-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const textContent = document.getElementById('readability-text').value.trim();
+        const btn = document.getElementById('submit-btn');
+        const resultContainer = document.getElementById('result-container');
+        const resultContent = document.getElementById('result-content');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Evaluating...';
+        resultContainer.classList.add('hidden');
+
+        fetch('scanner.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'readability_evaluator', text_content: textContent })
+        })
+        .then(async res => {
+            const text = await res.text();
+            try {
+                return JSON.parse(text);
+            } catch (err) {
+                throw new Error("Server Error / Invalid JSON response: " + text.substring(0, 150));
+            }
+        })
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-spell-check text-sm"></i> Evaluate Readability';
+            resultContainer.classList.remove('hidden');
+
+            if (data.success) {
+                resultContent.innerHTML = `<div class="p-4 bg-[#090d14] rounded-xl border border-slate-800">${data.message}</div>`;
+            } else {
+                resultContent.innerHTML = `<p class="text-red-400">${data.message}</p>`;
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-spell-check text-sm"></i> Evaluate Readability';
+            resultContainer.classList.remove('hidden');
+            resultContent.innerHTML = `<p class="text-red-400 text-xs font-mono bg-red-950/30 p-3 rounded border border-red-900/50">${err.message}</p>`;
+        });
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free UUID v4 Generator Tool - Online RFC4122 Unique ID Creator | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online UUID v4 generator tool. Instantly create cryptographically secure, RFC4122 compliant version 4 unique identifiers for database records and APIs.">
+    <meta name="keywords" content="free uuid v4 generator, online uuid creator, rfc4122 unique identifier, generate guid online, cryptographic uuid tool, developer utility">
+    <link rel="canonical" href="https://junctiontools.com/uuid-v4-generator">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/uuid-v4-generator">
+    <meta property="og:title" content="Free UUID v4 Generator Tool - Online RFC4122 Unique ID Creator | JunctionTools">
+    <meta property="og:description" content="Generate cryptographically secure version 4 UUIDs instantly client-side for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-uuid-generator.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free UUID v4 Generator Tool | JunctionTools">
+    <meta name="twitter:description" content="Instantly generate and copy secure RFC4122 compliant version 4 UUIDs in your browser.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free UUID v4 Generator Tool",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, UtilitiesApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to generate cryptographically secure version 4 UUIDs instantly client-side."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans">
+
+       <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full space-y-6" 
+          x-data="{ 
+              uuid: '', 
+              copied: false,
+              generate() { 
+                  this.uuid = crypto.randomUUID(); 
+              },
+              copyToClipboard() {
+                  if (!this.uuid) return;
+                  navigator.clipboard.writeText(this.uuid);
+                  this.copied = true;
+                  setTimeout(() => this.copied = false, 2000);
+              }
+          }"
+          x-init="generate()">
+        
+        <div class="space-y-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-1">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Developer Utility
+            </span>
+            <h1 class="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+                <i class="fa-solid fa-fingerprint text-emerald-400"></i>
+                Free UUID v4 Generator
+            </h1>
+            <p class="text-slate-400 text-sm">
+                Generate cryptographically secure Universally Unique Identifiers (UUID v4) for database records and APIs.
+            </p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>A cryptographically secure <strong>UUID v4</strong> is automatically generated as soon as the page loads.</li>
+                <li>Click the <strong class="text-slate-200">Copy</strong> button next to the input field to copy the generated UUID to your clipboard.</li>
+                <li>Click the <strong class="text-slate-200">Generate New UUID</strong> button to instantly produce a new unique identifier.</li>
+            </ol>
+        </div>
+
+        <div class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-4 shadow-xl">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Generated UUID</label>
+                <div class="flex gap-2">
+                    <input type="text" x-model="uuid" readonly class="flex-grow p-3 border border-slate-800 rounded-xl bg-[#090d14] text-emerald-400 font-mono text-sm focus:outline-none transition">
+                    <button @click="copyToClipboard()" class="bg-[#0f172a] border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-white px-5 rounded-xl text-xs font-semibold transition flex items-center gap-2 shadow-sm cursor-pointer">
+                        <i class="fa-regular fa-copy"></i>
+                        <span x-text="copied ? 'Copied!' : 'Copy'"></span>
+                    </button>
+                </div>
+            </div>
+
+            <button @click="generate()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-rotate text-xs"></i> Generate New UUID
+            </button>
+        </div>
+    </main>
+
+     <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+
+</body>
+</html>

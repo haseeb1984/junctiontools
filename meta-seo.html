@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Meta Tags & On-Page SEO Auditor | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online On-Page SEO Auditor tool. Instantly inspect meta titles, descriptions, H1-H3 hierarchy, Open Graph tags, and robots.txt configuration to rank higher on Google for free.">
+    <meta name="keywords" content="free on-page seo auditor, meta tags checker, free seo analysis tool, website seo inspector, title and description checker, html seo audit tool">
+    <link rel="canonical" href="https://junctiontools.com/seo-auditor">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/seo-auditor">
+    <meta property="og:title" content="Free Meta Tags & On-Page SEO Auditor | JunctionTools">
+    <meta property="og:description" content="Instantly analyze meta titles, H1 tags, indexability, and overall on-page SEO health for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-seo-auditor.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Meta Tags & On-Page SEO Auditor | JunctionTools">
+    <meta name="twitter:description" content="Audit web page meta titles, descriptions, and structure instantly with our free SEO tool.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Meta Tags & On-Page SEO Auditor",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, SEOTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to inspect, analyze, and optimize web page meta elements, H1 structure, and SEO indexability."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="seoAuditor()">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+        <div class="mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free SEO Optimization Tool
+            </span>
+            <h1 class="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                <i class="fa-solid fa-robot text-emerald-400"></i>
+                Free Meta Tags & On-Page SEO Auditor
+            </h1>
+            <p class="text-slate-400 text-sm">Comprehensive on-page audit tool to inspect Meta Titles, Descriptions, H1-H3 hierarchy, Open Graph tags, indexability status, and robots.txt configuration instantly.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>Paste the product page or category URL you wish to audit.</li>
+                <li>Enter primary keyword (optional) to check title/meta match ratio.</li>
+                <li>Click <strong class="text-slate-200">Audit On-Page SEO</strong> for actionable recommendations.</li>
+            </ol>
+        </div>
+
+        <form @submit.prevent="runSeoAudit()" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2 flex items-center space-x-2">
+                    <span>Page URL</span>
+                </label>
+                <input type="url" x-model="pageUrl" required placeholder="https://example.com/products/running-shoes" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm transition">
+                <p class="text-xs text-slate-500 mt-2">Example: Product page URL for SEO title and tag check.</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2 flex items-center space-x-2">
+                    <span>Target Keyword (Optional)</span>
+                </label>
+                <input type="text" x-model="targetKeyword" placeholder="e.g. Leather Jacket" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm transition">
+                <p class="text-xs text-slate-500 mt-2">Helps check if target keyword exists in title and description.</p>
+            </div>
+
+            <button type="submit" :disabled="loading" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                <i :class="loading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-chart-line'"></i>
+                <span x-text="loading ? 'Auditing On-Page SEO...' : 'Audit On-Page SEO'"></span>
+            </button>
+        </form>
+
+        <!-- ERROR NOTIFICATION -->
+        <template x-if="errorMessage">
+            <div class="bg-red-950/60 border border-red-900/50 rounded-xl p-4 text-red-300 text-sm flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                <span x-text="errorMessage"></span>
+            </div>
+        </template>
+
+        <!-- RESULTS SECTION -->
+        <div x-cloak x-show="tested" class="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-6 space-y-6 shadow-xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-square-poll-vertical text-emerald-400"></i> On-Page SEO Audit Results
+                </h2>
+                <span class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-semibold" x-text="seoScore + '/100 Score'"></span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <p class="text-xs text-slate-400">Detected Meta Title</p>
+                    <p class="text-sm font-bold text-emerald-400 mt-1" x-text="metaTitleText"></p>
+                </div>
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <p class="text-xs text-slate-400">H1 Tag Status</p>
+                    <p class="text-sm font-bold text-slate-200 mt-1" x-text="h1StatusText"></p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <p class="text-xs text-slate-400">Indexability Status</p>
+                    <p class="text-sm font-bold text-emerald-400 mt-1" x-text="indexabilityText"></p>
+                </div>
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <p class="text-xs text-slate-400">Robots.txt Status</p>
+                    <p class="text-sm font-bold text-slate-200 mt-1" x-text="robotsTxtText"></p>
+                </div>
+            </div>
+            <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800 text-slate-400 text-xs leading-relaxed space-y-2">
+                <p class="font-semibold text-slate-200"><i class="fa-solid fa-circle-info text-emerald-400 mr-1.5"></i> Audit Summary & Recommendations:</p>
+                <p x-text="recommendationMessage"></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- ALPINE LOGIC & INCLUDER -->
+    <script>
+        function seoAuditor() {
+            return {
+                pageUrl: '',
+                targetKeyword: '',
+                loading: false,
+                tested: false,
+                seoScore: 0,
+                metaTitleText: '',
+                h1StatusText: '',
+                recommendationMessage: '',
+                indexabilityText: '',
+                robotsTxtText: '',
+                errorMessage: '',
+                async runSeoAudit() {
+                    if (!this.pageUrl) return;
+                    this.loading = true;
+                    this.tested = false;
+                    this.errorMessage = '';
+
+                    try {
+                        let response = await fetch('scanner.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                url: this.pageUrl, 
+                                keyword: this.targetKeyword, 
+                                type: 'seo_auditor' 
+                            })
+                        });
+
+                        let data = await response.json();
+
+                        if (data.success) {
+                            this.seoScore = data.score;
+                            this.metaTitleText = data.metaTitle;
+                            this.h1StatusText = data.h1Status;
+                            this.recommendationMessage = data.message;
+                            this.indexabilityText = data.indexability;
+                            this.robotsTxtText = data.robotsTxt;
+                            this.tested = true;
+                        } else {
+                            this.errorMessage = data.message || 'Failed to analyze page SEO tags.';
+                        }
+                    } catch (err) {
+                        this.errorMessage = 'Server connection error. Please ensure scanner.php is running.';
+                        console.error(err);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

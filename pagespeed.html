@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free PageSpeed & Core Web Vitals Analyzer | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online PageSpeed and Core Web Vitals analyzer tool. Instantly audit mobile and desktop performance, LCP, CLS, and TBT scores to optimize your store speed.">
+    <meta name="keywords" content="pagespeed analyzer, core web vitals checker, free speed test tool, lcp cls tbt audit, google lighthouse api wrapper, website performance auditor">
+    <link rel="canonical" href="https://junctiontools.com/pagespeed-analyzer">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/pagespeed-analyzer">
+    <meta property="og:title" content="Free PageSpeed & Core Web Vitals Analyzer | JunctionTools">
+    <meta property="og:description" content="Instantly test your website's mobile and desktop performance, LCP, CLS, and TBT metrics for free with our Core Web Vitals auditor.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-pagespeed-analyzer.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free PageSpeed & Core Web Vitals Analyzer | JunctionTools">
+    <meta name="twitter:description" content="Audit web page speed, LCP, CLS, and performance scores instantly using our free tool.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free PageSpeed & Core Web Vitals Analyzer",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, PerformanceTool, SEOTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility to measure LCP, CLS, TBT, and overall performance scores using Google Lighthouse metrics."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" 
+      x-data="pagespeedAnalyzer()">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full">
+        <div class="mb-8">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Online Performance Tool
+            </span>
+            <h1 class="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                <i class="fa-solid fa-bolt text-emerald-400"></i>
+                Free PageSpeed & Core Web Vitals Analyzer
+            </h1>
+            <p class="text-slate-400 text-sm">Measure LCP, FID, CLS, and page speed diagnostics for your store with our free audit utility.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400">
+                <li>Paste your complete page URL (e.g., https://yourstore.com/product).</li>
+                <li>Choose whether to analyze Mobile or Desktop viewport performance.</li>
+                <li>Click <strong class="text-slate-200">Analyze Free PageSpeed</strong> to generate performance score & Core Web Vitals breakdown.</li>
+            </ol>
+        </div>
+
+        <!-- FORM -->
+        <form @submit.prevent="analyzeUrl" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl mb-8">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2 flex items-center space-x-2">
+                    <span>Store URL</span>
+                </label>
+                <input type="url" x-model="url" required placeholder="https://example.com/products/sample-item" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2 flex items-center space-x-2">
+                    <span>Target Device</span>
+                </label>
+                <select x-model="strategy" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm transition">
+                    <option value="mobile">Mobile (Simulated 4G)</option>
+                    <option value="desktop">Desktop (High-Speed)</option>
+                </select>
+            </div>
+
+            <button type="submit" :disabled="loading" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 disabled:opacity-50">
+                <i class="fa-solid" :class="loading ? 'fa-spinner fa-spin' : 'fa-gauge-high'"></i>
+                <span x-text="loading ? 'Analyzing Page Speed...' : 'Analyze Free PageSpeed'"></span>
+            </button>
+        </form>
+
+        <!-- ERROR MESSAGE -->
+        <div x-cloak x-show="errorMessage" class="bg-red-950/60 border border-red-500/50 text-red-300 p-4 rounded-xl text-sm mb-8 text-center">
+            <i class="fa-solid fa-circle-exclamation mr-2"></i> <span x-text="errorMessage"></span>
+        </div>
+
+        <!-- RESULTS SECTION -->
+        <div x-cloak x-show="results" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <h2 class="text-xl font-bold text-white border-b border-slate-800 pb-4 flex items-center justify-between">
+                <span>Free Performance Score</span>
+                <span class="text-2xl font-extrabold px-3 py-1 rounded-lg" 
+                      :class="scoreColor(results?.score)">
+                    <span x-text="Math.round((results?.score || 0) * 100)"></span>/100
+                </span>
+            </h2>
+
+            <!-- Core Web Vitals Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Largest Contentful Paint (LCP)</span>
+                    <span class="text-lg font-bold text-white mt-1 block" x-text="results?.lcp"></span>
+                </div>
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Cumulative Layout Shift (CLS)</span>
+                    <span class="text-lg font-bold text-white mt-1 block" x-text="results?.cls"></span>
+                </div>
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Total Blocking Time (TBT)</span>
+                    <span class="text-lg font-bold text-white mt-1 block" x-text="results?.tbt"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        function pagespeedAnalyzer() {
+            return {
+                url: '',
+                strategy: 'mobile',
+                loading: false,
+                errorMessage: '',
+                results: null,
+                async analyzeUrl() {
+                    this.loading = true;
+                    this.errorMessage = '';
+                    this.results = null;
+
+                    try {
+                        let apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(this.url)}&strategy=${this.strategy}&category=PERFORMANCE&key=AIzaSyB28JOdwjxippWPReiyTWMO6surSOswHsg`;
+                        
+                        let response = await fetch(apiUrl);
+                        let data = await response.json();
+
+                        if (data.error) {
+                            throw new Error(data.error.message || 'Failed to analyze URL.');
+                        }
+
+                        let lighthouse = data.lighthouseResult;
+                        this.results = {
+                            score: lighthouse.categories.performance.score,
+                            lcp: lighthouse.audits['largest-contentful-paint'].displayValue,
+                            cls: lighthouse.audits['cumulative-layout-shift'].displayValue,
+                            tbt: lighthouse.audits['total-blocking-time'].displayValue
+                        };
+                    } catch (err) {
+                        this.errorMessage = err.message || 'Something went wrong while fetching data. Make sure the URL is public.';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                scoreColor(score) {
+                    if (!score) return 'bg-slate-800 text-slate-300';
+                    let val = score * 100;
+                    if (val >= 90) return 'bg-emerald-950 text-emerald-400 border border-emerald-500/30';
+                    if (val >= 50) return 'bg-amber-950 text-amber-400 border border-amber-500/30';
+                    return 'bg-red-950 text-red-400 border border-red-500/30';
+                }
+            }
+        }
+
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

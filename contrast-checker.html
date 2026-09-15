@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free WCAG Contrast Checker & Accessibility Tool | AA/AAA | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online WCAG compliance and contrast checker. Evaluate text legibility contrast ratios against WCAG 2.1 AA and AAA accessibility standards instantly.">
+    <meta name="keywords" content="free wcag contrast checker, accessibility checker, color contrast ratio tool, wcag 2.1 aa aaa checker, web accessibility validator">
+    <link rel="canonical" href="https://junctiontools.com/wcag-contrast-checker">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/wcag-contrast-checker">
+    <meta property="og:title" content="Free WCAG Contrast Checker & Accessibility Tool | AA/AAA | JunctionTools">
+    <meta property="og:description" content="Evaluate text legibility contrast ratios against WCAG 2.1 AA and AAA standards for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-wcag-checker.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free WCAG Contrast Checker | JunctionTools">
+    <meta name="twitter:description" content="Instantly test your color combinations for WCAG AA and AAA accessibility compliance.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free WCAG Compliance & Contrast Checker",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, AccessibilityTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to check text contrast ratios and validate WCAG 2.1 AA and AAA compliance."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full">
+        <div class="mb-8">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Accessibility Utility
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-circle-half-stroke text-emerald-400"></i>
+                Free WCAG Compliance & Contrast Checker
+            </h1>
+            <p class="text-slate-400 text-sm">Evaluate text legibility contrast ratios against WCAG 2.1 AA (4.5:1) and AAA standards.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed space-y-1">
+                <li>Input text foreground hex color code.</li>
+                <li>Input background hex color code.</li>
+                <li>Click <strong class="text-slate-200">Check Contrast Ratio</strong> for pass/fail score on AA/AAA requirements.</li>
+            </ol>
+        </div>
+
+        <form id="wcag-form" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Text Color (Hex)</label>
+                    <input type="text" id="text-color" required placeholder="#FFFFFF" value="#FFFFFF" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm font-mono transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Background Color (Hex)</label>
+                    <input type="text" id="bg-color" required placeholder="#0F172A" value="#0F172A" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm font-mono transition">
+                </div>
+            </div>
+        
+            <button type="submit" id="submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-circle-check text-sm"></i>
+                Check Contrast Ratio
+            </button>
+        </form>
+        
+        <!-- Result Display Container (Form ke foran baad yeh add karein) -->
+        <div id="result-container" class="hidden mt-6 bg-[#0f172a] border border-slate-800 rounded-xl p-6 shadow-xl">
+            <h3 class="text-lg font-bold text-white mb-3">Scan Results</h3>
+            <div id="result-content" class="text-sm text-slate-300 space-y-2"></div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+    <script>
+document.getElementById('wcag-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const textColor = document.getElementById('text-color').value.trim();
+    const bgColor = document.getElementById('bg-color').value.trim();
+    const btn = document.getElementById('submit-btn');
+    const resultContainer = document.getElementById('result-container');
+    const resultContent = document.getElementById('result-content');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking Contrast...';
+    resultContainer.classList.add('hidden');
+
+    fetch('scanner.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'wcag_checker', text_color: textColor, bg_color: bgColor })
+    })
+    .then(async res => {
+        const text = await res.text();
+        try {
+            return JSON.parse(text);
+        } catch (err) {
+            throw new Error("Server Error / Invalid JSON response: " + text.substring(0, 150));
+        }
+    })
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-circle-check text-sm"></i> Check Contrast Ratio';
+        resultContainer.classList.remove('hidden');
+
+        if (data.success) {
+            resultContent.innerHTML = `<div class="p-4 bg-[#090d14] rounded-xl border border-slate-800">${data.message}</div>`;
+        } else {
+            resultContent.innerHTML = `<p class="text-red-400">${data.message}</p>`;
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-circle-check text-sm"></i> Check Contrast Ratio';
+        resultContainer.classList.remove('hidden');
+        resultContent.innerHTML = `<p class="text-red-400 text-xs font-mono bg-red-950/30 p-3 rounded border border-red-900/50">${err.message}</p>`;
+    });
+});
+</script>
+</body>
+</html>

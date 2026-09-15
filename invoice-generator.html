@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Invoice & Receipt Generator | Create & Download A4 PDF | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online invoice and receipt generator tool. Easily create, customize, print, and save professional A4 invoices and receipts instantly for your business.">
+    <meta name="keywords" content="free invoice generator, receipt generator, online invoice maker, printable invoice pdf, free billing tool, A4 invoice template">
+    <link rel="canonical" href="https://junctiontools.com/invoice-receipt-generator">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/invoice-receipt-generator">
+    <meta property="og:title" content="Free Invoice & Receipt Generator | Create & Download A4 PDF | JunctionTools">
+    <meta property="og:description" content="Create professional invoices and receipts instantly. Customize line items, calculate totals with tax, and download as A4 PDF for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-invoice-generator.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Invoice & Receipt Generator | JunctionTools">
+    <meta name="twitter:description" content="Generate and print professional business invoices and receipts in seconds with our free online tool.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Invoice & Receipt Generator",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication, FinanceApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web-based tool to create, preview, print, and save professional invoices and receipts to A4 PDF format."
+    }
+    </script>
+
+	<!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        [x-cloak] { display: none !important; }
+        @media print {
+            body * { visibility: hidden; }
+            #invoice-printable, #invoice-printable * { visibility: visible; }
+            #invoice-printable { position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0; border: none !important; box-shadow: none !important; }
+            .no-print { display: none !important; }
+            @page { size: A4 portrait; margin: 1cm; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans" x-data="{ companyName: 'Junction Tools', companyInfo: 'Karachi, Pakistan | +92 300 0000000', clientName: 'Valued Customer', invoiceNo: 'INV-1001', date: new Date().toISOString().slice(0, 10), currency: 'Rs. ', taxRate: 0, items: [{ desc: 'Web Development Services', qty: 1, price: 15000 }], addItem() { this.items.push({ desc: '', qty: 1, price: 0 }); }, removeItem(index) { if(this.items.length > 1) this.items.splice(index, 1); }, get subtotal() { return this.items.reduce((sum, item) => sum + ((item.qty || 0) * (item.price || 0)), 0); }, get taxAmount() { return (this.subtotal * ((this.taxRate || 0) / 100)); }, get total() { return this.subtotal + this.taxAmount; }, printInvoice() { window.print(); } }">
+
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-5xl mx-auto px-6 py-10 flex-grow space-y-6 w-full">
+        <div class="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                    <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Billing Utility
+                </span>
+                <h1 class="text-3xl font-extrabold text-white mt-1"><i class="fa-solid fa-file-invoice-dollar text-emerald-400"></i> Free Invoice & Receipt Generator</h1>
+                <p class="text-slate-400 text-sm mt-1">Fill client details and print or save as A4 PDF instantly.</p>
+            </div>
+            <button @click="printInvoice()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2.5 rounded-lg shadow-lg shadow-emerald-950/40 transition duration-200 flex items-center justify-center gap-2 shrink-0 self-start sm:self-auto cursor-pointer">
+                <i class="fa-solid fa-print text-sm"></i>
+                <span>Print / Save PDF</span>
+            </button>
+        </div>
+
+        <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5 mb-8 no-print">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>Fill in your business details, client name, invoice number, and tax rate in the control panel.</li>
+                <li>Add services or products using the <strong>+ Add Line Item</strong> button and specify descriptions, quantities, and prices.</li>
+                <li>Review the live preview below, then press <strong class="text-slate-200">Print / Save PDF</strong> or use <kbd class="px-1.5 py-0.5 text-xs font-mono text-slate-300 bg-slate-900 border border-slate-700 rounded">Ctrl + P</kbd> / <kbd class="px-1.5 py-0.5 text-xs font-mono text-slate-300 bg-slate-900 border border-slate-700 rounded">Cmd + P</kbd> to save as PDF.</li>
+            </ol>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-800/80 border border-slate-700/80 p-5 rounded-2xl no-print text-xs space-y-2 sm:space-y-0">
+            <div>
+                <label class="block font-semibold text-slate-300 mb-1">Company Name</label>
+                <input type="text" x-model="companyName" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-emerald-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-300 mb-1">Business Contact / Address</label>
+                <input type="text" x-model="companyInfo" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-emerald-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-300 mb-1">Client Name</label>
+                <input type="text" x-model="clientName" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-emerald-500 focus:outline-none">
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Invoice #</label>
+                    <input type="text" x-model="invoiceNo" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Currency</label>
+                    <input type="text" x-model="currency" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-center focus:border-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Tax (%)</label>
+                    <input type="number" x-model.number="taxRate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-center focus:border-emerald-500 focus:outline-none">
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-3 no-print bg-slate-800/40 p-5 border border-slate-800 rounded-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xs font-bold text-slate-300 uppercase">Items / Services</h3>
+                <button @click="addItem()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-emerald-500 transition-colors cursor-pointer">+ Add Line Item</button>
+            </div>
+            <template x-for="(item, index) in items" :key="index">
+                <div class="flex gap-2 items-center">
+                    <input type="text" x-model="item.desc" placeholder="Item description..." class="flex-grow bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:border-emerald-500 focus:outline-none">
+                    <input type="number" x-model.number="item.qty" placeholder="Qty" class="w-16 bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white text-center focus:border-emerald-500 focus:outline-none">
+                    <input type="number" x-model.number="item.price" placeholder="Price" class="w-28 bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white text-right focus:border-emerald-500 focus:outline-none">
+                    <button @click="removeItem(index)" class="text-red-400 font-bold px-2 hover:text-red-300 text-sm cursor-pointer">✕</button>
+                </div>
+            </template>
+        </div>
+
+        <div id="invoice-printable" class="p-8 bg-white text-slate-900 rounded-2xl shadow-xl space-y-6 max-w-3xl mx-auto text-sm">
+            <div class="flex justify-between items-start border-b pb-4 border-slate-200">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900" x-text="companyName"></h1>
+                    <p class="text-xs text-slate-500 mt-1" x-text="companyInfo"></p>
+                </div>
+                <div class="text-right">
+                    <h2 class="text-xl font-bold text-emerald-600 tracking-wider">INVOICE</h2>
+                    <p class="text-xs text-slate-600 mt-1">Invoice #: <span class="font-semibold" x-text="invoiceNo"></span></p>
+                    <p class="text-xs text-slate-600">Date: <span class="font-semibold" x-text="date"></span></p>
+                </div>
+            </div>
+
+            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
+                <span class="block text-[10px] text-emerald-600 font-bold uppercase">Billed To:</span>
+                <span class="text-sm font-semibold text-slate-800" x-text="clientName"></span>
+            </div>
+
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-200 text-xs font-bold text-slate-500 uppercase bg-slate-50">
+                        <th class="p-2">Description</th>
+                        <th class="p-2 text-center w-16">Qty</th>
+                        <th class="p-2 text-right w-28">Price</th>
+                        <th class="p-2 text-right w-28">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs">
+                    <template x-for="(item, i) in items" :key="i">
+                        <tr>
+                            <td class="p-2 text-slate-800" x-text="item.desc || 'Item ' + (i+1)"></td>
+                            <td class="p-2 text-center text-slate-600" x-text="item.qty"></td>
+                            <td class="p-2 text-right text-slate-600" x-text="currency + Number(item.price || 0).toLocaleString()"></td>
+                            <td class="p-2 text-right font-medium text-slate-800" x-text="currency + ((item.qty || 0) * (item.price || 0)).toLocaleString()"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+
+            <div class="flex justify-end pt-4 border-t border-slate-200">
+                <div class="w-56 space-y-1.5 text-xs">
+                    <div class="flex justify-between text-slate-600">
+                        <span>Subtotal:</span>
+                        <span class="font-medium" x-text="currency + subtotal.toLocaleString()"></span>
+                    </div>
+                    <template x-if="taxRate > 0">
+                        <div class="flex justify-between text-slate-600">
+                            <span x-text="'Tax (' + taxRate + '%):'"></span>
+                            <span class="font-medium" x-text="currency + taxAmount.toLocaleString()"></span>
+                        </div>
+                    </template>
+                    <div class="flex justify-between text-sm font-bold text-slate-900 border-t border-slate-200 pt-2">
+                        <span>Total Due:</span>
+                        <span class="text-emerald-600" x-text="currency + total.toLocaleString()"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="no-print flex justify-center pt-2 pb-6">
+            <button @click="printInvoice()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-8 py-3 rounded-lg shadow-lg shadow-emerald-950/40 transition duration-200 flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-file-arrow-down text-sm"></i>
+                <span>Print or Download PDF</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

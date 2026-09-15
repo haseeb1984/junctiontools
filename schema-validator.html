@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Schema Markup & JSON-LD Validator | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online Schema Markup & JSON-LD validator tool. Instantly test Product, Offer, AggregateRating, and structured data syntax for rich Google snippets for free.">
+    <meta name="keywords" content="free schema validator, json-ld markup checker, structured data testing tool, google rich snippets validator, product schema checker, seo utility tools">
+    <link rel="canonical" href="https://junctiontools.com/schema-validator">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/schema-validator">
+    <meta property="og:title" content="Free Schema Markup & JSON-LD Validator | JunctionTools">
+    <meta property="og:description" content="Instantly validate JSON-LD code and product schema syntax for rich Google snippets for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-schema-validator.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Schema Markup & JSON-LD Validator | JunctionTools">
+    <meta name="twitter:description" content="Test and validate your website structured data and JSON-LD markup snippets instantly with our free tool.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Schema Markup & JSON-LD Validator",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, SEOTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web-based tool to inspect, validate, and audit JSON-LD structured data syntax and Google rich snippet compatibility."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="schemaValidator()">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-10 flex-grow w-full space-y-8">
+        <div class="mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Structured Data Tool
+            </span>
+            <h1 class="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                <i class="fa-solid fa-diagram-project text-emerald-400"></i>
+                Free Schema Markup & Structured Data Validator
+            </h1>
+            <p class="text-slate-400 text-sm">Validate Product, Offer, AggregateRating, and JSON-LD schema snippets for rich Google snippets instantly.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
+                <li>Paste direct product page URL or raw JSON-LD markup code.</li>
+                <li>Ensure key attributes like <code class="text-emerald-400">price</code>, <code class="text-emerald-400">priceCurrency</code>, and <code class="text-emerald-400">availability</code> are present.</li>
+                <li>Click <strong class="text-slate-200">Validate Schema Markup</strong> to test syntax correctness and Google compliance.</li>
+            </ol>
+        </div>
+
+        <form @submit.prevent="runSchemaValidation()" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2 flex items-center space-x-2">
+                    <span>Product URL or JSON-LD Script</span>
+                </label>
+                <textarea rows="5" x-model="inputPayload" required placeholder='{"@context": "https://schema.org/", "@type": "Product", "name": "Classic Leather Bag", "offers": {"@type": "Offer", "price": "89.99"}}' class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm font-mono transition"></textarea>
+                <p class="text-xs text-slate-500 mt-2">Example: Raw JSON-LD snippet or live store product URL.</p>
+            </div>
+
+            <button type="submit" :disabled="loading" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                <i :class="loading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-code'"></i>
+                <span x-text="loading ? 'Validating Schema Markup...' : 'Validate Schema Markup'"></span>
+            </button>
+        </form>
+
+        <!-- ERROR NOTIFICATION -->
+        <template x-if="errorMessage">
+            <div class="bg-red-950/60 border border-red-900/50 rounded-xl p-4 text-red-300 text-sm flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                <span x-text="errorMessage"></span>
+            </div>
+        </template>
+
+        <!-- RESULTS SECTION -->
+        <div x-cloak x-show="tested" class="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-6 space-y-6 shadow-xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-square-poll-vertical text-emerald-400"></i> Schema Validation Results
+                </h2>
+                <span class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-semibold" x-text="validationScore + '/100 Score'"></span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <p class="text-xs text-slate-400">Schema Type Detected</p>
+                    <p class="text-sm font-bold text-emerald-400 mt-1" x-text="schemaTypeText"></p>
+                </div>
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <p class="text-xs text-slate-400">Syntax Status</p>
+                    <p class="text-sm font-bold text-slate-200 mt-1" x-text="syntaxStatusText"></p>
+                </div>
+            </div>
+
+            <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800 text-slate-400 text-xs leading-relaxed space-y-2">
+                <p class="font-semibold text-slate-200"><i class="fa-solid fa-circle-info text-emerald-400 mr-1.5"></i> Diagnostic Summary:</p>
+                <p x-text="diagnosticMessage"></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- ALPINE LOGIC & INCLUDER -->
+    <script>
+        function schemaValidator() {
+            return {
+                inputPayload: '',
+                loading: false,
+                tested: false,
+                validationScore: 0,
+                schemaTypeText: '',
+                syntaxStatusText: '',
+                diagnosticMessage: '',
+                errorMessage: '',
+                async runSchemaValidation() {
+                    if (!this.inputPayload) return;
+                    this.loading = true;
+                    this.tested = false;
+                    this.errorMessage = '';
+
+                    try {
+                        let response = await fetch('scanner.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                url: this.inputPayload, 
+                                type: 'schema_validator' 
+                            })
+                        });
+
+                        let data = await response.json();
+
+                        if (data.success) {
+                            this.validationScore = data.score;
+                            this.schemaTypeText = data.schemaType;
+                            this.syntaxStatusText = data.syntaxStatus;
+                            this.diagnosticMessage = data.message;
+                            this.tested = true;
+                        } else {
+                            this.errorMessage = data.message || 'Failed to validate schema markup.';
+                        }
+                    } catch (err) {
+                        this.errorMessage = 'Server connection error. Please ensure scanner.php is running.';
+                        console.error(err);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

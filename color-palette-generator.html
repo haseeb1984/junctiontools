@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Color Picker & Palette Generator | HEX & RGB Tool | JunctionTools</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online color picker and palette generator tool. Select custom shades, extract HEX and RGB values, and copy color codes instantly for web design.">
+    <meta name="keywords" content="free color picker, palette generator, hex code extractor, rgb color tool, web design colors, CSS color picker">
+    <link rel="canonical" href="https://junctiontools.com/color-picker">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/color-picker">
+    <meta property="og:title" content="Free Color Picker & Palette Generator | HEX & RGB Tool | JunctionTools">
+    <meta property="og:description" content="Pick colors, extract HEX and RGB values, and generate web palettes instantly for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-color-picker.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Color Picker & Palette Generator | JunctionTools">
+    <meta name="twitter:description" content="Quickly select custom colors and copy HEX codes with our free web color utility tool.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Color Picker & Palette Generator",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, DesignApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility tool to pick colors, generate palettes, and copy HEX or RGB color codes instantly."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="{ color: '#10b981' }">
+
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow space-y-8 w-full">
+        <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Design Utility
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mt-1 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-droplet text-emerald-400"></i>
+                Free Color Picker & Palette Generator
+            </h1>
+            <p class="text-slate-400 text-sm mt-2">Pick colors and extract HEX, RGB values instantly.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5 mb-8">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i>
+                <span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed space-y-1">
+                <li>Click on the color box to open the visual color picker tool.</li>
+                <li>Select your desired shade or enter custom values to update the preview.</li>
+                <li>Click <strong class="text-slate-200">Copy HEX Code</strong> to copy the exact color code to your clipboard.</li>
+            </ol>
+        </div>
+
+        <div class="bg-[#0f172a] border border-slate-800/80 p-8 rounded-2xl space-y-6 flex flex-col items-center shadow-xl">
+            <div class="relative group">
+                <input type="color" x-model="color" class="w-36 h-36 rounded-2xl border-2 border-slate-700/80 cursor-pointer bg-transparent shadow-lg transition transform group-hover:scale-105">
+            </div>
+
+            <div class="text-center space-y-3">
+                <p class="text-2xl font-bold font-mono text-emerald-400 tracking-wider" x-text="color"></p>
+                <button @click="navigator.clipboard.writeText(color)" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg text-xs font-semibold transition shadow-md shadow-emerald-950/40 flex items-center gap-2 mx-auto cursor-pointer">
+                    <i class="fa-regular fa-copy text-xs"></i> Copy HEX Code
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER SCRIPT -->
+    <script>
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>

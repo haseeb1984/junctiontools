@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Cross-Browser Compatibility Checker | Web Rendering & CSS Audit Tool</title>
+    
+    <!-- High-Impact SEO Meta Tags for Top Rankings -->
+    <meta name="description" content="Free online cross-browser compatibility checker. Audit web layout rendering issues, CSS prefixes, and flexbox bugs on Apple WebKit, Chromium Blink, and Mozilla Gecko instantly.">
+    <meta name="keywords" content="free cross browser compatibility checker, css rendering bug tester, safari layout validator, browser engine audit, web developer tools, css prefix validator">
+    <link rel="canonical" href="https://junctiontools.com/browser-checker">
+
+    <!-- Open Graph / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://junctiontools.com/browser-checker">
+    <meta property="og:title" content="Free Cross-Browser Compatibility Checker | JunctionTools">
+    <meta property="og:description" content="Test web layouts and CSS rendering engines across Safari, Chrome, and Firefox instantly for free.">
+    <meta property="og:image" content="https://junctiontools.com/assets/og-browser-checker.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Cross-Browser Compatibility Checker | JunctionTools">
+    <meta name="twitter:description" content="Audit web layout rendering issues and CSS prefix compatibility across browser engines for free.">
+
+    <!-- Schema.org Structured Data (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Free Cross-Browser Compatibility Checker",
+      "operatingSystem": "All",
+      "applicationCategory": "DeveloperApplication, WebTool, SEOTool",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free web utility to inspect and audit CSS rendering behavior and engine compatibility across browsers."
+    }
+    </script>
+
+    <!-- Favicon Link -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="browserChecker()">
+    <!-- HEADER CALL HERE -->
+    <div id="header-container"></div>
+
+    <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
+        <div class="mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
+                <i class="fa-solid fa-sparkles text-[10px]"></i> 100% Free Browser Engine Audit Tool
+            </span>
+            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-window-restore text-emerald-400"></i> Free Cross-Browser Compatibility Checker
+            </h1>
+            <p class="text-slate-400 text-sm">Check web layout rendering issues on iOS Safari, Chrome, Firefox, and Edge engines with deep diagnostic checks.</p>
+        </div>
+
+        <div class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center space-x-2">
+                <i class="fa-solid fa-circle-info text-emerald-400"></i><span>How to Use Instructions:</span>
+            </h3>
+            <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed">
+                <li>Input page URL to audit rendering engine issues.</li>
+                <li>Select target browser engines (WebKit/Safari, Blink/Chrome, Gecko/Firefox).</li>
+                <li>Click <strong class="text-slate-200">Check Compatibility</strong> to detect unsupported CSS properties or flexbox bugs.</li>
+            </ol>
+        </div>
+
+        <form @submit.prevent="runCompatibilityCheck()" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Target Store Link</label>
+                <input type="url" x-model="pageUrl" required placeholder="https://example.com/checkout" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Target Browser Engine</label>
+                <select x-model="browserEngine" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-emerald-500 text-sm transition">
+                    <option value="webkit">Apple WebKit (iOS Safari)</option>
+                    <option value="blink">Chromium Blink (Google Chrome, Edge, Brave)</option>
+                    <option value="gecko">Mozilla Gecko (Firefox)</option>
+                </select>
+            </div>
+
+            <button type="submit" :disabled="loading" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                <i :class="loading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-laptop-code'"></i>
+                <span x-text="loading ? 'Analyzing Rendering Engine...' : 'Check Compatibility'"></span>
+            </button>
+        </form>
+
+        <!-- ERROR NOTIFICATION -->
+        <template x-if="errorMessage">
+            <div class="bg-red-950/60 border border-red-900/50 rounded-xl p-4 text-red-300 text-sm flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                <span x-text="errorMessage"></span>
+            </div>
+        </template>
+
+        <!-- RESULTS SECTION -->
+        <div x-cloak x-show="tested" class="bg-[#0f172a] border border-slate-800/80 rounded-2xl p-6 space-y-6 shadow-xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-square-poll-vertical text-emerald-400"></i> Engine Audit Results
+                </h2>
+                <span class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-semibold" x-text="compatibilityScore + '/100 Score'"></span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <p class="text-xs text-slate-400">Engine Compatibility Status</p>
+                    <p class="text-base font-bold text-emerald-400 mt-1" x-text="engineStatusText"></p>
+                </div>
+                <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800">
+                    <p class="text-xs text-slate-400">CSS Prefix & Property Check</p>
+                    <p class="text-base font-bold text-slate-200 mt-1" x-text="cssCheckStatus"></p>
+                </div>
+            </div>
+
+            <div class="bg-[#090d14] p-4 rounded-xl border border-slate-800 text-slate-400 text-xs leading-relaxed">
+                <p class="font-semibold text-slate-200 mb-1"><i class="fa-solid fa-circle-info text-emerald-400 mr-1.5"></i> Engine Diagnostic Log:</p>
+                <p x-text="recommendationText"></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER CALL HERE -->
+    <div id="footer-container"></div>
+
+    <!-- PURE HTML FILE INCLUDER & ALPINE LOGIC -->
+    <script>
+        function browserChecker() {
+            return {
+                pageUrl: '',
+                browserEngine: 'webkit',
+                loading: false,
+                tested: false,
+                compatibilityScore: 0,
+                engineStatusText: '',
+                cssCheckStatus: '',
+                recommendationText: '',
+                errorMessage: '',
+                async runCompatibilityCheck() {
+                    if (!this.pageUrl) return;
+                    this.loading = true;
+                    this.tested = false;
+                    this.errorMessage = '';
+
+                    try {
+                        let response = await fetch('scanner.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                url: this.pageUrl, 
+                                engine: this.browserEngine, 
+                                type: 'browser_checker' 
+                            })
+                        });
+
+                        let data = await response.json();
+
+                        if (data.success) {
+                            this.compatibilityScore = data.score;
+                            this.engineStatusText = data.engineStatus;
+                            this.cssCheckStatus = data.cssStatus;
+                            this.recommendationText = data.message;
+                            this.tested = true;
+                        } else {
+                            this.errorMessage = data.message || 'Failed to analyze target URL compatibility.';
+                        }
+                    } catch (err) {
+                        this.errorMessage = 'Server connection error. Please ensure scanner.php is accessible.';
+                        console.error(err);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+
+        function loadComponent(id, file) {
+            fetch(file)
+                .then(res => res.text())
+                .then(data => {
+                    document.getElementById(id).innerHTML = data;
+                })
+                .catch(err => console.error(`Error loading ${file}:`, err));
+        }
+
+        loadComponent('header-container', 'header.html');
+        loadComponent('footer-container', 'footer.html');
+    </script>
+</body>
+</html>
