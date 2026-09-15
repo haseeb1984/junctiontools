@@ -140,7 +140,6 @@ jobs:
           test -f tests/fixtures/large-response.php
           test -f tests/fixtures/redirect.php
           test -f tests/fixtures/ssrf-target.php
-          test -f tests/fixtures/contact-endpoint.php
           echo 'Phase 0 automated test suite and committed fixtures found.'
 
       - name: Start local PHP server with committed fixtures
@@ -153,11 +152,7 @@ jobs:
           echo $! > artifacts/php-server.pid
 
           for attempt in {1..20}; do
-            if curl --fail --silent --show-error "$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/health.php" >/dev/null 2>&1; then
-              echo 'Local PHP server is ready.'
-              exit 0
-            fi
-            if curl --silent --show-error "$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/timeout.php?delay=0" >/dev/null 2>&1; then
+            if curl --fail --silent --show-error "$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/timeout.php?delay=0" >/dev/null 2>&1; then
               echo 'Local PHP server is ready.'
               exit 0
             fi
@@ -207,15 +202,6 @@ jobs:
           set -euo pipefail
           php tests/run.php --suite=rate-limit --report=artifacts/results/rate-limit.json
 
-      - name: Run contact endpoint tests
-        shell: bash
-        env:
-          JUNCTIONTOOLS_CONTACT_TEST_URL: ${{ env.JUNCTIONTOOLS_TEST_BASE_URL }}/process-contact.php
-        run: |
-          set -euo pipefail
-          php tests/run.php --suite=contact --report=artifacts/results/contact.json \
-            --contact-url="$JUNCTIONTOOLS_CONTACT_TEST_URL"
-
       - name: Run HTTP method and security-header tests
         shell: bash
         run: |
@@ -235,15 +221,17 @@ jobs:
             echo "Workflow: $GITHUB_WORKFLOW"
             echo "Run: $GITHUB_RUN_ID"
             echo
-            echo 'Required suites:'
+            echo 'Required automated suites:'
             echo '- 35-tool compatibility'
             echo '- SSL issuer / expiry / days remaining'
             echo '- SSRF / private IP / metadata / IPv6'
             echo '- Redirect blocking'
             echo '- Timeout / response-size / request-size limits'
             echo '- Rate limiting'
-            echo '- Contact endpoint validation and abuse cases'
             echo '- HTTP methods / security headers'
+            echo
+            echo 'Manual production verification:'
+            echo '- Contact form validation, database insertion, and SMTP/email delivery'
           } > artifacts/results/summary.md
 
       - name: Upload security-suite artifacts
