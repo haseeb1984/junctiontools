@@ -32,6 +32,7 @@ jobs:
           php -l tools/run-demand-refresh.php
           php -l tools/build-tool-specs.php
           php -l tools/generate-approved-tools.php
+          php -l tools/sync-site-navigation.php
           php -l tools/build-search-console-feedback.php
           php -l tools/build-search-console-generation-queue.php
           php -l tools/evaluate-automatic-publishing.php
@@ -41,6 +42,7 @@ jobs:
           php -l tests/validate-tool-factory-e2e.php
           php -l tests/validate-tool-specs.php
           php -l tests/validate-generated-runtime.php
+          php -l tests/validate-site-navigation-sync.php
           php -l tests/validate-tool-enhancement-approval.php
           php -l tests/validate-enhancement-deployment-plan.php
 
@@ -52,6 +54,9 @@ jobs:
 
       - name: Validate generated tool layout and content order
         run: php tests/validate-generated-runtime.php
+
+      - name: Validate site navigation synchronization contract
+        run: php tests/validate-site-navigation-sync.php
 
       - name: Validate demand refresh chain
         run: php tests/validate-demand-refresh.php
