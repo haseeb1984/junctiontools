@@ -6,8 +6,7 @@ declare(strict_types=1);
  *
  * Apache uses .htaccess to map clean tool URLs such as /pagespeed-analyzer
  * to their corresponding .html files. PHP's built-in server does not process
- * .htaccess, so mirror that public routing here while keeping real static
- * files and the scanner compatibility route working.
+ * .htaccess, so mirror both the public clean URL redirects and routing here.
  */
 
 $uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
@@ -25,6 +24,15 @@ $root = realpath(__DIR__ . '/..');
 if ($root === false) {
     http_response_code(500);
     exit('Repository root not found');
+}
+
+// Mirror production: direct .html page requests redirect to the clean URL.
+if (preg_match('#^/(.+)\.html$#i', $uriPath, $match)) {
+    $cleanPath = '/' . $match[1];
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+        header('Location: ' . $cleanPath, true, 301);
+    }
+    return;
 }
 
 $requested = realpath($root . $uriPath);
