@@ -26,6 +26,7 @@ jobs:
         run: |
           php -l tools/import-search-console.php
           php -l tools/build-search-console-feedback.php
+          php -l tools/build-search-console-generation-queue.php
           php -l tests/validate-search-console.php
       - name: Validate Search Console feedback pipeline
         run: php tests/validate-search-console.php
