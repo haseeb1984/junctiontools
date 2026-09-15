@@ -1,0 +1,34 @@
+name: Phase 8 Search Console Feedback
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [phase-8/search-console-feedback, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  search-console-feedback:
+    name: Search Console feedback validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: PHP syntax checks
+        run: |
+          php -l tools/import-search-console.php
+          php -l tools/build-search-console-feedback.php
+          php -l tests/validate-search-console.php
+      - name: Validate Search Console feedback pipeline
+        run: php tests/validate-search-console.php
+      - name: Verify no Search Console credentials are committed
+        run: |
+          ! grep -RniE 'client_secret|refresh_token|authorization: bearer|developer_token' tools config .github --exclude-dir=.git
