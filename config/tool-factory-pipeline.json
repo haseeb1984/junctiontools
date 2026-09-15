@@ -10,6 +10,7 @@
     {"id":"approved-generation","phase":5,"script":"tools/generate-approved-tools.php","required_files":["config/tool-generation-approvals.json"],"enabled":true},
     {"id":"runtime-validation","phase":6,"script":"tests/validate-generated-runtime.php","required_files":["tests/validate-generated-runtime.php"],"enabled":true},
     {"id":"deployment-plan","phase":7,"script":"tools/build-deployment-plan.php","required_files":["config/tool-generation-approvals.json"],"enabled":true},
+    {"id":"site-navigation-sync","phase":7,"script":"tools/sync-site-navigation.php","required_files":["config/tools.json","header.html","footer.html","index.html"],"enabled":true},
     {"id":"search-console-feedback","phase":8,"script":"tools/build-search-console-generation-queue.php","required_files":["config/search-console-opportunities.json","config/tools.json"],"enabled":true},
     {"id":"automatic-publishing-gate","phase":9,"script":"tools/evaluate-automatic-publishing.php","required_files":["config/automatic-publishing-policy.json"],"enabled":true}
   ],
@@ -18,6 +19,7 @@
     "never_modify_registry_or_sitemap": true,
     "never_publish_without_explicit_approval": true,
     "never_commit_credentials": true,
-    "production_publish_requires_separate_review": true
+    "production_publish_requires_separate_review": true,
+    "published_tool_navigation_must_sync": true
   }
 }
