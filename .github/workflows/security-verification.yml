@@ -2,13 +2,9 @@ name: Phase 0 Security Verification
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   push:
-    branches:
-      - security/phase-0-hardening
-      - phase-3/search-demand-discovery
-      - main
+    branches: [security/phase-0-hardening, phase-3/search-demand-discovery, main]
   workflow_dispatch:
 
 permissions:
@@ -30,8 +26,7 @@ jobs:
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+        with: {fetch-depth: 1}
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -44,8 +39,7 @@ jobs:
         with:
           path: ${{ env.COMPOSER_CACHE_DIR }}
           key: composer-${{ runner.os }}-php8.2-${{ hashFiles('composer.lock', 'composer.json') }}
-          restore-keys: |
-            composer-${{ runner.os }}-php8.2-
+          restore-keys: composer-${{ runner.os }}-php8.2-
       - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
       - name: PHP syntax check
@@ -53,8 +47,8 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -d '' PHP_FILES < <(find . -path './vendor' -prune -o -path './.git' -prune -o -name '*.php' -print0)
-          if [ "${#PHP_FILES[@]}" -eq 0 ]; then echo 'No PHP files found.' >&2; exit 1; fi
-          for file in "${PHP_FILES[@]}"; do php -l "${file}"; done
+          test "${#PHP_FILES[@]}" -gt 0
+          for file in "${PHP_FILES[@]}"; do php -l "$file"; done
       - name: Validate Phase 1 tool registry
         run: php tests/validate-registry.php
       - name: Validate timestamp converter tool
@@ -75,14 +69,8 @@ jobs:
         run: php tests/validate-generation-queue.php
       - name: Validate Google Keyword Planner importer
         run: php tests/validate-google-keyword-planner.php
-      - name: Upload static verification artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase-0-static-verification
-          path: .
-          retention-days: 14
-          if-no-files-found: ignore
+      - name: Validate Google demand opportunity builder
+        run: php tests/validate-google-demand-opportunities.php
 
   security-suite:
     name: Compatibility and security integration suite
@@ -92,8 +80,7 @@ jobs:
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+        with: {fetch-depth: 1}
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -101,41 +88,14 @@ jobs:
           extensions: curl, dom, mbstring, openssl, pdo, pdo_mysql
           coverage: none
           tools: composer:v2
-      - name: Restore Composer cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.COMPOSER_CACHE_DIR }}
-          key: composer-${{ runner.os }}-php8.2-${{ hashFiles('composer.lock', 'composer.json') }}
-          restore-keys: |
-            composer-${{ runner.os }}-php8.2-
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
-      - name: Verify test suite and committed fixtures exist
+      - name: Verify committed test and demand files
         shell: bash
         run: |
           set -euo pipefail
-          test -f tests/run.php
-          test -f tests/compatibility-fixture-suite.php
-          test -f tests/bootstrap.php
-          test -f tests/router.php
-          test -f tests/validate-registry.php
-          test -f tests/validate-timestamp-converter.php
-          test -f tests/validate-qr-code-generator.php
-          test -f tests/validate-age-calculator.php
-          test -f tests/validate-image-compressor-enhancement.php
-          test -f tests/validate-sitemap.php
-          test -f tests/validate-opportunities.php
-          test -f tests/validate-search-demand.php
-          test -f tests/validate-generation-queue.php
-          test -f tests/validate-google-keyword-planner.php
-          test -f tools/generate-sitemap.php
-          test -f tools/import-google-keyword-planner.php
+          for file in tests/run.php tests/compatibility-fixture-suite.php tests/bootstrap.php tests/router.php tests/validate-registry.php tests/validate-timestamp-converter.php tests/validate-qr-code-generator.php tests/validate-age-calculator.php tests/validate-image-compressor-enhancement.php tests/validate-sitemap.php tests/validate-opportunities.php tests/validate-search-demand.php tests/validate-generation-queue.php tests/validate-google-keyword-planner.php tests/validate-google-demand-opportunities.php tools/generate-sitemap.php tools/import-google-keyword-planner.php tools/build-demand-opportunities.php; do test -f "$file"; done
           test -d tests/fixtures
-          test -f tests/fixtures/compatibility-page.html
-          test -f tests/fixtures/timeout.php
-          test -f tests/fixtures/large-response.php
-          test -f tests/fixtures/redirect.php
-          test -f tests/fixtures/ssrf-target.php
       - name: Start local PHP server with committed fixtures
         shell: bash
         run: |
@@ -163,36 +123,6 @@ jobs:
         run: php tests/run.php --suite=rate-limit --report=artifacts/rate-limit.json
       - name: Run HTTP method and security-header tests
         run: php tests/run.php --suite=http-security --report=artifacts/http-security.json
-      - name: Build consolidated test summary
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts
-          {
-            echo '# JunctionTools Phase 0 Security Verification'
-            echo "Commit: $GITHUB_SHA"
-            echo "Workflow: $GITHUB_WORKFLOW"
-            echo "Run: $GITHUB_RUN_ID"
-            echo '- 35-tool compatibility using deterministic local fixture'
-            echo '- Timestamp Converter static/registry validation'
-            echo '- QR Code Generator static/registry validation'
-            echo '- Age Calculator static/registry validation'
-            echo '- Image Compressor / Resizer enhancement validation'
-            echo '- SSL issuer / expiry / days remaining'
-            echo '- SSRF / private IP / metadata / IPv6'
-            echo '- Redirect blocking'
-            echo '- Timeout / response-size / request-size limits'
-            echo '- Rate limiting'
-            echo '- HTTP methods / security headers'
-            echo '- Phase 1 tool registry schema and file-reference validation'
-            echo '- Registry-driven sitemap generation and validation'
-            echo '- Phase 3 search-demand opportunity registry validation'
-            echo '- Phase 3 search-demand evidence registry validation'
-            echo '- Phase 3 ranked generation queue validation'
-            echo '- Google Keyword Planner importer validation'
-            echo 'Manual: contact form validation, DB insertion, SMTP/email delivery'
-          } > artifacts/summary.md
       - name: Upload security-suite artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -214,6 +144,6 @@ jobs:
       - name: Require all Phase 0 checks to pass
         run: |
           set -euo pipefail
-          if [ "${{ needs.php-static.result }}" != 'success' ]; then echo 'PHP/static verification failed.' >&2; exit 1; fi
-          if [ "${{ needs.security-suite.result }}" != 'success' ]; then echo 'Security/compatibility verification failed.' >&2; exit 1; fi
+          if [ "${{ needs.php-static.result }}" != success ]; then exit 1; fi
+          if [ "${{ needs.security-suite.result }}" != success ]; then exit 1; fi
           echo 'Phase 0 verification gate: PASS'
