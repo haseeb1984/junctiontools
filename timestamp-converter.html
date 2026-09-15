@@ -15,15 +15,7 @@
   <meta name="twitter:title" content="Free Unix Timestamp Converter | JunctionTools">
   <meta name="twitter:description" content="Free browser-based Unix timestamp and date converter.">
   <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"SoftwareApplication",
-    "name":"Unix Timestamp Converter",
-    "operatingSystem":"All",
-    "applicationCategory":"UtilitiesApplication",
-    "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
-    "description":"Free browser-based converter for Unix timestamps and calendar dates."
-  }
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Unix Timestamp Converter","operatingSystem":"All","applicationCategory":"UtilitiesApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Free browser-based converter for Unix timestamps and calendar dates."}
   </script>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -35,93 +27,39 @@
   <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
     <section>
       <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3"><i class="fa-solid fa-clock"></i> Free Developer Utility</span>
-      <h1 class="text-3xl font-extrabold text-white mb-2">Unix Timestamp Converter</h1>
-      <p class="text-slate-400 text-sm">Convert Unix timestamps to readable dates and dates to Unix timestamps instantly. Supports seconds and milliseconds.</p>
+      <h1 class="text-3xl font-extrabold text-white tracking-tight">Unix Timestamp Converter</h1>
+      <p class="text-slate-400 text-sm mt-2">Convert Unix timestamps to readable dates and dates to Unix timestamps instantly. Supports seconds and milliseconds.</p>
+    </section>
+
+    <section class="bg-[#0f172a]/60 border border-cyan-900/40 rounded-xl p-5">
+      <h2 class="text-sm font-semibold text-slate-200 mb-2"><i class="fa-solid fa-circle-info text-cyan-400 mr-2"></i>How to Use</h2>
+      <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed space-y-1">
+        <li>Enter a Unix timestamp in seconds or milliseconds.</li>
+        <li>Choose the unit that matches the timestamp.</li>
+        <li>Or enter a date and time to convert it back to a Unix timestamp.</li>
+      </ol>
     </section>
 
     <section class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 shadow-xl space-y-6">
       <div class="flex flex-col md:flex-row md:items-end gap-4">
-        <div class="flex-1">
-          <label class="block text-sm font-medium text-slate-300 mb-2">Timestamp</label>
-          <input x-model="timestamp" @input="fromTimestamp()" type="text" inputmode="numeric" placeholder="e.g. 1750000000" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500">
-        </div>
-        <div class="md:w-48">
-          <label class="block text-sm font-medium text-slate-300 mb-2">Unit</label>
-          <select x-model="unit" @change="fromTimestamp()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500">
-            <option value="seconds">Seconds</option>
-            <option value="milliseconds">Milliseconds</option>
-          </select>
-        </div>
+        <div class="flex-1"><label class="block text-sm font-medium text-slate-300 mb-2" for="timestamp">Timestamp</label><input id="timestamp" x-model="timestamp" @input="fromTimestamp()" type="text" inputmode="numeric" placeholder="e.g. 1750000000" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500"></div>
+        <div class="md:w-48"><label class="block text-sm font-medium text-slate-300 mb-2" for="unit">Unit</label><select id="unit" x-model="unit" @change="fromTimestamp()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500"><option value="seconds">Seconds</option><option value="milliseconds">Milliseconds</option></select></div>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-slate-300 mb-2">Converted Date & Time</label>
-        <input x-model="dateValue" type="datetime-local" step="1" @input="fromDate()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500">
-      </div>
-      <div class="flex flex-wrap gap-3">
-        <button @click="useNow()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition"><i class="fa-solid fa-bolt mr-2"></i>Use Current Time</button>
-        <button @click="clearAll()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-4 py-2.5 rounded-lg transition">Clear</button>
-      </div>
+      <div><label class="block text-sm font-medium text-slate-300 mb-2" for="dateValue">Converted Date & Time</label><input id="dateValue" x-model="dateValue" type="datetime-local" step="1" @input="fromDate()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500"></div>
+      <div class="flex flex-wrap gap-3"><button @click="useNow()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition"><i class="fa-solid fa-bolt mr-2"></i>Use Current Time</button><button @click="clearAll()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-4 py-2.5 rounded-lg transition">Clear</button></div>
       <p x-show="error" x-text="error" class="text-sm text-red-400"></p>
     </section>
 
     <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-5">
-        <p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Current Unix Timestamp</p>
-        <p class="text-2xl font-bold text-cyan-400 break-all" x-text="currentSeconds"></p>
-        <p class="text-xs text-slate-500 mt-1">Seconds</p>
-      </div>
-      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-5">
-        <p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Current Unix Timestamp</p>
-        <p class="text-2xl font-bold text-cyan-400 break-all" x-text="currentMilliseconds"></p>
-        <p class="text-xs text-slate-500 mt-1">Milliseconds</p>
-      </div>
-    </section>
-
-    <section class="bg-[#0f172a]/60 border border-cyan-900/40 rounded-xl p-5">
-      <h2 class="text-base font-bold text-white mb-3"><i class="fa-solid fa-circle-info text-cyan-400 mr-2"></i>How to Use</h2>
-      <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed space-y-1">
-        <li>Enter a Unix timestamp in seconds or milliseconds.</li>
-        <li>Switch the unit if needed; the date updates automatically.</li>
-        <li>Or enter a date and convert it back to a Unix timestamp.</li>
-      </ol>
+      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-5"><p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Current Unix Timestamp</p><p class="text-2xl font-bold text-cyan-400 break-all" x-text="currentSeconds"></p><p class="text-xs text-slate-500 mt-1">Seconds</p></div>
+      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-5"><p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Current Unix Timestamp</p><p class="text-2xl font-bold text-cyan-400 break-all" x-text="currentMilliseconds"></p><p class="text-xs text-slate-500 mt-1">Milliseconds</p></div>
     </section>
   </main>
   <div id="footer-container"></div>
   <script>
-    function timestampConverter() {
-      return {
-        timestamp: '', unit: 'seconds', dateValue: '', error: '', currentSeconds: '', currentMilliseconds: '', timer: null,
-        init() { this.refreshNow(); this.timer = setInterval(() => this.refreshNow(), 1000); },
-        refreshNow() { const ms = Date.now(); this.currentSeconds = Math.floor(ms / 1000); this.currentMilliseconds = ms; },
-        fromTimestamp() {
-          this.error = '';
-          if (this.timestamp.trim() === '') { this.dateValue = ''; return; }
-          if (!/^[-+]?\d+(?:\.\d+)?$/.test(this.timestamp.trim())) { this.error = 'Enter a valid numeric Unix timestamp.'; return; }
-          const value = Number(this.timestamp);
-          if (!Number.isFinite(value)) { this.error = 'Timestamp is outside the supported numeric range.'; return; }
-          const ms = this.unit === 'milliseconds' ? value : value * 1000;
-          const date = new Date(ms);
-          if (Number.isNaN(date.getTime())) { this.error = 'Timestamp could not be converted to a valid date.'; return; }
-          this.dateValue = this.toLocalInputValue(date);
-        },
-        fromDate() {
-          this.error = '';
-          if (!this.dateValue) { this.timestamp = ''; return; }
-          const ms = new Date(this.dateValue).getTime();
-          if (Number.isNaN(ms)) { this.error = 'Enter a valid date and time.'; return; }
-          this.timestamp = this.unit === 'milliseconds' ? String(ms) : String(Math.floor(ms / 1000));
-        },
-        toLocalInputValue(date) {
-          const pad = n => String(n).padStart(2, '0');
-          return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-        },
-        useNow() { this.timestamp = this.unit === 'milliseconds' ? String(Date.now()) : String(Math.floor(Date.now() / 1000)); this.fromTimestamp(); },
-        clearAll() { this.timestamp = ''; this.dateValue = ''; this.error = ''; }
-      };
-    }
-    function loadComponent(id, file) { fetch(file).then(res => res.text()).then(data => { document.getElementById(id).innerHTML = data; }).catch(err => console.error(`Error loading ${file}:`, err)); }
-    loadComponent('header-container', 'header.html');
-    loadComponent('footer-container', 'footer.html');
+    function timestampConverter(){return{timestamp:'',unit:'seconds',dateValue:'',error:'',currentSeconds:'',currentMilliseconds:'',timer:null,init(){this.refreshNow();this.timer=setInterval(()=>this.refreshNow(),1000)},refreshNow(){const ms=Date.now();this.currentSeconds=Math.floor(ms/1000);this.currentMilliseconds=ms},fromTimestamp(){this.error='';if(this.timestamp.trim()===''){this.dateValue='';return}if(!/^[-+]?\d+(?:\.\d+)?$/.test(this.timestamp.trim())){this.error='Enter a valid numeric Unix timestamp.';return}const value=Number(this.timestamp);if(!Number.isFinite(value)){this.error='Timestamp is outside the supported numeric range.';return}const ms=this.unit==='milliseconds'?value:value*1000;const date=new Date(ms);if(Number.isNaN(date.getTime())){this.error='Timestamp could not be converted to a valid date.';return}this.dateValue=this.toLocalInputValue(date)},fromDate(){this.error='';if(!this.dateValue){this.timestamp='';return}const ms=new Date(this.dateValue).getTime();if(Number.isNaN(ms)){this.error='Enter a valid date and time.';return}this.timestamp=this.unit==='milliseconds'?String(ms):String(Math.floor(ms/1000))},toLocalInputValue(date){const pad=n=>String(n).padStart(2,'0');return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`},useNow(){this.timestamp=this.unit==='milliseconds'?String(Date.now()):String(Math.floor(Date.now()/1000));this.fromTimestamp()},clearAll(){this.timestamp='';this.dateValue='';this.error=''}}}
+    function loadComponent(id,file){fetch(file).then(res=>res.text()).then(data=>{document.getElementById(id).innerHTML=data}).catch(err=>console.error(`Error loading ${file}:`,err))}
+    loadComponent('header-container','header.html');loadComponent('footer-container','footer.html');
   </script>
 </body>
 </html>
