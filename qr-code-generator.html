@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free QR Code Generator | JunctionTools</title>
+  <meta name="description" content="Free private QR code generator. Create QR codes for URLs and text directly in your browser, customize size and colors, and download as PNG without signup.">
+  <meta name="keywords" content="qr code generator, free qr code generator, generate qr code free, qr code maker, qr generator online">
+  <link rel="canonical" href="https://junctiontools.com/qr-code-generator">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://junctiontools.com/qr-code-generator">
+  <meta property="og:title" content="Free QR Code Generator | JunctionTools">
+  <meta property="og:description" content="Generate private static QR codes for URLs and text in your browser. No signup or upload required.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Free QR Code Generator | JunctionTools">
+  <meta name="twitter:description" content="Create and download QR codes privately in your browser.">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"SoftwareApplication",
+    "name":"QR Code Generator",
+    "operatingSystem":"All",
+    "applicationCategory":"UtilitiesApplication",
+    "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+    "description":"Free browser-based QR code generator for URLs and text."
+  }
+  </script>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="qrGenerator()" x-init="init()">
+  <div id="header-container"></div>
+  <main class="max-w-5xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
+    <section>
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3"><i class="fa-solid fa-qrcode"></i> Free Privacy-First Utility</span>
+      <h1 class="text-3xl font-extrabold text-white mb-2">Free QR Code Generator</h1>
+      <p class="text-slate-400 text-sm">Create a static QR code for a URL or text. Generation happens in your browser, so your content is not uploaded to JunctionTools.</p>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 shadow-xl space-y-5">
+        <div>
+          <label for="qr-content" class="block text-sm font-medium text-slate-300 mb-2">URL or text</label>
+          <textarea id="qr-content" x-model="content" @input="generate()" rows="6" maxlength="2000" placeholder="https://example.com" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500 resize-y"></textarea>
+          <p class="text-xs text-slate-500 mt-1"><span x-text="content.length"></span>/2000 characters</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="qr-size" class="block text-sm font-medium text-slate-300 mb-2">Image size</label>
+            <select id="qr-size" x-model.number="size" @change="generate()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+              <option value="256">256 × 256</option>
+              <option value="512">512 × 512</option>
+              <option value="1024">1024 × 1024</option>
+              <option value="2048">2048 × 2048</option>
+            </select>
+          </div>
+          <div>
+            <label for="qr-level" class="block text-sm font-medium text-slate-300 mb-2">Error correction</label>
+            <select id="qr-level" x-model="level" @change="generate()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500">
+              <option value="L">Low (7%)</option>
+              <option value="M">Medium (15%)</option>
+              <option value="Q">Quartile (25%)</option>
+              <option value="H">High (30%)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="qr-foreground" class="block text-sm font-medium text-slate-300 mb-2">Foreground</label>
+            <input id="qr-foreground" x-model="foreground" @input="generate()" type="color" class="w-full h-12 bg-[#090d14] border border-slate-800 rounded-lg p-1 cursor-pointer">
+          </div>
+          <div>
+            <label for="qr-background" class="block text-sm font-medium text-slate-300 mb-2">Background</label>
+            <input id="qr-background" x-model="background" @input="generate()" type="color" class="w-full h-12 bg-[#090d14] border border-slate-800 rounded-lg p-1 cursor-pointer">
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button @click="download()" :disabled="!content.trim() || !ready" class="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition"><i class="fa-solid fa-download mr-2"></i>Download PNG</button>
+          <button @click="clearAll()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-4 py-2.5 rounded-lg transition">Clear</button>
+        </div>
+        <p x-show="error" x-text="error" class="text-sm text-red-400"></p>
+      </div>
+
+      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 shadow-xl flex flex-col items-center justify-center min-h-[420px]">
+        <div class="bg-white p-5 rounded-xl shadow-lg">
+          <canvas id="qr-canvas" width="512" height="512" aria-label="Generated QR code"></canvas>
+        </div>
+        <p x-show="!content.trim()" class="text-sm text-slate-500 mt-4">Enter a URL or text to generate your QR code.</p>
+        <p x-show="content.trim() && ready" class="text-xs text-slate-500 mt-4">Static QR code • generated locally</p>
+      </div>
+    </section>
+
+    <section class="bg-[#0f172a]/60 border border-cyan-900/40 rounded-xl p-5">
+      <h2 class="text-base font-bold text-white mb-3"><i class="fa-solid fa-shield-halved text-cyan-400 mr-2"></i>Private by Design</h2>
+      <p class="text-sm text-slate-400 leading-relaxed">The QR code is generated with JavaScript in your browser. Your URL or text is not submitted to a JunctionTools server. Static QR codes contain the encoded data directly and do not depend on a JunctionTools redirect.</p>
+    </section>
+
+    <section class="bg-[#0f172a]/60 border border-slate-800/80 rounded-xl p-5">
+      <h2 class="text-base font-bold text-white mb-3">How to Create a QR Code</h2>
+      <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed space-y-1">
+        <li>Enter a website URL or any text you want to encode.</li>
+        <li>Choose the image size, error correction, and colors.</li>
+        <li>Download the generated static QR code as a PNG.</li>
+      </ol>
+    </section>
+  </main>
+  <div id="footer-container"></div>
+  <script>
+    function qrGenerator() {
+      return {
+        content: '', size: 512, level: 'M', foreground: '#000000', background: '#ffffff', ready: false, error: '',
+        init() { this.generate(); },
+        generate() {
+          this.error = '';
+          this.ready = false;
+          const canvas = document.getElementById('qr-canvas');
+          if (!canvas || typeof QRCode === 'undefined') { this.error = 'QR generator library could not be loaded.'; return; }
+          canvas.width = this.size;
+          canvas.height = this.size;
+          if (!this.content.trim()) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+          }
+          QRCode.toCanvas(canvas, this.content.trim(), { width: this.size, margin: 2, errorCorrectionLevel: this.level, color: { dark: this.foreground, light: this.background } }, (error) => {
+            if (error) { this.error = 'The content is too large or could not be encoded. Try shorter text.'; return; }
+            this.ready = true;
+          });
+        },
+        download() {
+          const canvas = document.getElementById('qr-canvas');
+          if (!canvas || !this.ready) return;
+          const link = document.createElement('a');
+          link.download = 'junctiontools-qr-code.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        },
+        clearAll() { this.content = ''; this.error = ''; this.ready = false; this.generate(); }
+      };
+    }
+    function loadComponent(id, file) { fetch(file).then(res => res.text()).then(data => { document.getElementById(id).innerHTML = data; }).catch(err => console.error(`Error loading ${file}:`, err)); }
+    loadComponent('header-container', 'header.html');
+    loadComponent('footer-container', 'footer.html');
+  </script>
+</body>
+</html>
