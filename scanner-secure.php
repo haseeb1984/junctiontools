@@ -97,61 +97,90 @@ function jt_domain_from_input(array $input): string
     return strtolower($value);
 }
 
-function jt_text_input(array $input, string $field, string $label, int $maxLength = 50000): string
+function jt_hex_rgb(string $value): ?array
 {
-    $text = trim((string)($input[$field] ?? ''));
-    if (strlen($text) > $maxLength) {
-        jt_json(['success' => false, 'message' => $label . ' is too large.'], 413);
-    }
-    return $text;
+    if (!preg_match('/^#?(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $value)) return null;
+    $h = ltrim($value, '#');
+    if (strlen($h) === 3) $h = $h[0].$h[0].$h[1].$h[1].$h[2].$h[2];
+    return [hexdec(substr($h,0,2)), hexdec(substr($h,2,2)), hexdec(substr($h,4,2))];
+}
+
+function jt_luminance(array $rgb): float
+{
+    $v = array_map(static function ($x) {
+        $x /= 255;
+        return $x <= 0.03928 ? $x / 12.92 : (($x + 0.055) / 1.055) ** 2.4;
+    }, $rgb);
+    return $v[0]*0.2126 + $v[1]*0.7152 + $v[2]*0.0722;
+}
+
+function jt_contrast_ratio(array $a, array $b): float
+{
+    return round((max(jt_luminance($a), jt_luminance($b)) + 0.05) / (min(jt_luminance($a), jt_luminance($b)) + 0.05), 2);
 }
 
 switch ($scanType) {
     case 'trust_inspector':
-        $elements = $input['trust_elements'] ?? [];
-        $count = is_array($elements) ? min(20, count($elements)) : 0;
-        $confidenceIndex = min(100, $count * 25);
+        $url = jt_request_url($input);
+        $result = jt_fetch_html($url);
+        $html = strtolower(strip_tags($result['body']));
+        $signals = [
+            'secure/payment' => preg_match('/\b(secure checkout|secure payment|ssl|encrypted|payment secure|safe checkout)\b/i', $html) === 1,
+            'guarantee' => preg_match('/\b(guarantee|guaranteed|money[- ]back|refund policy)\b/i', $html) === 1,
+            'reviews' => preg_match('/\b(review|reviews|testimonial|testimonials|rating|ratings)\b/i', $html) === 1,
+            'shipping/returns' => preg_match('/\b(free shipping|shipping|returns?|return policy|delivery)\b/i', $html) === 1,
+        ];
+        $count = count(array_filter($signals));
+        $confidenceIndex = $count * 25;
         jt_json([
             'success' => true,
+            'url' => $url,
             'confidenceIndex' => $confidenceIndex,
             'activeElements' => $count,
+            'detectedElements' => array_keys(array_filter($signals)),
             'message' => 'Buyer Confidence Index: <strong>' . $confidenceIndex . '%</strong><br>Active Elements Detected: ' . $count . '/4'
         ]);
 
     case 'copy_analyzer':
-        $text = jt_text_input($input, 'copy_text', 'Copy');
-        $wordCount = str_word_count(strip_tags($text));
-        $charCount = mb_strlen($text);
+        $url = jt_request_url($input);
+        $result = jt_fetch_html($url);
+        $plain = trim(preg_replace('/\s+/', ' ', strip_tags($result['body'])));
+        $wordCount = str_word_count($plain);
+        $charCount = mb_strlen($plain);
         $status = $wordCount >= 50 ? "Good ({$wordCount} words)" : "Too Short ({$wordCount} words - aim for 50+)";
-        jt_json(['success' => true, 'wordCount' => $wordCount, 'characterCount' => $charCount, 'message' => "Word Count: {$status}<br>Character Count: <strong>{$charCount} characters</strong><br>Readability & Copy Strength: <strong>Analyzed Successfully</strong>"]);
+        jt_json(['success' => true, 'url' => $url, 'wordCount' => $wordCount, 'characterCount' => $charCount, 'message' => "Word Count: {$status}<br>Character Count: <strong>{$charCount} characters</strong><br>Readability & Copy Strength: <strong>Analyzed Successfully</strong>"]);
 
     case 'readability_evaluator':
-        $text = jt_text_input($input, 'text_content', 'Text');
-        $plain = strip_tags($text);
+        $url = jt_request_url($input);
+        $result = jt_fetch_html($url);
+        $plain = trim(preg_replace('/\s+/', ' ', strip_tags($result['body'])));
         $words = str_word_count($plain);
         $sentences = max(1, preg_match_all('/[.!?]+/', $plain, $matches));
         $characters = mb_strlen(preg_replace('/\s+/', '', $plain));
         $readingEase = $words > 0 ? max(0, min(100, round(206.835 - (1.015 * ($words / $sentences)) - (84.6 * ($characters / $words)), 1))) : 0;
         $gradeLevel = $readingEase < 50 ? 'Advanced / College Level' : ($readingEase > 80 ? 'Very Easy (5th-6th Grade)' : 'Standard (Easy to Read)');
-        jt_json(['success' => true, 'readingEase' => $readingEase, 'message' => "Reading Ease Score: <strong>{$readingEase} / 100</strong><br>Estimated Level: <strong>{$gradeLevel}</strong><br>Total Words: {$words} | Sentences: {$sentences}"]);
+        jt_json(['success' => true, 'url' => $url, 'readingEase' => $readingEase, 'message' => "Reading Ease Score: <strong>{$readingEase} / 100</strong><br>Estimated Level: <strong>{$gradeLevel}</strong><br>Total Words: {$words} | Sentences: {$sentences}"]);
 
     case 'wcag_checker':
-        $textColor = trim((string)($input['text_color'] ?? '#FFFFFF'));
-        $bgColor = trim((string)($input['bg_color'] ?? '#000000'));
-        $hex = static function (string $value): ?array {
-            if (!preg_match('/^#?(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $value)) return null;
-            $h = ltrim($value, '#');
-            if (strlen($h) === 3) $h = $h[0].$h[0].$h[1].$h[1].$h[2].$h[2];
-            return [hexdec(substr($h,0,2)), hexdec(substr($h,2,2)), hexdec(substr($h,4,2))];
-        };
-        $rgb1 = $hex($textColor); $rgb2 = $hex($bgColor);
-        if (!$rgb1 || !$rgb2) jt_json(['success' => false, 'message' => 'Invalid color value.'], 400);
-        $lum = static function (array $rgb): float {
-            $v = array_map(static function ($x) { $x /= 255; return $x <= 0.03928 ? $x / 12.92 : (($x + 0.055) / 1.055) ** 2.4; }, $rgb);
-            return $v[0]*0.2126 + $v[1]*0.7152 + $v[2]*0.0722;
-        };
-        $ratio = round((max($lum($rgb1), $lum($rgb2)) + 0.05) / (min($lum($rgb1), $lum($rgb2)) + 0.05), 2);
-        jt_json(['success' => true, 'contrastRatio' => $ratio, 'message' => "Contrast Ratio: <strong>{$ratio}:1</strong>"]);
+        $url = jt_request_url($input);
+        $result = jt_fetch_html($url);
+        preg_match_all('/#[0-9a-fA-F]{3,6}\b/', $result['body'], $matches);
+        $colors = [];
+        foreach ($matches[0] as $value) {
+            $normalized = strtoupper($value);
+            if (!in_array($normalized, $colors, true) && jt_hex_rgb($normalized) !== null) $colors[] = $normalized;
+            if (count($colors) >= 20) break;
+        }
+        $pairs = [];
+        for ($i = 0; $i < count($colors); $i++) {
+            for ($j = $i + 1; $j < count($colors); $j++) {
+                $ratio = jt_contrast_ratio(jt_hex_rgb($colors[$i]), jt_hex_rgb($colors[$j]));
+                $pairs[] = ['foreground' => $colors[$i], 'background' => $colors[$j], 'ratio' => $ratio, 'passesAA' => $ratio >= 4.5, 'passesAAA' => $ratio >= 7];
+            }
+        }
+        $bestRatio = null;
+        foreach ($pairs as $pair) $bestRatio = $bestRatio === null ? $pair['ratio'] : max($bestRatio, $pair['ratio']);
+        jt_json(['success'=>true,'url'=>$url,'colorsDetected'=>count($colors),'contrastPairsAnalyzed'=>count($pairs),'bestContrastRatio'=>$bestRatio,'pairs'=>$pairs,'message'=>'Analyzed color values present in the fetched HTML for WCAG contrast. Found '.count($colors).' unique color value(s) and '.count($pairs).' contrast pair(s).']);
 
     case 'aria_audit':
     case 'mobile_audit':
@@ -203,16 +232,8 @@ switch ($scanType) {
     case 'ssl_audit':
         $domain = jt_domain_from_input($input);
         $url = 'https://' . $domain;
-        $result = jt_safe_http_get($url, [
-            'timeout' => 12,
-            'connect_timeout' => 5,
-            'max_bytes' => 256 * 1024,
-            'certificate_info' => true,
-            'user_agent' => 'JunctionTools-SSLChecker/1.0 (+https://junctiontools.com)'
-        ]);
-        if (!$result['success']) {
-            jt_json(['success'=>false,'message'=>$result['message'] ?? 'Unable to establish a verified HTTPS connection.'],422);
-        }
+        $result = jt_safe_http_get($url, ['timeout'=>12,'connect_timeout'=>5,'max_bytes'=>256*1024,'certificate_info'=>true,'user_agent'=>'JunctionTools-SSLChecker/1.0 (+https://junctiontools.com)']);
+        if (!$result['success']) jt_json(['success'=>false,'message'=>$result['message'] ?? 'Unable to establish a verified HTTPS connection.'],422);
         $headers = strtolower((string)($result['headers'] ?? ''));
         $hsts = strpos($headers, 'strict-transport-security') !== false;
         $csp = strpos($headers, 'content-security-policy') !== false;
@@ -222,18 +243,7 @@ switch ($scanType) {
         $expiryDate = (string)($certificate['expires_at'] ?? '');
         $daysRemaining = $certificate['days_remaining'] ?? null;
         $score = 40 + ($hsts?15:0) + ($xFrame?15:0) + 30;
-        jt_json([
-            'success'=>true,
-            'sslValid'=>true,
-            'issuer'=>$issuer !== '' ? $issuer : null,
-            'expiryDate'=>$expiryDate !== '' ? $expiryDate : null,
-            'daysRemaining'=>$daysRemaining,
-            'hsts'=>$hsts,
-            'csp'=>$csp,
-            'xFrame'=>$xFrame,
-            'score'=>$score,
-            'message'=>"Verified HTTPS connection succeeded. Certificate issuer: " . ($issuer !== '' ? $issuer : 'Unavailable') . "; expiry: " . ($expiryDate !== '' ? $expiryDate : 'Unavailable') . "; HSTS: " . ($hsts?'Yes':'No') . "; CSP: " . ($csp?'Yes':'No') . "; X-Frame-Options: " . ($xFrame?'Present':'Missing') . "."
-        ]);
+        jt_json(['success'=>true,'sslValid'=>true,'issuer'=>$issuer!==''?$issuer:null,'expiryDate'=>$expiryDate!==''?$expiryDate:null,'daysRemaining'=>$daysRemaining,'hsts'=>$hsts,'csp'=>$csp,'xFrame'=>$xFrame,'score'=>$score,'message'=>'Verified HTTPS connection succeeded. Certificate issuer: '.($issuer!==''?$issuer:'Unavailable').'; expiry: '.($expiryDate!==''?$expiryDate:'Unavailable').'; HSTS: '.($hsts?'Yes':'No').'; CSP: '.($csp?'Yes':'No').'; X-Frame-Options: '.($xFrame?'Present':'Missing').'.']);
 
     default:
         jt_json(['success'=>false,'message'=>'Unsupported scan type.'],400);
