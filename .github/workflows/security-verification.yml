@@ -117,6 +117,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f tests/run.php
+          test -f tests/compatibility-fixture-suite.php
           test -f tests/bootstrap.php
           test -f tests/router.php
           test -f tests/validate-registry.php
@@ -130,6 +131,7 @@ jobs:
           test -f tests/validate-generation-queue.php
           test -f tools/generate-sitemap.php
           test -d tests/fixtures
+          test -f tests/fixtures/compatibility-page.html
           test -f tests/fixtures/timeout.php
           test -f tests/fixtures/large-response.php
           test -f tests/fixtures/redirect.php
@@ -148,7 +150,7 @@ jobs:
           cat artifacts/php-server.log >&2 || true
           exit 1
       - name: Run 35-tool compatibility suite
-        run: php tests/run.php --suite=compatibility --report=artifacts/35-tool-compatibility.json
+        run: php tests/compatibility-fixture-suite.php
       - name: Run SSL issuer and expiry tests
         run: php tests/run.php --suite=ssl --report=artifacts/ssl.json
       - name: Run SSRF protection tests
@@ -172,7 +174,7 @@ jobs:
             echo "Commit: $GITHUB_SHA"
             echo "Workflow: $GITHUB_WORKFLOW"
             echo "Run: $GITHUB_RUN_ID"
-            echo '- 35-tool compatibility'
+            echo '- 35-tool compatibility using deterministic local fixture'
             echo '- Timestamp Converter static/registry validation'
             echo '- QR Code Generator static/registry validation'
             echo '- Age Calculator static/registry validation'
