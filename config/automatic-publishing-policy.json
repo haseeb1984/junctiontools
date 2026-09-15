@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "mode": "high-confidence-only",
+  "default_decision": "review",
+  "automatic_publish": {
+    "enabled": false,
+    "minimum_score": 90,
+    "requires_generation_eligible": true,
+    "requires_generated_quality": true,
+    "requires_generated_runtime": true,
+    "requires_human_publication_review": true,
+    "requires_registry_validation": true,
+    "requires_sitemap_validation": true,
+    "requires_post_publish_validation": true
+  },
+  "blocked_conditions": [
+    "security_failure",
+    "runtime_failure",
+    "duplicate_tool",
+    "external_network_dependency",
+    "missing_source_evidence",
+    "sensitive_or_regulated_functionality"
+  ],
+  "policy_note": "Phase 9 initially operates as a decision gate. Automatic production publishing remains disabled until the gate has been proven against real deployment artifacts and explicitly enabled."
+}
