@@ -1,0 +1,175 @@
+name: Phase 0 Security Verification
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-0-security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  COMPOSER_CACHE_DIR: ${{ github.workspace }}/.composer-cache
+  JUNCTIONTOOLS_TEST_BASE_URL: http://127.0.0.1:8080
+  JUNCTIONTOOLS_TEST_TIMEOUT: '12'
+  JUNCTIONTOOLS_TEST_CONNECT_TIMEOUT: '5'
+  JUNCTIONTOOLS_TEST_MAX_BYTES: '2097152'
+
+jobs:
+  php-static:
+    name: PHP syntax and Composer validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: curl, dom, mbstring, openssl, pdo, pdo_mysql
+          coverage: none
+          tools: composer:v2
+      - name: Cache Composer downloads
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.COMPOSER_CACHE_DIR }}
+          key: composer-${{ runner.os }}-php8.2-${{ hashFiles('composer.lock', 'composer.json') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php8.2-
+      - name: Validate Composer configuration
+        run: composer validate --strict
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+      - name: PHP syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' PHP_FILES < <(find . -path './vendor' -prune -o -path './.git' -prune -o -name '*.php' -print0)
+          if [ "${#PHP_FILES[@]}" -eq 0 ]; then echo 'No PHP files found.' >&2; exit 1; fi
+          for file in "${PHP_FILES[@]}"; do php -l "${file}"; done
+      - name: Upload static verification artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-0-static-verification
+          path: .
+          retention-days: 14
+          if-no-files-found: ignore
+
+  security-suite:
+    name: Compatibility and security integration suite
+    runs-on: ubuntu-latest
+    needs: php-static
+    timeout-minutes: 20
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: curl, dom, mbstring, openssl, pdo, pdo_mysql
+          coverage: none
+          tools: composer:v2
+      - name: Restore Composer cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.COMPOSER_CACHE_DIR }}
+          key: composer-${{ runner.os }}-php8.2-${{ hashFiles('composer.lock', 'composer.json') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php8.2-
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+      - name: Verify test suite and committed fixtures exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tests/run.php
+          test -f tests/bootstrap.php
+          test -f tests/router.php
+          test -d tests/fixtures
+          test -f tests/fixtures/timeout.php
+          test -f tests/fixtures/large-response.php
+          test -f tests/fixtures/redirect.php
+          test -f tests/fixtures/ssrf-target.php
+      - name: Start local PHP server with committed fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          php -S 127.0.0.1:8080 tests/router.php > artifacts/php-server.log 2>&1 &
+          echo $! > artifacts/php-server.pid
+          for attempt in {1..20}; do
+            if curl --fail --silent --show-error "$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/timeout.php?delay=0" >/dev/null 2>&1; then exit 0; fi
+            sleep 0.5
+          done
+          cat artifacts/php-server.log >&2 || true
+          exit 1
+      - name: Run 35-tool compatibility suite
+        run: php tests/run.php --suite=compatibility --report=artifacts/35-tool-compatibility.json
+      - name: Run SSL issuer and expiry tests
+        run: php tests/run.php --suite=ssl --report=artifacts/ssl.json
+      - name: Run SSRF protection tests
+        run: php tests/run.php --suite=ssrf --report=artifacts/ssrf.json
+      - name: Run redirect-blocking tests
+        run: php tests/run.php --suite=redirects --report=artifacts/redirects.json
+      - name: Run timeout and response-size tests
+        run: php tests/run.php --suite=limits --report=artifacts/limits.json --slow-url="$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/timeout.php?delay=10" --large-url="$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/large-response.php?bytes=3145728"
+      - name: Run rate-limit tests
+        run: php tests/run.php --suite=rate-limit --report=artifacts/rate-limit.json
+      - name: Run HTTP method and security-header tests
+        run: php tests/run.php --suite=http-security --report=artifacts/http-security.json
+      - name: Build consolidated test summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          {
+            echo '# JunctionTools Phase 0 Security Verification'
+            echo "Commit: $GITHUB_SHA"
+            echo "Workflow: $GITHUB_WORKFLOW"
+            echo "Run: $GITHUB_RUN_ID"
+            echo '- 35-tool compatibility'
+            echo '- SSL issuer / expiry / days remaining'
+            echo '- SSRF / private IP / metadata / IPv6'
+            echo '- Redirect blocking'
+            echo '- Timeout / response-size / request-size limits'
+            echo '- Rate limiting'
+            echo '- HTTP methods / security headers'
+            echo 'Manual: contact form validation, DB insertion, SMTP/email delivery'
+          } > artifacts/summary.md
+      - name: Upload security-suite artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-0-security-verification-${{ github.run_id }}
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Stop local PHP server
+        if: always()
+        run: if [ -f artifacts/php-server.pid ]; then kill "$(cat artifacts/php-server.pid)" 2>/dev/null || true; fi
+
+  final-gate:
+    name: Phase 0 verification gate
+    runs-on: ubuntu-latest
+    needs: [php-static, security-suite]
+    if: always()
+    steps:
+      - name: Require all Phase 0 checks to pass
+        run: |
+          set -euo pipefail
+          if [ "${{ needs.php-static.result }}" != 'success' ]; then echo 'PHP/static verification failed.' >&2; exit 1; fi
+          if [ "${{ needs.security-suite.result }}" != 'success' ]; then echo 'Security/compatibility verification failed.' >&2; exit 1; fi
+          echo 'Phase 0 verification gate: PASS'
