@@ -36,7 +36,7 @@ function jt_parse_certificate_info(array $certInfo): array
         if ($issuer === '' && preg_match('/^Issuer\s*:\s*(.+)$/i', $line, $m)) {
             $issuer = trim($m[1]);
         }
-        if ($expiresAt === '' && preg_match('/^(?:Expire date|Not After)\s*:\s*(.+)$/i', $line, $m)) {
+        if ($expiresAt === '' && preg_match('/^(?:Expire date|Not After|validTo)\s*:\s*(.+)$/i', $line, $m)) {
             $expiresAt = trim($m[1]);
         }
 
@@ -56,8 +56,27 @@ function jt_parse_certificate_info(array $certInfo): array
                         }
                         $issuer = implode(', ', $issuerParts);
                     }
-                    if (isset($parsed['validTo_time']) && is_int($parsed['validTo_time'])) {
-                        $expiresTimestamp = $parsed['validTo_time'];
+
+                    // OpenSSL normally exposes validTo_time, but some builds
+                    // return it as a numeric string. Accept either form.
+                    $validToTime = $parsed['validTo_time'] ?? null;
+                    if (is_int($validToTime) || (is_string($validToTime) && ctype_digit($validToTime))) {
+                        $expiresTimestamp = (int)$validToTime;
+                    }
+
+                    if ($expiresTimestamp === null) {
+                        $validTo = $parsed['validTo'] ?? null;
+                        if (is_string($validTo) && trim($validTo) !== '') {
+                            try {
+                                $date = new DateTimeImmutable($validTo);
+                                $expiresTimestamp = $date->getTimestamp();
+                            } catch (Throwable $e) {
+                                // Fall through to textual cURL metadata.
+                            }
+                        }
+                    }
+
+                    if ($expiresTimestamp !== null) {
                         $expiresAt = gmdate('D, d M Y H:i:s T', $expiresTimestamp);
                     }
                 }
