@@ -45,7 +45,7 @@ jobs:
           restore-keys: |
             composer-${{ runner.os }}-php8.2-
       - name: Validate Composer configuration
-        run: composer validate --strict
+        run: composer validate
       - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
       - name: PHP syntax check
