@@ -17,7 +17,8 @@ if(count($files)!==2){fwrite(STDERR,"Expected 2 generated artifacts, found ".cou
 foreach($files as $file){
   $html=(string)file_get_contents($file);
   if(substr_count($html,'<html')!==1 || substr_count($html,'<script')<2){fwrite(STDERR,"Invalid document structure: {$file}\n");exit(1);}
-  if(preg_match('/<script[^>]+src=(?!["\']https:\/\/(?:cdn\.tailwindcss\.com|cdn\.jsdelivr\.net)\/)[^>]*>/i',$html)){fwrite(STDERR,"Unexpected external script detected.\n");exit(1);}
+  // Only the site's declared browser-side CDN dependencies are permitted.
+  if(preg_match('/<script[^>]+src=["\'](?!https:\/\/(?:cdn\.tailwindcss\.com(?:\/|["\'])|cdn\.jsdelivr\.net(?:\/|["\'])))/i',$html)){fwrite(STDERR,"Unexpected external script detected.\n");exit(1);}
   foreach(['eval(','new Function(','document.write(','innerHTML =','fetch(','XMLHttpRequest','WebSocket(','localStorage','sessionStorage','cookie','formaction='] as $needle){if(stripos($html,$needle)!==false){fwrite(STDERR,"Unsafe runtime pattern {$needle} in {$file}.\n");exit(1);}}
   if(preg_match('/<(?:iframe|frame|source|video|audio)\b[^>]+src=["\'](?:https?:|\/\/)/i',$html)){fwrite(STDERR,"External network resource detected.\n");exit(1);}
   if(preg_match('/<img\b[^>]+src=["\'](?:https?:|\/\/)/i',$html)){fwrite(STDERR,"External image resource detected.\n");exit(1);}
@@ -25,7 +26,6 @@ foreach($files as $file){
   if(strpos($html,'https://junctiontools.com/')===false || preg_match('/rel="canonical"[^>]+href="[^"]+\.html/i',$html)){fwrite(STDERR,"Clean canonical URL contract failed.\n");exit(1);}
   $titlePos=strpos($html,'<h1');$howPos=strpos($html,'How to Use');$formPos=strpos($html,'<form');$toolSectionPos=strpos($html,'id="run"');
   if($titlePos===false||$howPos===false||($formPos!==false&&$howPos>$formPos)||($toolSectionPos!==false&&$howPos>$toolSectionPos)){fwrite(STDERR,"How to Use is not before the tool form/action.\n");exit(1);}
-  // Generated pages use the site's shared header/footer component containers.
   if(strpos($html,'id="header-container"')===false||strpos($html,'id="footer-container"')===false||strpos($html,'max-w-4xl')===false){fwrite(STDERR,"Shared JunctionTools layout markers missing.\n");exit(1);}
   if(strpos($html,'aria-live="polite"')===false && strpos($html,'<output')===false){fwrite(STDERR,"No accessible result region.\n");exit(1);}
 }
