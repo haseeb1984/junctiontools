@@ -9,15 +9,18 @@ require_once __DIR__ . '/url-validator.php';
 
 function jt_parse_certificate_info(array $certInfo): array
 {
+    if ($certInfo === []) {
+        return [];
+    }
+
     $issuer = '';
     $expiresAt = '';
     $expiresTimestamp = null;
 
-    // CURLOPT_CERTINFO normally returns one array per certificate in the
-    // verified chain. Be tolerant of the exact nested representation returned
-    // by different libcurl/OpenSSL builds while only consuming text supplied by
-    // cURL for this already-verified connection.
-    $scan = static function ($value) use (&$scan, &$issuer, &$expiresAt): void {
+    // Prefer parsing the PEM certificate supplied by cURL. This is still the
+    // certificate from the same TLS-verified cURL connection and is more
+    // reliable across libcurl/OpenSSL builds than textual field formatting.
+    $scan = static function ($value) use (&$scan, &$issuer, &$expiresAt, &$expiresTimestamp): void {
         if (is_array($value)) {
             foreach ($value as $item) {
                 $scan($item);
@@ -36,11 +39,36 @@ function jt_parse_certificate_info(array $certInfo): array
         if ($expiresAt === '' && preg_match('/^(?:Expire date|Not After)\s*:\s*(.+)$/i', $line, $m)) {
             $expiresAt = trim($m[1]);
         }
+
+        if ($expiresTimestamp === null && preg_match('/-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----/s', $value, $m)) {
+            $certificate = @openssl_x509_read($m[0]);
+            if ($certificate !== false) {
+                $parsed = @openssl_x509_parse($certificate);
+                if (is_array($parsed)) {
+                    $parsedIssuer = $parsed['issuer'] ?? [];
+                    if ($issuer === '' && is_array($parsedIssuer)) {
+                        $issuerParts = [];
+                        foreach ($parsedIssuer as $key => $part) {
+                            if (is_array($part)) {
+                                $part = implode(', ', array_map('strval', $part));
+                            }
+                            $issuerParts[] = $key . '=' . (string)$part;
+                        }
+                        $issuer = implode(', ', $issuerParts);
+                    }
+                    if (isset($parsed['validTo_time']) && is_int($parsed['validTo_time'])) {
+                        $expiresTimestamp = $parsed['validTo_time'];
+                        $expiresAt = gmdate('D, d M Y H:i:s T', $expiresTimestamp);
+                    }
+                }
+                @openssl_x509_free($certificate);
+            }
+        }
     };
 
     $scan($certInfo);
 
-    if ($expiresAt !== '') {
+    if ($expiresTimestamp === null && $expiresAt !== '') {
         try {
             $date = new DateTimeImmutable($expiresAt);
             $expiresTimestamp = $date->getTimestamp();
@@ -54,8 +82,10 @@ function jt_parse_certificate_info(array $certInfo): array
         $daysRemaining = (int)floor(($expiresTimestamp - time()) / 86400);
     }
 
-    // Public names match the test/API contract; snake_case aliases preserve
-    // compatibility for callers that use conventional PHP field naming.
+    if ($issuer === '' && $expiresAt === '' && $daysRemaining === null) {
+        return [];
+    }
+
     return [
         'issuer' => $issuer,
         'expires' => $expiresAt,
