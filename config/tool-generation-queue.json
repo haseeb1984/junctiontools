@@ -24,13 +24,13 @@
         "unix-timestamp-to-date",
         "date-to-unix-timestamp"
       ],
-      "rationale": "A focused utility with a reported 48K search-demand signal and low implementation complexity is a strong next build."
+      "rationale": "A focused utility with a reported 48K search-demand signal and low implementation complexity is a strong build."
     },
     {
       "rank": 2,
       "cluster_id": "qr-code",
       "core_query": "qr code generator",
-      "decision": "research",
+      "decision": "build",
       "priority_score": 76,
       "demand_signal": 783000,
       "signal_count": 2,
@@ -42,7 +42,7 @@
         "generate-qr-code-free",
         "qr-code-maker"
       ],
-      "rationale": "Demand is exceptionally strong, but the evidence explicitly indicates entrenched competition; validate differentiation and SERP feasibility before implementation."
+      "rationale": "Two source-reported US demand signals total 783K, while current competitors emphasize no-signup, no-watermark, privacy-first, styling, and export features. JunctionTools can differentiate with a simple browser-only static generator, no account, no server upload, and PNG download."
     }
   ],
   "enhancements": [
