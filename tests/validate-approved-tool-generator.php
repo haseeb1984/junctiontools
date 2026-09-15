@@ -7,15 +7,16 @@ $dir=sys_get_temp_dir().'/jt-generated-'.bin2hex(random_bytes(4)); mkdir($dir,07
 $spec=tempnam(sys_get_temp_dir(),'jt-spec-'); $approval=tempnam(sys_get_temp_dir(),'jt-approval-');
 file_put_contents($spec,json_encode(['specifications'=>[[
  'spec_status'=>'draft','generation_eligible'=>false,
- 'seo'=>['description'=>'Free age calculator.'],
- 'tool'=>['name'=>'Age Calculator','slug'=>'age-calculator']
+ 'seo'=>['description'=>'Free age calculator.','title'=>'Age Calculator | Free Online Tool | JunctionTools'],
+ 'tool'=>['name'=>'Age Calculator','slug'=>'age-calculator','implementation_template'=>'date-age-calculator'],
+ 'inputs'=>['fields'=>[['name'=>'birth_date','type'=>'date'],['name'=>'as_of_date','type'=>'date']]]
 ]]],JSON_PRETTY_PRINT));
 file_put_contents($approval,json_encode(['approvals'=>[['slug'=>'age-calculator','approved'=>true,'approved_by'=>'ci-test','approved_at'=>'2026-09-15T00:00:00Z']]],JSON_PRETTY_PRINT));
 $cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($dir); exec($cmd,$lines,$status);
 $file=$dir.'/age-calculator.html';
 if($status!==0 || !is_file($file)){fwrite(STDERR,"Approved generation failed.\n");exit(1);}
 $html=(string)file_get_contents($file);
-foreach(['<title>Age Calculator | Free Online Tool | JunctionTools</title>','<link rel="canonical" href="https://junctiontools.com/age-calculator">','Date of Birth','Calculate Age On','ageCalculator()'] as $needle){if(strpos($html,$needle)===false){fwrite(STDERR,"Generated page missing: {$needle}\n");exit(1);}}
+foreach(['<title>Age Calculator | Free Online Tool | JunctionTools</title>','<link rel="canonical" href="https://junctiontools.com/age-calculator">','Date of Birth','Calculate Age On','id="birth_date"','id="as_of_date"'] as $needle){if(strpos($html,$needle)===false){fwrite(STDERR,"Generated page missing: {$needle}\n");exit(1);}}
 foreach(['eval(','fetch(','XMLHttpRequest','<script src='] as $forbidden){if(stripos($html,$forbidden)!==false){fwrite(STDERR,"Forbidden generated pattern: {$forbidden}\n");exit(1);}}
 $empty=tempnam(sys_get_temp_dir(),'jt-empty-'); file_put_contents($empty,json_encode(['approvals'=>[]])); $emptyDir=$dir.'/empty'; mkdir($emptyDir);
 $cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($empty).' '.escapeshellarg($emptyDir); exec($cmd,$lines2,$status2);
