@@ -2,9 +2,11 @@
 
 ## Verification status
 
-**Static verification: PASS WITH ONE REMAINING PARITY GAP.**
+**Static verification: PASS.**
 
-Public `scanner.php` requests now route to `scanner-compat.php`. The shim preserves the legacy local contracts for Pixel Diagnostic, Checkout Funnel, Cart Abandonment, and Schema Validator while delegating all other scanner types to the hardened `scanner-secure.php` implementation. Outbound requests in the shim use the same SSRF-safe HTTP client with TLS verification, redirects disabled, timeouts, and response-size limits.
+Public `scanner.php` requests now route to `scanner-compat.php`. The shim preserves the legacy local contracts for Pixel Diagnostic, Checkout Funnel, Cart Abandonment, and Schema Validator while delegating all other scanner types to the hardened `scanner-secure.php` implementation. Outbound requests use the SSRF-safe HTTP client with TLS verification, redirects disabled, timeouts, response-size limits, and DNS/private-address validation.
+
+The SSL Checker now obtains certificate issuer and expiry metadata from the same TLS-verified cURL connection using `CURLOPT_CERTINFO`. No second raw socket or unrestricted DNS operation is used, preserving the SSRF boundary.
 
 This is source/static verification only. No runtime/CI test is being claimed because the PR head has no registered status checks.
 
@@ -27,7 +29,7 @@ This is source/static verification only. No runtime/CI test is being claimed bec
 | 13 | Cart Loss Calculator | `cart_abandonment` | **PASS** | Local calculation handled before any outbound request. |
 | 14 | CTA & Headline Analyzer | `cta_analyzer` | **PASS** | Existing `score`/`message` contract preserved. |
 | 15 | Trust Badge Inspector | `trust_inspector` | **PASS** | Existing contract preserved. |
-| 16 | SSL & Security Checker | `ssl_audit` | **PARTIAL** | UI works and HTTPS/header checks are hardened, but certificate issuer/expiry parity is not restored; `daysRemaining` remains unavailable. |
+| 16 | SSL & Security Checker | `ssl_audit` | **PASS** | Certificate issuer, expiry date, and `daysRemaining` are restored through the SSRF-safe cURL/TLS connection; no raw socket fallback. |
 | 17 | Invoice Generator | Client-side | N/A | No scanner dependency. |
 | 18 | Discount Calculator | Client-side | N/A | No scanner dependency. |
 | 19 | Aspect Ratio Calculator | Client-side | N/A | No scanner dependency. |
@@ -50,11 +52,19 @@ This is source/static verification only. No runtime/CI test is being claimed bec
 
 ## Current result
 
-- **34/35 tools:** PASS or N/A.
-- **1/35:** PARTIAL — SSL Checker certificate metadata parity.
+- **35/35 tools:** PASS or N/A.
+- **0/35:** PARTIAL.
 - **Previous four compatibility blockers:** resolved by `scanner-compat.php`.
+- **SSL parity:** issuer, expiry date, and remaining-days metadata restored.
 - **Security posture:** preserved; public scanner requests no longer execute the legacy monolithic outbound-fetch implementation.
 
-## Remaining decision
+## Static verification notes
 
-SSL certificate issuer/expiry metadata can be restored only with a carefully bounded certificate inspection implementation. Do not reintroduce the legacy unrestricted socket behavior. Until that parity decision is completed, keep PR #1 in draft/hold status.
+- URL validation remains the first boundary for all outbound requests.
+- HTTPS certificate metadata is collected only when explicitly requested by `certificate_info => true`.
+- Certificate metadata comes from the same cURL handle that performed the verified HTTPS request.
+- Redirects remain disabled.
+- TLS peer and hostname verification remain enabled.
+- No unrestricted `stream_socket_client` or raw certificate socket fallback was introduced.
+- Certificate parsing failures degrade metadata to unavailable values rather than weakening TLS validation.
+- Runtime/CI execution is still not claimed; PR #1 currently has no registered status checks.
