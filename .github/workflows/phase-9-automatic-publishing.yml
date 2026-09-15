@@ -18,19 +18,29 @@ jobs:
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          coverage: none
       - name: PHP syntax checks
         run: |
           php -l tools/evaluate-automatic-publishing.php
           php -l tests/validate-automatic-publishing.php
+          php -l tests/validate-phase9-deployment-integration.php
       - name: Validate automatic publishing gate
         run: php tests/validate-automatic-publishing.php
+      - name: Validate Phase 9 deployment-plan integration
+        run: php tests/validate-phase9-deployment-integration.php
       - name: Verify policy is deny-by-default
+        shell: bash
         run: |
-          php -r '$p=json_decode(file_get_contents("config/automatic-publishing-policy.json"),true); if(($p["automatic_publish"]["enabled"]??true)!==false) exit(1); if(($p["default_decision"]??"")!=="review") exit(1); echo "Policy is deny-by-default.\n";'
+          set -euo pipefail
+          php -r '$p=json_decode(file_get_contents("config/automatic-publishing-policy.json"), true); if (($p["default_decision"] ?? null) !== "review" || ($p["automatic_publish"]["enabled"] ?? true) !== false) exit(1); echo "Automatic publishing policy: PASS\n";'
       - name: Verify no secrets are committed
+        shell: bash
         run: |
-          ! grep -RniE 'client_secret|refresh_token|authorization: bearer|developer_token' tools config --exclude-dir=.git
+          set -euo pipefail
+          ! grep -RniE 'client_secret|refresh_token|authorization: bearer|developer_token' tools config tests --exclude-dir=.git
