@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "review_type": "existing-tool-enhancement-publication",
+  "status": "pending-human-review",
+  "policy": {
+    "default_decision": "reject-until-explicitly-approved",
+    "automatic_publication_allowed": false,
+    "registry_or_sitemap_modification_allowed": false,
+    "production_publish_allowed": false
+  },
+  "enhancement": {
+    "cluster_id": "image-resizing",
+    "target_tool_slug": "image-compressor",
+    "target_tool_name": "Image Compressor",
+    "scope": "implementation-and-validation-only",
+    "user_approval": "approved-for-implementation-and-validation",
+    "approval_source": "user-explicit-approval"
+  },
+  "validation": {
+    "implementation_validation": "passed",
+    "phase_10_ci_run": "35015447353",
+    "approved_enhancement_validation": "passed",
+    "deployment_plan_validation": "passed",
+    "runtime_validation_required": true,
+    "production_publish_gate": "not-approved"
+  },
+  "quality_review": {
+    "functionality": "pending-human-review",
+    "ux_and_accessibility": "pending-human-review",
+    "seo_metadata_and_canonical": "pending-human-review",
+    "privacy_and_client_side_processing": "pending-human-review",
+    "browser_compatibility": "pending-human-review",
+    "performance": "pending-human-review",
+    "external_dependency_review": "pending-human-review",
+    "security_regression_review": "pending-human-review",
+    "rollback_readiness": "pending-human-review"
+  },
+  "deployment_impact": {
+    "registry_update_required": false,
+    "sitemap_update_required": false,
+    "new_url_required": false,
+    "existing_tool_url": "https://junctiontools.com/image-compressor"
+  },
+  "post_publication_checks": [
+    "verify production page loads successfully",
+    "verify compression and resize flows",
+    "verify supported output formats",
+    "verify download behavior",
+    "verify canonical and metadata",
+    "verify no console/runtime errors",
+    "verify registry and sitemap remain consistent"
+  ],
+  "human_decision": {
+    "decision": "pending",
+    "reviewer": null,
+    "reviewed_at": null,
+    "notes": null
+  }
+}
