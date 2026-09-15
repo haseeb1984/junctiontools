@@ -13,22 +13,32 @@ function jt_parse_certificate_info(array $certInfo): array
     $expiresAt = '';
     $expiresTimestamp = null;
 
-    // CURLOPT_CERTINFO returns one array per certificate in the verified chain.
-    // The first certificate is the peer certificate we want to report.
-    $peer = $certInfo[0] ?? [];
-    if (is_array($peer)) {
-        foreach ($peer as $line) {
-            if (!is_string($line)) {
-                continue;
+    // CURLOPT_CERTINFO normally returns one array per certificate in the
+    // verified chain. Be tolerant of the exact nested representation returned
+    // by different libcurl/OpenSSL builds while only consuming text supplied by
+    // cURL for this already-verified connection.
+    $scan = static function ($value) use (&$scan, &$issuer, &$expiresAt): void {
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                $scan($item);
             }
-            if ($issuer === '' && stripos($line, 'Issuer:') === 0) {
-                $issuer = trim(substr($line, strlen('Issuer:')));
-            }
-            if ($expiresAt === '' && stripos($line, 'Expire date:') === 0) {
-                $expiresAt = trim(substr($line, strlen('Expire date:')));
-            }
+            return;
         }
-    }
+
+        if (!is_string($value)) {
+            return;
+        }
+
+        $line = trim($value);
+        if ($issuer === '' && preg_match('/^Issuer\s*:\s*(.+)$/i', $line, $m)) {
+            $issuer = trim($m[1]);
+        }
+        if ($expiresAt === '' && preg_match('/^(?:Expire date|Not After)\s*:\s*(.+)$/i', $line, $m)) {
+            $expiresAt = trim($m[1]);
+        }
+    };
+
+    $scan($certInfo);
 
     if ($expiresAt !== '') {
         try {
@@ -44,8 +54,12 @@ function jt_parse_certificate_info(array $certInfo): array
         $daysRemaining = (int)floor(($expiresTimestamp - time()) / 86400);
     }
 
+    // Public names match the test/API contract; snake_case aliases preserve
+    // compatibility for callers that use conventional PHP field naming.
     return [
         'issuer' => $issuer,
+        'expires' => $expiresAt,
+        'daysRemaining' => $daysRemaining,
         'expires_at' => $expiresAt,
         'expires_timestamp' => $expiresTimestamp,
         'days_remaining' => $daysRemaining,
