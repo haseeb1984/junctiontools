@@ -1,0 +1,39 @@
+name: Phase 7 Approval Gate Validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [phase-3/search-demand-discovery, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  approval-gate:
+    name: Deployment approval gate validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Validate deployment-plan compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/build-deployment-plan.php
+          php -l tests/validate-deployment-plan.php
+          php tests/validate-deployment-plan.php
+      - name: Verify publication remains deny-by-default
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -r '$p=json_decode(file_get_contents("config/tool-generation-approvals.json"), true); if (($p["policy"]["default"] ?? null) !== "deny" || ($p["policy"]["publication_requires_separate_review"] ?? null) !== true) exit(1); echo "Approval policy: PASS\n";'
