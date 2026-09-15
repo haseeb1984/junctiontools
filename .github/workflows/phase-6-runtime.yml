@@ -1,0 +1,51 @@
+name: Phase 6 Generated Runtime Validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [phase-3/search-demand-discovery, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generated-runtime:
+    name: Generated tool runtime sandbox validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Verify Phase 6 runtime harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tests/validate-generated-runtime.php
+          test -f tools/generate-approved-tools.php
+          php -l tests/validate-generated-runtime.php
+          php -l tools/generate-approved-tools.php
+      - name: Run generated runtime sandbox validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/junctiontools-runtime"
+          ulimit -t 10
+          ulimit -f 4096
+          php tests/validate-generated-runtime.php
+      - name: Verify no generated artifacts leaked into repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -d generated-tools
+          test ! -d generated
+          git status --short
+          test -z "$(git status --short)"
