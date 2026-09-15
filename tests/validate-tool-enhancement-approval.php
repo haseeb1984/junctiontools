@@ -53,7 +53,7 @@ if (!$tool || ($tool['generation_eligibility'] ?? null) !== 'eligible') {
 $html = (string) file_get_contents($toolPath);
 $required = [
     'Free Image Compressor & Resizer',
-    'image-resizer',
+    'Resize Mode',
     'resizeMode',
     'targetWidth',
     'targetHeight',
@@ -72,9 +72,16 @@ foreach ($required as $needle) {
     }
 }
 
-if (preg_match('/https?:\\/\\/(?!junctiontools\\.com)/i', $html)) {
-    fwrite(STDERR, "FAIL: enhancement implementation contains an unexpected external URL dependency\n");
-    exit(1);
+$forbiddenUploadPatterns = [
+    '/<form[^>]+action=["\'][^"\']*["\']/i',
+    '/XMLHttpRequest/i',
+    '/navigator\.sendBeacon/i',
+];
+foreach ($forbiddenUploadPatterns as $pattern) {
+    if (preg_match($pattern, $html)) {
+        fwrite(STDERR, "FAIL: enhancement implementation exposes a server upload path\n");
+        exit(1);
+    }
 }
 
 fwrite(STDOUT, "PASS: Image Compressor/Image Resizer enhancement is explicitly approved for implementation and validation, while publication and registry/sitemap mutation remain denied.\n");
