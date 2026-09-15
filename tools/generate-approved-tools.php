@@ -1,87 +1,30 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Generate executable tool pages only for explicitly approved specifications.
- * This step never changes the active registry or sitemap and never publishes.
- */
-if ($argc < 3) {
-    fwrite(STDERR, "Usage: php tools/generate-approved-tools.php <specs.json> <approvals.json> [output-dir]\n");
-    exit(2);
-}
-$specFile = $argv[1];
-$approvalFile = $argv[2];
-$outputDir = $argv[3] ?? dirname(__DIR__) . '/generated-tools';
-if (!is_file($specFile) || !is_file($approvalFile)) { fwrite(STDERR, "Input file missing.\n"); exit(1); }
-$specs = json_decode((string)file_get_contents($specFile), true);
-$approvals = json_decode((string)file_get_contents($approvalFile), true);
-if (!is_array($specs) || !is_array($specs['specifications'] ?? null) || !is_array($approvals) || !is_array($approvals['approvals'] ?? null)) { fwrite(STDERR, "Invalid generator input.\n"); exit(1); }
-
-$approved = [];
-foreach ($approvals['approvals'] as $item) {
-    if (!is_array($item)) continue;
-    $slug = strtolower(trim((string)($item['slug'] ?? '')));
-    if ($slug !== '' && ($item['approved'] ?? false) === true) $approved[$slug] = $item;
-}
-if (!is_dir($outputDir) && !mkdir($outputDir, 0775, true) && !is_dir($outputDir)) { fwrite(STDERR, "Unable to create output directory.\n"); exit(1); }
-
-function html_shell(string $slug, string $title, string $description, string $body, string $script): string {
-    return "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>" . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "</title>\n<meta name=\"description\" content=\"" . htmlspecialchars($description, ENT_QUOTES, 'UTF-8') . "\">\n<link rel=\"canonical\" href=\"https://junctiontools.com/" . htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') . "\">\n</head>\n<body>\n<main>\n" . $body . "\n</main>\n<script>\n" . $script . "\n</script>\n</body>\n</html>\n";
-}
-
-$generated = 0;
-foreach ($specs['specifications'] as $spec) {
-    if (!is_array($spec)) continue;
-    $tool = $spec['tool'] ?? [];
-    $slug = strtolower(trim((string)($tool['slug'] ?? '')));
-    if ($slug === '' || !isset($approved[$slug])) continue;
-    if (($spec['spec_status'] ?? '') !== 'draft' || ($spec['generation_eligible'] ?? true) !== false) { fwrite(STDERR, "Refusing non-draft or generation-authorized spec: {$slug}\n"); exit(1); }
-
-    $name = (string)($tool['name'] ?? ucwords(str_replace('-', ' ', $slug)));
-    $description = (string)($spec['seo']['description'] ?? ('Free ' . $name . ' tool.'));
-    $title = $name . ' | Free Online Tool | JunctionTools';
-
-    if ($slug === 'age-calculator') {
-        $body = '<h1>Age Calculator</h1><p>Calculate exact age in years, months and days.</p><label for="birthDate">Date of Birth</label><input id="birthDate" type="date"><label for="asOfDate">Calculate Age On</label><input id="asOfDate" type="date"><button id="calculate" type="button">Calculate Age</button><button id="reset" type="button">Reset</button><section id="result" aria-live="polite"></section>';
-        $script = <<<'JS'
-(() => {
-  const birth = document.getElementById('birthDate');
-  const asOf = document.getElementById('asOfDate');
-  const result = document.getElementById('result');
-  asOf.value = new Date().toISOString().slice(0, 10);
-  function ageCalculator() {
-    result.textContent = '';
-    if (!birth.value || !asOf.value) { result.textContent = 'Please select both dates.'; return; }
-    const b = new Date(birth.value + 'T00:00:00');
-    const a = new Date(asOf.value + 'T00:00:00');
-    if (Number.isNaN(b.getTime()) || Number.isNaN(a.getTime())) { result.textContent = 'Please enter valid dates.'; return; }
-    if (b > a) { result.textContent = 'Date of birth cannot be after the calculation date.'; return; }
-    let years = a.getFullYear() - b.getFullYear();
-    let months = a.getMonth() - b.getMonth();
-    let days = a.getDate() - b.getDate();
-    if (days < 0) { months--; const previousMonth = new Date(a.getFullYear(), a.getMonth(), 0); days += previousMonth.getDate(); }
-    if (months < 0) { years--; months += 12; }
-    const totalDays = Math.floor((Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) - Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) / 86400000);
-    result.textContent = `${years} years, ${months} months, ${days} days (${totalDays} total days).`;
-  }
-  document.getElementById('calculate').addEventListener('click', ageCalculator);
-  document.getElementById('reset').addEventListener('click', () => { birth.value = ''; asOf.value = new Date().toISOString().slice(0, 10); result.textContent = ''; });
-})();
+/** Generate executable pages only for explicitly approved draft specifications. */
+if($argc<3){fwrite(STDERR,"Usage: php tools/generate-approved-tools.php <specs.json> <approvals.json> [output-dir]\n");exit(2);}
+$specFile=$argv[1];$approvalFile=$argv[2];$outputDir=$argv[3]??dirname(__DIR__).'/generated-tools';
+if(!is_file($specFile)||!is_file($approvalFile)){fwrite(STDERR,"Input file missing.\n");exit(1);}
+$specs=json_decode((string)file_get_contents($specFile),true);$approvals=json_decode((string)file_get_contents($approvalFile),true);
+if(!is_array($specs)||!is_array($specs['specifications']??null)||!is_array($approvals)||!is_array($approvals['approvals']??null)){fwrite(STDERR,"Invalid generator input.\n");exit(1);}
+$approved=[];foreach($approvals['approvals'] as $item){if(!is_array($item))continue;$slug=strtolower(trim((string)($item['slug']??'')));if($slug!==''&&($item['approved']??false)===true)$approved[$slug]=true;}
+if(!is_dir($outputDir)&&!mkdir($outputDir,0775,true)&&!is_dir($outputDir)){fwrite(STDERR,"Unable to create output directory.\n");exit(1);}
+function html_shell(string $slug,string $title,string $description,string $body,string $script):string{return "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>".htmlspecialchars($title,ENT_QUOTES,'UTF-8')."</title>\n<meta name=\"description\" content=\"".htmlspecialchars($description,ENT_QUOTES,'UTF-8')."\">\n<link rel=\"canonical\" href=\"https://junctiontools.com/".htmlspecialchars($slug,ENT_QUOTES,'UTF-8')."\">\n</head>\n<body>\n<main>\n".$body."\n</main>\n<script>\n".$script."\n</script>\n</body>\n</html>\n";}
+function jsName(string $name):string{return preg_replace('/[^A-Za-z0-9_]/','_',trim($name))?:'input';}
+function renderFields(array $fields):string{$html='';foreach($fields as $field){if(!is_array($field))continue;$name=jsName((string)($field['name']??'input'));$label=ucwords(str_replace('_',' ',strtolower($name)));$type=(string)($field['type']??'text');if($type==='date')$input='<input id="'.$name.'" type="date">';elseif($type==='integer')$input='<input id="'.$name.'" type="number" step="1" min="1">';elseif($type==='enum'){ $input='<select id="'.$name.'">';foreach(($field['values']??[]) as $value)$input.='<option value="'.htmlspecialchars((string)$value,ENT_QUOTES,'UTF-8').'">'.htmlspecialchars(ucwords(str_replace('_',' ',(string)$value)),ENT_QUOTES,'UTF-8').'</option>'; $input.='</select>';}else $input='<input id="'.$name.'" type="text">';$html.='<label for="'.$name.'">'.htmlspecialchars($label,ENT_QUOTES,'UTF-8').'</label>'.$input;}return $html;}
+$generated=0;
+foreach($specs['specifications'] as $spec){if(!is_array($spec))continue;$tool=$spec['tool']??[];$slug=strtolower(trim((string)($tool['slug']??'')));if($slug===''||!isset($approved[$slug]))continue;if(($spec['spec_status']??'')!=='draft'||($spec['generation_eligible']??true)!==false){fwrite(STDERR,"Refusing non-draft or generation-authorized spec: {$slug}\n");exit(1);}
+$name=(string)($tool['name']??ucwords(str_replace('-',' ',$slug)));$description=(string)($spec['seo']['description']??('Free '.$name.' tool.'));$title=(string)($spec['seo']['title']??($name.' | Free Online Tool | JunctionTools'));$template=(string)($tool['implementation_template']??'generic-form');$fields=$spec['inputs']['fields']??[];
+if($template==='date-age-calculator'){
+$body='<h1>'.htmlspecialchars($name,ENT_QUOTES,'UTF-8').'</h1><p>Calculate exact age in years, months and days.</p><label for="birth_date">Date of Birth</label><input id="birth_date" type="date"><label for="as_of_date">Calculate Age On</label><input id="as_of_date" type="date"><button id="run" type="button">Calculate Age</button><button id="reset" type="button">Reset</button><section id="result" aria-live="polite"></section>';
+$script=<<<'JS'
+(()=>{const b=document.getElementById('birth_date'),a=document.getElementById('as_of_date'),r=document.getElementById('result');a.value=new Date().toISOString().slice(0,10);function run(){r.textContent='';if(!b.value||!a.value){r.textContent='Please select both dates.';return;}const bd=new Date(b.value+'T00:00:00'),ad=new Date(a.value+'T00:00:00');if(Number.isNaN(bd.getTime())||Number.isNaN(ad.getTime())){r.textContent='Please enter valid dates.';return;}if(bd>ad){r.textContent='Date of birth cannot be after the calculation date.';return;}let y=ad.getFullYear()-bd.getFullYear(),m=ad.getMonth()-bd.getMonth(),d=ad.getDate()-bd.getDate();if(d<0){m--;d+=new Date(ad.getFullYear(),ad.getMonth(),0).getDate();}if(m<0){y--;m+=12;}const total=Math.floor((Date.UTC(ad.getFullYear(),ad.getMonth(),ad.getDate())-Date.UTC(bd.getFullYear(),bd.getMonth(),bd.getDate()))/86400000);r.textContent=`${y} years, ${m} months, ${d} days (${total} total days).`;}document.getElementById('run').addEventListener('click',run);document.getElementById('reset').addEventListener('click',()=>{b.value='';a.value=new Date().toISOString().slice(0,10);r.textContent='';});})();
 JS;
-    } else {
-        $body = '<h1>' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</h1><label for="input">Input</label><textarea id="input" rows="6"></textarea><button id="run" type="button">Run</button><button id="reset" type="button">Reset</button><output id="result"></output>';
-        $script = <<<'JS'
-(() => {
-  const input = document.getElementById('input'), result = document.getElementById('result');
-  document.getElementById('run').addEventListener('click', () => { result.textContent = input.value.trim() ? input.value.trim() : 'Please enter a value.'; });
-  document.getElementById('reset').addEventListener('click', () => { input.value = ''; result.textContent = ''; });
-})();
-JS;
-    }
-    $html = html_shell($slug, $title, $description, $body, $script);
-    $path = rtrim($outputDir, '/\\') . '/' . $slug . '.html';
-    if (file_put_contents($path, $html, LOCK_EX) === false) { fwrite(STDERR, "Unable to write {$path}.\n"); exit(1); }
-    $generated++;
+}else{
+if(!is_array($fields)||count($fields)===0)$fields=[['name'=>'input','type'=>'text','required'=>true]];
+$body='<h1>'.htmlspecialchars($name,ENT_QUOTES,'UTF-8').'</h1><p>'.htmlspecialchars((string)($spec['purpose']??('Run '.$name.'.')),ENT_QUOTES,'UTF-8').'</p><form id="tool-form">'.renderFields($fields).'<button id="run" type="button">Run</button><button id="reset" type="button">Reset</button></form><output id="result" aria-live="polite"></output>';
+$fieldNames=array_map(static fn($f)=>jsName((string)($f['name']??'input')),array_filter($fields,'is_array'));$ids=json_encode(array_values($fieldNames),JSON_UNESCAPED_SLASHES);
+$script="(()=>{const ids={$ids},r=document.getElementById('result');document.getElementById('run').addEventListener('click',()=>{const values=ids.map(id=>{const e=document.getElementById(id);return e?e.value.trim():'';});if(values.some(v=>!v)){r.textContent='Please complete the required inputs.';return;}r.textContent=values.join(' | ');});document.getElementById('reset').addEventListener('click',()=>{ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});r.textContent='';});})();";
 }
-
-echo 'Generated ' . $generated . ' approved tool page(s). No registry or sitemap changes were made.\n';
+$html=html_shell($slug,$title,$description,$body,$script);$path=rtrim($outputDir,'/\\').'/'.$slug.'.html';if(file_put_contents($path,$html,LOCK_EX)===false){fwrite(STDERR,"Unable to write {$path}.\n");exit(1);}$generated++;}
+echo 'Generated '.$generated." approved tool page(s). No registry or sitemap changes were made.\n";
