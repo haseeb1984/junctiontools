@@ -33,10 +33,12 @@ jobs:
           php -l tools/build-search-console-feedback.php
           php -l tools/build-search-console-generation-queue.php
           php -l tools/evaluate-automatic-publishing.php
+          php -l tools/build-enhancement-deployment-plan.php
           php -l tests/validate-tool-factory-pipeline.php
           php -l tests/validate-demand-refresh.php
           php -l tests/validate-tool-factory-e2e.php
           php -l tests/validate-tool-enhancement-approval.php
+          php -l tests/validate-enhancement-deployment-plan.php
 
       - name: Validate Phase 10 pipeline contract
         run: php tests/validate-tool-factory-pipeline.php
@@ -49,6 +51,9 @@ jobs:
 
       - name: Validate approved image resizer enhancement
         run: php tests/validate-tool-enhancement-approval.php
+
+      - name: Validate enhancement deployment plan
+        run: php tests/validate-enhancement-deployment-plan.php
 
       - name: Verify production publishing remains disabled
         run: |
