@@ -128,64 +128,43 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
 
-      - name: Verify test suite exists
+      - name: Verify test suite and committed fixtures exist
         shell: bash
         run: |
           set -euo pipefail
           test -f tests/run.php
           test -f tests/bootstrap.php
+          test -f tests/router.php
           test -d tests/fixtures
-          echo 'Phase 0 automated test suite found.'
+          test -f tests/fixtures/timeout.php
+          test -f tests/fixtures/large-response.php
+          test -f tests/fixtures/redirect.php
+          test -f tests/fixtures/ssrf-target.php
+          test -f tests/fixtures/contact-endpoint.php
+          echo 'Phase 0 automated test suite and committed fixtures found.'
 
-      - name: Start local PHP fixture server
+      - name: Start local PHP server with committed fixtures
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p artifacts/server
+          mkdir -p artifacts
 
-          cat > artifacts/server/large-response.php <<'PHP'
-          <?php
-          declare(strict_types=1);
-          header('Content-Type: text/plain; charset=utf-8');
-          $size = 3145728;
-          echo str_repeat('X', $size);
-          PHP
-
-          cat > artifacts/server/slow-response.php <<'PHP'
-          <?php
-          declare(strict_types=1);
-          $delay = isset($_GET['delay']) ? max(0, min(30, (int) $_GET['delay'])) : 10;
-          sleep($delay);
-          header('Content-Type: text/plain; charset=utf-8');
-          echo 'slow-response-complete';
-          PHP
-
-          cat > artifacts/server/redirect.php <<'PHP'
-          <?php
-          declare(strict_types=1);
-          header('Location: /slow-response.php?delay=0', true, 302);
-          exit;
-          PHP
-
-          cat > artifacts/server/health.php <<'PHP'
-          <?php
-          declare(strict_types=1);
-          header('Content-Type: text/plain; charset=utf-8');
-          echo 'ok';
-          PHP
-
-          php -S 127.0.0.1:8080 -t artifacts/server > artifacts/php-server.log 2>&1 &
+          php -S 127.0.0.1:8080 tests/router.php > artifacts/php-server.log 2>&1 &
           echo $! > artifacts/php-server.pid
 
           for attempt in {1..20}; do
-            if curl --fail --silent --show-error "$JUNCTIONTOOLS_TEST_BASE_URL/health.php" >/dev/null; then
-              echo 'Local fixture server is ready.'
+            if curl --fail --silent --show-error "$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/health.php" >/dev/null 2>&1; then
+              echo 'Local PHP server is ready.'
+              exit 0
+            fi
+            if curl --silent --show-error "$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/timeout.php?delay=0" >/dev/null 2>&1; then
+              echo 'Local PHP server is ready.'
               exit 0
             fi
             sleep 0.5
           done
 
-          echo 'Local fixture server failed to start.' >&2
+          echo 'Local PHP server failed to start.' >&2
           cat artifacts/php-server.log >&2 || true
           exit 1
 
@@ -219,8 +198,8 @@ jobs:
         run: |
           set -euo pipefail
           php tests/run.php --suite=limits --report=artifacts/results/limits.json \
-            --slow-url="$JUNCTIONTOOLS_TEST_BASE_URL/slow-response.php?delay=10" \
-            --large-url="$JUNCTIONTOOLS_TEST_BASE_URL/large-response.php"
+            --slow-url="$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/timeout.php?delay=10" \
+            --large-url="$JUNCTIONTOOLS_TEST_BASE_URL/tests/fixtures/large-response.php?bytes=3145728"
 
       - name: Run rate-limit tests
         shell: bash
@@ -276,7 +255,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Stop local fixture server
+      - name: Stop local PHP server
         if: always()
         shell: bash
         run: |
