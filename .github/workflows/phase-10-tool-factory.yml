@@ -36,6 +36,7 @@ jobs:
           php -l tests/validate-tool-factory-pipeline.php
           php -l tests/validate-demand-refresh.php
           php -l tests/validate-tool-factory-e2e.php
+          php -l tests/validate-tool-enhancement-approval.php
 
       - name: Validate Phase 10 pipeline contract
         run: php tests/validate-tool-factory-pipeline.php
@@ -45,6 +46,9 @@ jobs:
 
       - name: Validate full factory dry-run
         run: php tests/validate-tool-factory-e2e.php
+
+      - name: Validate approved image resizer enhancement
+        run: php tests/validate-tool-enhancement-approval.php
 
       - name: Verify production publishing remains disabled
         run: |
