@@ -31,4 +31,4 @@ jobs:
         run: php tests/validate-search-console.php
       - name: Verify no Search Console credentials are committed
         run: |
-          ! grep -RniE 'client_secret|refresh_token|authorization: bearer|developer_token' tools config .github --exclude-dir=.git
+          ! grep -RniE 'client_secret|refresh_token|authorization: bearer|developer_token' tools config --exclude-dir=.git
