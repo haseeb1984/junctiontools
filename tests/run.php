@@ -137,7 +137,7 @@ function jt_suite_redirects(): array
     global $fixtureBase;
     $results=[];
     jt_test_case($results,'Committed redirect fixture returns 302',static function()use($fixtureBase):void{$r=jt_run_http($fixtureBase.'/redirect.php','GET');jt_test_assert($r['status']===302,'redirect.php did not return 302.');jt_test_assert(isset($r['headers']['location']),'Redirect Location header missing.');});
-    jt_test_case($results,'Safe HTTP client does not follow committed redirect fixture',static function()use($fixtureBase):void{$r=jt_safe_http_get($fixtureBase.'/redirect.php',['timeout'=>5,'connect_timeout'=>2,'max_bytes'=>65536]);jt_test_assert(($r['status']??0)===302,'Safe HTTP client followed/transformed redirect.');});
+    jt_test_case($results,'Safe HTTP client rejects private redirect fixture before any follow',static function()use($fixtureBase):void{$r=jt_safe_http_get($fixtureBase.'/redirect.php',['timeout'=>5,'connect_timeout'=>2,'max_bytes'=>65536]);jt_test_assert(($r['status']??0)===0,'Safe HTTP client reached the private redirect fixture.');jt_test_assert(($r['success']??true)===false,'Safe HTTP client unexpectedly succeeded against a private fixture URL.');});
     return $results;
 }
 
@@ -183,6 +183,14 @@ function jt_suite_http_security(): array
 
 $dispatch=['compatibility'=>'jt_suite_compatibility','ssl'=>'jt_suite_ssl','ssrf'=>'jt_suite_ssrf','redirects'=>'jt_suite_redirects','limits'=>static fn():array=>jt_suite_limits($options),'rate-limit'=>'jt_suite_rate_limit','contact'=>static fn():array=>jt_suite_contact($options),'http-security'=>'jt_suite_http_security'];
 
-if($suite==='all'){$all=[];foreach($dispatch as $name=>$runner){echo "\n=== {$name} ===\n";$all=array_merge($all,$runner());}jt_test_finish('all',$all,$reportPath);}
-if(!isset($dispatch[$suite])){fwrite(STDERR,"Unknown suite: {$suite}\n");exit(2);}
-jt_test_finish($suite,$dispatch[$suite](),$reportPath);
+if($suite==='all'){$all=[];foreach($dispatch as $fn){$all=array_merge($all,$fn());}$results=$all;}elseif(isset($dispatch[$suite])){$fn=$dispatch[$suite];$results=$fn();}else{fwrite(STDERR,"Unknown suite: {$suite}\n");exit(2);}
+
+$passed=0;$failed=0;foreach($results as $result){if($result['status']==='PASS')$passed++;else$failed++;echo '['.$result['status'].'] '.$result['name']."\n";if($result['status']==='FAIL')echo '  '.$result['error']."\n";}
+
+echo "\nSuite: {$suite} | PASS: {$passed} | FAIL: {$failed} | TOTAL: ".count($results)."\n";
+
+$summary=['suite'=>$suite,'status'=>$failed===0?'PASS':'FAIL','passed'=>$passed,'failed'=>$failed,'total'=>count($results),'results'=>$results];
+if($reportPath!==null){file_put_contents($reportPath,json_encode($summary,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));}
+
+echo 'RESULT: '.($failed===0?'PASS':'FAIL')."\n";
+exit($failed===0?0:1);
