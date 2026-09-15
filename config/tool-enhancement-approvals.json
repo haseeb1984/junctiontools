@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "policy": {
+    "description": "Only explicitly approved existing-tool enhancements may enter implementation and validation.",
+    "default": "deny",
+    "publication_requires_separate_review": true
+  },
+  "approvals": [
+    {
+      "cluster_id": "image-resizing",
+      "target_tool_slug": "image-compressor",
+      "decision": "approved-for-implementation-and-validation",
+      "approved_at": "2026-09-16",
+      "approval_scope": "implementation-and-validation-only",
+      "automatic_publication_allowed": false,
+      "registry_or_sitemap_modification_allowed": false,
+      "source": "user-explicit-approval"
+    }
+  ]
+}
