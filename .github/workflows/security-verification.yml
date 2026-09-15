@@ -67,6 +67,8 @@ jobs:
         run: php tests/validate-opportunities.php
       - name: Validate Phase 3 search-demand registry
         run: php tests/validate-search-demand.php
+      - name: Validate Phase 3 generation queue
+        run: php tests/validate-generation-queue.php
       - name: Upload static verification artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -113,6 +115,7 @@ jobs:
           test -f tests/validate-sitemap.php
           test -f tests/validate-opportunities.php
           test -f tests/validate-search-demand.php
+          test -f tests/validate-generation-queue.php
           test -f tools/generate-sitemap.php
           test -d tests/fixtures
           test -f tests/fixtures/timeout.php
@@ -168,6 +171,7 @@ jobs:
             echo '- Registry-driven sitemap generation and validation'
             echo '- Phase 3 search-demand opportunity registry validation'
             echo '- Phase 3 search-demand evidence registry validation'
+            echo '- Phase 3 ranked generation queue validation'
             echo 'Manual: contact form validation, DB insertion, SMTP/email delivery'
           } > artifacts/summary.md
       - name: Upload security-suite artifacts
