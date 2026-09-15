@@ -1,7 +1,9 @@
 <?php
 /**
- * Safe HTTP client for future server-side scanners.
- * Keep all outbound HTTP(S) fetching behind this helper.
+ * SSRF-safe outbound HTTP client.
+ *
+ * All server-side URL fetching should use this helper. Redirects are disabled
+ * deliberately so a validated public URL cannot pivot to a private address.
  */
 require_once __DIR__ . '/url-validator.php';
 
@@ -17,6 +19,10 @@ function jt_fetch_url(string $url, array $options = []): array
     $userAgent = (string)($options['user_agent'] ?? 'JunctionTools-SafeScanner/1.0');
 
     $ch = curl_init($normalized);
+    if ($ch === false) {
+        return ['ok' => false, 'error' => 'Unable to initialize HTTP client.', 'status' => 0, 'body' => ''];
+    }
+
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => false,
@@ -25,8 +31,10 @@ function jt_fetch_url(string $url, array $options = []): array
         CURLOPT_CONNECTTIMEOUT => 5,
         CURLOPT_TIMEOUT => $timeout,
         CURLOPT_USERAGENT => $userAgent,
-        CURLOPT_MAXFILESIZE => $maxBytes,
         CURLOPT_HTTPHEADER => ['Accept: text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.1'],
+        CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+        CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+        CURLOPT_MAXFILESIZE => $maxBytes,
     ]);
 
     $body = curl_exec($ch);
