@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-09-15",
+  "methodology": {
+    "volume_policy": "Use source-reported estimates only; do not invent volume.",
+    "country_policy": "Store country with each volume.",
+    "score_policy": "Demand evidence is a signal, not a guaranteed traffic forecast."
+  },
+  "clusters": [
+    {
+      "id": "image-resizing",
+      "core_query": "image resizer",
+      "intent": "utility",
+      "existing_tool_match": null,
+      "signals": [
+        {
+          "query": "image resizer",
+          "country": "US",
+          "search_volume": 126000,
+          "source": "ahrefstop",
+          "source_date": "2026-08",
+          "evidence_url": "https://ahrefstop.com/websites/imageresizer.com"
+        },
+        {
+          "query": "resize image",
+          "country": "US",
+          "search_volume": 69000,
+          "source": "ahrefstop",
+          "source_date": "2026-08",
+          "evidence_url": "https://ahrefstop.com/websites/imageresizer.com"
+        },
+        {
+          "query": "resize image to 100kb",
+          "country": "IN",
+          "search_volume": 45000,
+          "source": "ahrefstop",
+          "source_date": "2026-08",
+          "evidence_url": "https://ahrefstop.com/websites/simpleimageresizer.com"
+        },
+        {
+          "query": "resize image to 50kb",
+          "country": "IN",
+          "search_volume": 50000,
+          "source": "ahrefstop",
+          "source_date": "2026-08",
+          "evidence_url": "https://ahrefstop.com/websites/simpleimageresizer.com"
+        }
+      ]
+    },
+    {
+      "id": "qr-code",
+      "core_query": "qr code generator",
+      "intent": "generator",
+      "existing_tool_match": null,
+      "competition_note": "High/entrenched; demand is strong but differentiation is required.",
+      "signals": [
+        {
+          "query": "qr code generator",
+          "country": "US",
+          "search_volume": 673000,
+          "source": "seodata",
+          "source_date": "2026-05-16",
+          "evidence_url": "https://www.seodata.dev/keyword/generate-qr-code-free"
+        },
+        {
+          "query": "generate qr code free",
+          "country": "US",
+          "search_volume": 110000,
+          "source": "seodata",
+          "source_date": "2026-05-16",
+          "evidence_url": "https://www.seodata.dev/keyword/generate-qr-code-free"
+        }
+      ]
+    },
+    {
+      "id": "timestamp",
+      "core_query": "timestamp converter",
+      "intent": "converter",
+      "existing_tool_match": null,
+      "signals": [
+        {
+          "query": "timestamp converter",
+          "country": "global",
+          "search_volume": 48000,
+          "source": "kdroi",
+          "source_date": "2026-09-15",
+          "evidence_url": "https://kdroi.io/analysis/timestamp-converter"
+        }
+      ]
+    }
+  ]
+}
