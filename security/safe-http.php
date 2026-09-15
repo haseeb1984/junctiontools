@@ -57,21 +57,22 @@ function jt_parse_certificate_info(array $certInfo): array
                         $issuer = implode(', ', $issuerParts);
                     }
 
-                    // OpenSSL normally exposes validTo_time, but some builds
-                    // return it as a numeric string. Accept either form.
+                    // OpenSSL normally exposes validTo_time as an integer, but
+                    // some PHP/OpenSSL combinations return a numeric string or
+                    // another numeric scalar. Accept all safe numeric forms.
                     $validToTime = $parsed['validTo_time'] ?? null;
-                    if (is_int($validToTime) || (is_string($validToTime) && ctype_digit($validToTime))) {
+                    if (is_int($validToTime) || is_float($validToTime)) {
                         $expiresTimestamp = (int)$validToTime;
+                    } elseif (is_string($validToTime) && is_numeric(trim($validToTime))) {
+                        $expiresTimestamp = (int)trim($validToTime);
                     }
 
                     if ($expiresTimestamp === null) {
                         $validTo = $parsed['validTo'] ?? null;
                         if (is_string($validTo) && trim($validTo) !== '') {
-                            try {
-                                $date = new DateTimeImmutable($validTo);
-                                $expiresTimestamp = $date->getTimestamp();
-                            } catch (Throwable $e) {
-                                // Fall through to textual cURL metadata.
+                            $parsedTime = strtotime(trim($validTo));
+                            if ($parsedTime !== false) {
+                                $expiresTimestamp = $parsedTime;
                             }
                         }
                     }
@@ -88,11 +89,10 @@ function jt_parse_certificate_info(array $certInfo): array
     $scan($certInfo);
 
     if ($expiresTimestamp === null && $expiresAt !== '') {
-        try {
-            $date = new DateTimeImmutable($expiresAt);
-            $expiresTimestamp = $date->getTimestamp();
-        } catch (Throwable $e) {
-            $expiresTimestamp = null;
+        $parsedTime = strtotime(trim($expiresAt));
+        if ($parsedTime !== false) {
+            $expiresTimestamp = $parsedTime;
+            $expiresAt = gmdate('D, d M Y H:i:s T', $expiresTimestamp);
         }
     }
 
