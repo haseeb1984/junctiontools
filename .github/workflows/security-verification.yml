@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - security/phase-0-hardening
+      - phase-3/search-demand-discovery
       - main
   workflow_dispatch:
 
@@ -62,6 +63,8 @@ jobs:
         run: php tests/validate-registry.php
       - name: Validate registry-driven sitemap
         run: php tests/validate-sitemap.php
+      - name: Validate Phase 3 opportunity registry
+        run: php tests/validate-opportunities.php
       - name: Upload static verification artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -106,6 +109,7 @@ jobs:
           test -f tests/router.php
           test -f tests/validate-registry.php
           test -f tests/validate-sitemap.php
+          test -f tests/validate-opportunities.php
           test -f tools/generate-sitemap.php
           test -d tests/fixtures
           test -f tests/fixtures/timeout.php
@@ -159,6 +163,7 @@ jobs:
             echo '- HTTP methods / security headers'
             echo '- Phase 1 tool registry schema and file-reference validation'
             echo '- Registry-driven sitemap generation and validation'
+            echo '- Phase 3 search-demand opportunity registry validation'
             echo 'Manual: contact form validation, DB insertion, SMTP/email delivery'
           } > artifacts/summary.md
       - name: Upload security-suite artifacts
