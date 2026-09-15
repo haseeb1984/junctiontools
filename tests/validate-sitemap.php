@@ -48,14 +48,14 @@ foreach (($data['tools'] ?? []) as $tool) {
         exit(1);
     }
 
-    $frontendPath = $root . '/' . $frontend;
-    if (!is_file($frontendPath)) {
+    if (!is_file($root . '/' . $frontend)) {
         fwrite(STDERR, "Registry frontend file missing: {$frontend}\n");
         exit(1);
     }
 
     $expectedUrls[$site . '/' . $slug] = true;
 }
+ksort($expectedUrls, SORT_STRING);
 
 $xpath = new DOMXPath($dom);
 $xpath->registerNamespace('sm', 'http://www.sitemaps.org/schemas/sitemap/0.9');
@@ -78,6 +78,7 @@ foreach ($nodes as $node) {
     }
     $urls[$url] = true;
 }
+ksort($urls, SORT_STRING);
 
 if ($urls !== $expectedUrls) {
     $missing = array_keys(array_diff_key($expectedUrls, $urls));
