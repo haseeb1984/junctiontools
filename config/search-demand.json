@@ -8,6 +8,22 @@
   },
   "clusters": [
     {
+      "id": "age-calculator",
+      "core_query": "age calculator",
+      "intent": "utility",
+      "existing_tool_match": null,
+      "signals": [
+        {
+          "query": "age calculator",
+          "country": "global",
+          "search_volume": 220000,
+          "source": "kdroi",
+          "source_date": "2026-09-15",
+          "evidence_url": "https://kdroi.io/analysis/age-calculator"
+        }
+      ]
+    },
+    {
       "id": "image-resizing",
       "core_query": "image resizer",
       "intent": "utility",
