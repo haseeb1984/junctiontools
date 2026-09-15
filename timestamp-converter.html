@@ -26,13 +26,13 @@
   <div id="header-container"></div>
   <main class="max-w-4xl mx-auto px-6 py-12 flex-grow w-full space-y-8">
     <section>
-      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3"><i class="fa-solid fa-clock"></i> Free Developer Utility</span>
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3"><i class="fa-solid fa-clock"></i> Free Developer Utility</span>
       <h1 class="text-3xl font-extrabold text-white tracking-tight">Unix Timestamp Converter</h1>
       <p class="text-slate-400 text-sm mt-2">Convert Unix timestamps to readable dates and dates to Unix timestamps instantly. Supports seconds and milliseconds.</p>
     </section>
 
-    <section class="bg-[#0f172a]/60 border border-cyan-900/40 rounded-xl p-5">
-      <h2 class="text-sm font-semibold text-slate-200 mb-2"><i class="fa-solid fa-circle-info text-cyan-400 mr-2"></i>How to Use</h2>
+    <section class="bg-[#0f172a]/60 border border-emerald-900/40 rounded-xl p-5">
+      <h2 class="text-sm font-semibold text-slate-200 mb-2"><i class="fa-solid fa-circle-info text-emerald-400 mr-2"></i>How to Use</h2>
       <ol class="list-decimal list-inside text-sm text-slate-400 leading-relaxed space-y-1">
         <li>Enter a Unix timestamp in seconds or milliseconds.</li>
         <li>Choose the unit that matches the timestamp.</li>
@@ -42,17 +42,17 @@
 
     <section class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 shadow-xl space-y-6">
       <div class="flex flex-col md:flex-row md:items-end gap-4">
-        <div class="flex-1"><label class="block text-sm font-medium text-slate-300 mb-2" for="timestamp">Timestamp</label><input id="timestamp" x-model="timestamp" @input="fromTimestamp()" type="text" inputmode="numeric" placeholder="e.g. 1750000000" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500"></div>
-        <div class="md:w-48"><label class="block text-sm font-medium text-slate-300 mb-2" for="unit">Unit</label><select id="unit" x-model="unit" @change="fromTimestamp()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500"><option value="seconds">Seconds</option><option value="milliseconds">Milliseconds</option></select></div>
+        <div class="flex-1"><label class="block text-sm font-medium text-slate-300 mb-2" for="timestamp">Timestamp</label><input id="timestamp" x-model="timestamp" @input="fromTimestamp()" type="text" inputmode="numeric" placeholder="e.g. 1750000000" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-emerald-500"></div>
+        <div class="md:w-48"><label class="block text-sm font-medium text-slate-300 mb-2" for="unit">Unit</label><select id="unit" x-model="unit" @change="fromTimestamp()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-emerald-500"><option value="seconds">Seconds</option><option value="milliseconds">Milliseconds</option></select></div>
       </div>
-      <div><label class="block text-sm font-medium text-slate-300 mb-2" for="dateValue">Converted Date & Time</label><input id="dateValue" x-model="dateValue" type="datetime-local" step="1" @input="fromDate()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500"></div>
-      <div class="flex flex-wrap gap-3"><button @click="useNow()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition"><i class="fa-solid fa-bolt mr-2"></i>Use Current Time</button><button @click="clearAll()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-4 py-2.5 rounded-lg transition">Clear</button></div>
+      <div><label class="block text-sm font-medium text-slate-300 mb-2" for="dateValue">Converted Date & Time</label><input id="dateValue" x-model="dateValue" type="datetime-local" step="1" @input="fromDate()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-emerald-500"></div>
+      <div class="flex flex-wrap gap-3"><button @click="useNow()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition"><i class="fa-solid fa-bolt mr-2"></i>Use Current Time</button><button @click="clearAll()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-4 py-2.5 rounded-lg transition">Clear</button></div>
       <p x-show="error" x-text="error" class="text-sm text-red-400"></p>
     </section>
 
     <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-5"><p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Current Unix Timestamp</p><p class="text-2xl font-bold text-cyan-400 break-all" x-text="currentSeconds"></p><p class="text-xs text-slate-500 mt-1">Seconds</p></div>
-      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-5"><p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Current Unix Timestamp</p><p class="text-2xl font-bold text-cyan-400 break-all" x-text="currentMilliseconds"></p><p class="text-xs text-slate-500 mt-1">Milliseconds</p></div>
+      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-5"><p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Current Unix Timestamp</p><p class="text-2xl font-bold text-emerald-400 break-all" x-text="currentSeconds"></p><p class="text-xs text-slate-500 mt-1">Seconds</p></div>
+      <div class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-5"><p class="text-xs uppercase tracking-wide text-slate-500 mb-2">Current Unix Timestamp</p><p class="text-2xl font-bold text-emerald-400 break-all" x-text="currentMilliseconds"></p><p class="text-xs text-slate-500 mt-1">Milliseconds</p></div>
     </section>
   </main>
   <div id="footer-container"></div>
