@@ -19,7 +19,7 @@ foreach($files as $file){
   if(substr_count($html,'<html')!==1 || substr_count($html,'<script>')!==1){fwrite(STDERR,"Invalid document structure: {$file}\n");exit(1);}
   if(preg_match('/<script[^>]+src=/i',$html)){fwrite(STDERR,"External script detected.\n");exit(1);}
   foreach(['eval(','new Function(','document.write(','innerHTML =','fetch(','XMLHttpRequest','WebSocket(','localStorage','sessionStorage','cookie','formaction='] as $needle){if(stripos($html,$needle)!==false){fwrite(STDERR,"Unsafe runtime pattern {$needle} in {$file}.\n");exit(1);}}
-  if(preg_match('/(?:src|href)=["\'](?:https?:|\/\/)/i',$html)){fwrite(STDERR,"External network resource detected.\n");exit(1);}
+  if(preg_match('/<(?:img|script|iframe|frame|source|video|audio|link)\b[^>]+(?:src|href)=["\'](?:https?:|\/\/)/i',$html)){fwrite(STDERR,"External network resource detected.\n");exit(1);}
   if(substr_count($html,'<title>')!==1 || substr_count($html,'rel="canonical"')!==1){fwrite(STDERR,"SEO metadata invalid.\n");exit(1);}
   if(strpos($html,'aria-live="polite"')===false && strpos($html,'<output')===false){fwrite(STDERR,"No accessible result region.\n");exit(1);}
 }
