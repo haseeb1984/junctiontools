@@ -7,6 +7,18 @@ Header always set Referrer-Policy "strict-origin-when-cross-origin"
 Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
 Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 
+# Central AdSense publisher integration for all HTML responses.
+# Google recommends the AdSense snippet in the page <head>; this response-body
+# filter injects the exact snippet immediately before </head> without requiring
+# every static tool page to duplicate it. If mod_substitute is unavailable on
+# the hosting account, the existing static pages remain unaffected and the
+# hosting environment must enable the module before AdSense can be verified.
+<IfModule mod_substitute.c>
+    AddOutputFilterByType SUBSTITUTE text/html
+    SubstituteMaxLineLength 10m
+    Substitute "s|</head>|<script async src=\"https://pagead.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2009027605349204\" crossorigin=\"anonymous\"></script></head>|i"
+</IfModule>
+
 Options -Indexes
 <FilesMatch "^(\.env|\.git|composer\.(json|lock)|.*\.(sql|bak|old|orig|log|ini))$">
     Require all denied
