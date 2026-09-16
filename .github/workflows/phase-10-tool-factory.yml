@@ -43,6 +43,7 @@ jobs:
           php -l tests/validate-tool-specs.php
           php -l tests/validate-generated-runtime.php
           php -l tests/validate-site-navigation-sync.php
+          php -l tests/validate-adsense-integration.php
           php -l tests/validate-tool-enhancement-approval.php
           php -l tests/validate-enhancement-deployment-plan.php
 
@@ -57,6 +58,9 @@ jobs:
 
       - name: Validate site navigation synchronization contract
         run: php tests/validate-site-navigation-sync.php
+
+      - name: Validate AdSense integration contract
+        run: php tests/validate-adsense-integration.php
 
       - name: Validate demand refresh chain
         run: php tests/validate-demand-refresh.php
