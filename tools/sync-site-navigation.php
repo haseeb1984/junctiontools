@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 /**
  * Synchronize published-tool references in the shared header, footer, and homepage.
+ * Existing internal URLs are treated as authoritative and are never rewritten.
+ * The sync is additive: it only adds missing published tools and updates the tool count.
  * Never changes config/tools.json or sitemap.xml.
  *
  * Usage: php tools/sync-site-navigation.php config/tools.json [--apply]
@@ -22,7 +24,14 @@ foreach ($registry['tools'] as $tool) {
     if (($tool['status'] ?? 'active') !== 'active' || (($tool['seo']['indexable'] ?? true) !== true)) continue;
     $name = trim((string) ($tool['name'] ?? ''));
     if ($name === '') continue;
-    $tools[$slug] = ['slug' => $slug, 'name' => $name, 'frontend' => (string) ($tool['frontend'] ?? '')];
+    $frontend = trim((string) ($tool['frontend'] ?? ''));
+    $frontendBase = preg_replace('/\.html$/i', '', basename($frontend));
+    $tools[$slug] = [
+        'slug' => $slug,
+        'name' => $name,
+        'frontend' => $frontend,
+        'frontendBase' => is_string($frontendBase) ? strtolower($frontendBase) : '',
+    ];
 }
 ksort($tools);
 $esc = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
@@ -36,19 +45,17 @@ foreach ($files as $file) {
     $original = $content;
     $content = preg_replace('/All \d+ Tools/', 'All ' . count($tools) . ' Tools', $content) ?? $content;
 
-    // Canonicalize known internal links from frontend filenames to public slugs.
-    foreach ($tools as $tool) {
-        $frontendBase = preg_replace('/\.html$/i', '', basename($tool['frontend']));
-        if ($frontendBase !== '' && $frontendBase !== false) {
-            $content = preg_replace('/href=["\']' . preg_quote($frontendBase, '/') . '["\']/i', 'href="' . $esc($tool['slug']) . '"', $content) ?? $content;
-        }
-    }
-
-    // Ensure every active/indexable published tool is discoverable from each site surface.
+    // Existing links are authoritative. A tool is already present if either its
+    // public slug or its existing frontend filename is referenced anywhere.
     $missing = [];
     foreach ($tools as $tool) {
-        if (!preg_match('/href=["\']' . preg_quote($tool['slug'], '/') . '["\']/i', $content)) $missing[] = $tool;
+        $slugPattern = preg_quote($tool['slug'], '/');
+        $frontendPattern = $tool['frontendBase'] !== '' ? preg_quote($tool['frontendBase'], '/') : '';
+        $hasSlug = preg_match('/href=["\']' . $slugPattern . '(?:["\'?#])/i', $content) === 1;
+        $hasFrontend = $frontendPattern !== '' && preg_match('/href=["\']' . $frontendPattern . '(?:\.html)?(?:["\'?#])/i', $content) === 1;
+        if (!$hasSlug && !$hasFrontend) $missing[] = $tool;
     }
+
     if ($missing) {
         if ($file === 'header.html') {
             $links = '';
