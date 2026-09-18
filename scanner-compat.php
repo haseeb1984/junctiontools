@@ -506,19 +506,107 @@ switch ($type) {
         ]);
 
     case 'trust_inspector':
-        $elements = isset($input['trust_elements']) && is_array($input['trust_elements']) ? $input['trust_elements'] : [];
-        $count = count($elements);
-        $confidence = min(100, $count * 25);
-        $tip = $confidence >= 75
-            ? 'Your store displays strong trust signals.'
-            : 'Consider adding missing trust badges such as guarantees or security signals.';
+        $elements = isset($input['trust_elements']) && is_array($input['trust_elements'])
+            ? array_values(array_unique(array_map('strval', $input['trust_elements'])))
+            : [];
+        $allowed = [
+            'payment_icons' => 'Payment Method Icons',
+            'money_back' => 'Money-Back Guarantee Seal',
+            'ssl_badge' => 'SSL Lock / Security Badge',
+            'reviews_summary' => 'Customer Reviews Summary'
+        ];
+
+        if (!$elements) {
+            compat_json(['success' => false, 'message' => 'Select at least one trust factor to scan.'], 400);
+        }
+        if (array_diff($elements, array_keys($allowed))) {
+            compat_json(['success' => false, 'message' => 'One or more selected trust checks are not supported.'], 400);
+        }
+
+        $html = compat_external_html(trim((string)($input['store_url'] ?? $input['url'] ?? '')));
+        [$dom, $xpath] = compat_dom($html);
+        $visibleText = preg_replace('/\s+/u', ' ', trim((string)$dom->textContent));
+        $htmlLower = strtolower($html);
+
+        $payment = false;
+        foreach ($xpath->query('//img | //svg | //i | //span | //div') as $node) {
+            $attrs = strtolower(
+                $node->getAttribute('alt') . ' ' .
+                $node->getAttribute('title') . ' ' .
+                $node->getAttribute('aria-label') . ' ' .
+                $node->getAttribute('class') . ' ' .
+                $node->getAttribute('id') . ' ' .
+                $node->getAttribute('data-payment-method') . ' ' .
+                $node->getAttribute('data-payment')
+            );
+            if (preg_match('/\b(visa|mastercard|master card|american express|amex|discover|paypal|apple pay|google pay|klarna|stripe|maestro|unionpay|payment method|accepted payments?)\b/i', $attrs)) {
+                $payment = true;
+                break;
+            }
+        }
+
+        $moneyBack = (bool)preg_match(
+            '/\b(money[- ]back|satisfaction|refund|return)\b.{0,100}\b(guarantee|guaranteed)\b|\b(guarantee|guaranteed)\b.{0,100}\b(money[- ]back|refund|satisfaction|return)\b/i',
+            $visibleText
+        );
+
+        $sslBadge = (bool)preg_match(
+            '/\b(ssl|secure checkout|secure payment|security badge|security seal|verified by visa|mastercard identity check|pci compliant|pci[- ]dss)\b/i',
+            $visibleText . ' ' . $htmlLower
+        );
+
+        $reviews = false;
+        $scripts = $xpath->query('//script[contains(translate(@type,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"ld+json")]');
+        foreach ($scripts as $script) {
+            $json = json_decode(trim($script->textContent), true);
+            if (!is_array($json)) continue;
+            $nodes = isset($json['@graph']) && is_array($json['@graph']) ? $json['@graph'] : [$json];
+            foreach ($nodes as $node) {
+                if (!is_array($node)) continue;
+                if (isset($node['aggregateRating']) || isset($node['review']) || isset($node['reviewCount']) || isset($node['ratingValue'])) {
+                    $reviews = true;
+                    break 2;
+                }
+            }
+        }
+        if (!$reviews) {
+            $reviews = (bool)preg_match(
+                '/\b(reviews?|ratings?|rated)\b.{0,80}(\d+(?:\.\d+)?\s*(?:\/\s*5|out of 5|stars?)|stars?|\(\d+[+]?\))/i',
+                $visibleText
+            );
+        }
+
+        $detected = [
+            'payment_icons' => $payment,
+            'money_back' => $moneyBack,
+            'ssl_badge' => $sslBadge,
+            'reviews_summary' => $reviews
+        ];
+
+        $results = [];
+        foreach ($elements as $key) {
+            $results[] = [
+                'key' => $key,
+                'name' => $allowed[$key],
+                'present' => $detected[$key],
+                'status' => $detected[$key] ? 'Present' : 'Not detected'
+            ];
+        }
+
+        $lines = [];
+        foreach ($results as $item) {
+            $lines[] = '<strong>' . htmlspecialchars($item['name'], ENT_QUOTES, 'UTF-8') . ':</strong> ' .
+                ($item['present'] ? "<span class='text-emerald-400 font-semibold'>Present</span>" : "<span class='text-amber-400 font-semibold'>Not detected</span>");
+        }
 
         compat_json([
             'success' => true,
-            'confidenceIndex' => $confidence,
-            'message' => "Buyer Confidence Index: <strong>{$confidence}%</strong><br>Active Elements Detected: {$count}/4<br>{$tip}"
+            'url' => (string)($input['store_url'] ?? $input['url'] ?? ''),
+            'checked' => $results,
+            'checkedCount' => count($results),
+            'foundCount' => count(array_filter($results, static fn($item) => $item['present'])),
+            'message' => 'Live page scan completed. Only the trust factors you selected were evaluated.<br>' . implode('<br>', $lines)
         ]);
-
     case 'aria_audit':
         $html = compat_external_html(trim((string)($input['url'] ?? '')));
         [$dom, $xpath] = compat_dom($html);
@@ -601,16 +689,56 @@ switch ($type) {
 
     case 'readability_evaluator':
         $text = trim((string)($input['text_content'] ?? ''));
-        $words = str_word_count(strip_tags($text));
-        $sentences = max(1, preg_match_all('/[.!?]+/', $text, $matches));
-        $chars = function_exists('mb_strlen') ? mb_strlen(str_replace(' ', '', $text)) : strlen(str_replace(' ', '', $text));
-        $avg = round($words / $sentences, 1);
-        $ease = $words > 0 ? max(0, min(100, round(206.835 - (1.015 * ($words / $sentences)) - (84.6 * ($chars / max(1, $words))), 1))) : 0;
-        $level = $ease < 50 ? 'Advanced / College Level' : ($ease > 80 ? 'Very Easy' : 'Standard');
+        $plainText = trim(strip_tags($text));
+        if ($plainText === '') {
+            compat_json(['success' => false, 'message' => 'Please provide text to evaluate.'], 400);
+        }
+
+        $words = preg_split('/\s+/u', $plainText, -1, PREG_SPLIT_NO_EMPTY);
+        $wordCount = is_array($words) ? count($words) : 0;
+        $sentenceMatches = [];
+        $sentenceCount = max(1, (int)preg_match_all('/[^.!?]+(?:[.!?]+|$)/u', $plainText, $sentenceMatches));
+
+        $syllables = 0;
+        foreach ($words as $word) {
+            $cleanWord = preg_replace('/[^\p{L}\p{N}\']/u', '', $word);
+            if ($cleanWord === '') continue;
+            $parts = preg_split('/[-\x{2010}-\x{2015}]+/u', $cleanWord, -1, PREG_SPLIT_NO_EMPTY);
+            foreach ($parts as $part) {
+                $lower = mb_strtolower($part, 'UTF-8');
+                if (preg_match('/^[a-z]+$/i', $lower)) {
+                    $count = max(1, (int)preg_match_all('/[aeiouy]+/i', $lower, $dummy));
+                    if (strlen($lower) > 2 && preg_match('/(?:e|es|ed)$/i', $lower) && !preg_match('/(?:le|ye)$/i', $lower)) $count--;
+                    if (preg_match('/[^aeiou]le$/i', $lower)) $count++;
+                    $syllables += max(1, $count);
+                } else {
+                    $syllables += max(1, (int)preg_match_all('/[aeiouy]+/iu', $lower, $dummy));
+                }
+            }
+        }
+
+        $wps = $wordCount / max(1, $sentenceCount);
+        $spw = $wordCount > 0 ? $syllables / $wordCount : 0;
+        $ease = $wordCount > 0 ? 206.835 - (1.015 * $wps) - (84.6 * $spw) : 0;
+        $ease = round(max(0, min(100, $ease)), 1);
+        $grade = $wordCount > 0 ? 0.39 * $wps + 11.8 * $spw - 15.59 : 0;
+        $grade = round(max(0, $grade), 1);
+        if ($ease >= 90) $level = 'Very Easy';
+        elseif ($ease >= 80) $level = 'Easy';
+        elseif ($ease >= 70) $level = 'Fairly Easy';
+        elseif ($ease >= 60) $level = 'Standard';
+        elseif ($ease >= 50) $level = 'Fairly Difficult';
+        elseif ($ease >= 30) $level = 'Difficult';
+        else $level = 'Very Difficult';
 
         compat_json([
             'success' => true,
             'readingEase' => $ease,
-            'message' => "Reading Ease Score: <strong>{$ease} / 100</strong><br>Estimated Level: <span class='text-emerald-400 font-semibold'>{$level}</span><br>Total Words: {$words} | Sentences: {$sentences} | Avg. Words/Sentence: {$avg}"
+            'fleschKincaidGrade' => $grade,
+            'wordCount' => $wordCount,
+            'sentenceCount' => $sentenceCount,
+            'syllableCount' => $syllables,
+            'message' => "Reading Ease Score: <strong>{$ease} / 100</strong><br>Estimated Reading Level: <span class='text-emerald-400 font-semibold'>{$level}</span><br>Flesch-Kincaid Grade: <strong>{$grade}</strong><br>Total Words: {$wordCount} | Sentences: {$sentenceCount} | Avg. Words/Sentence: " . round($wps, 1)
         ]);
+
 }
