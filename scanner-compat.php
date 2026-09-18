@@ -22,7 +22,8 @@ $compatTypes = [
     'wcag_checker',
     'aria_audit',
     'copy_analyzer',
-    'readability_evaluator'
+    'readability_evaluator',
+    'ssl_audit'
 ];
 
 if (!in_array($type, $compatTypes, true)) {
@@ -98,6 +99,70 @@ function compat_dom(string $html): array
 }
 
 switch ($type) {
+    case 'ssl_audit':
+        $rawTarget = trim((string)($input['domain'] ?? $input['url'] ?? ''));
+        if ($rawTarget === '' || strlen($rawTarget) > 2048) {
+            compat_json(['success' => false, 'message' => 'Please provide a valid domain or URL.'], 400);
+        }
+
+        $candidate = preg_match('#^https?://#i', $rawTarget) ? $rawTarget : 'https://' . $rawTarget;
+        $parts = parse_url($candidate);
+        $host = strtolower(trim((string)($parts['host'] ?? '')));
+        if ($host === '' || !jt_validate_domain($host)) {
+            compat_json(['success' => false, 'message' => 'Please provide a valid domain or URL.'], 400);
+        }
+
+        $pathPart = (string)($parts['path'] ?? '/');
+        if ($pathPart === '') $pathPart = '/';
+        $queryPart = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
+        $target = 'https://' . $host . $pathPart . $queryPart;
+
+        $result = jt_safe_http_get($target, [
+            'timeout' => 12,
+            'connect_timeout' => 5,
+            'max_bytes' => 262144,
+            'certificate_info' => true,
+            'user_agent' => 'JunctionTools-SSLChecker/1.0 (+https://junctiontools.com)'
+        ]);
+
+        if (!$result['success']) {
+            compat_json([
+                'success' => false,
+                'message' => $result['message'] ?: 'Unable to establish a verified HTTPS connection.'
+            ], 422);
+        }
+
+        $headers = strtolower((string)($result['headers'] ?? ''));
+        $hsts = strpos($headers, 'strict-transport-security') !== false;
+        $csp = strpos($headers, 'content-security-policy') !== false;
+        $xFrame = strpos($headers, 'x-frame-options') !== false;
+        $certificate = is_array($result['certificate'] ?? null) ? $result['certificate'] : [];
+        $issuer = (string)($certificate['issuer'] ?? '');
+        $expiryDate = (string)($certificate['expires_at'] ?? '');
+        $daysRemaining = $certificate['days_remaining'] ?? null;
+
+        $score = 40 + ($hsts ? 15 : 0) + ($xFrame ? 15 : 0) + 30;
+
+        compat_json([
+            'success' => true,
+            'url' => $target,
+            'domain' => $host,
+            'sslValid' => true,
+            'issuer' => $issuer !== '' ? $issuer : null,
+            'expiryDate' => $expiryDate !== '' ? $expiryDate : null,
+            'daysRemaining' => $daysRemaining,
+            'hsts' => $hsts,
+            'csp' => $csp,
+            'xFrame' => $xFrame,
+            'score' => min(100, $score),
+            'message' => 'Verified HTTPS connection succeeded. Certificate issuer: ' .
+                ($issuer !== '' ? $issuer : 'Unavailable') .
+                '; expiry: ' . ($expiryDate !== '' ? $expiryDate : 'Unavailable') .
+                '; HSTS: ' . ($hsts ? 'Yes' : 'No') .
+                '; CSP: ' . ($csp ? 'Yes' : 'No') .
+                '; X-Frame-Options: ' . ($xFrame ? 'Present' : 'Missing') . '.'
+        ]);
+
     case 'cart_abandonment':
         $carts = filter_var($input['total_carts'] ?? null, FILTER_VALIDATE_INT);
         $orders = filter_var($input['completed_orders'] ?? null, FILTER_VALIDATE_INT);
