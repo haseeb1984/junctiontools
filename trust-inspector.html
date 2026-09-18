@@ -66,7 +66,7 @@
             </h3>
             <ol class="list-decimal list-inside text-sm text-slate-400 space-y-1">
                 <li>Provide product page or cart URL.</li>
-                <li>Select active trust elements currently enabled on store.</li>
+                <li>Select the trust factors you want the scanner to verify on the live page.</li>
                 <li>Click <strong class="text-slate-200">Inspect Trust Factors</strong> to calculate buyer confidence index.</li>
             </ol>
         </div>
@@ -78,11 +78,11 @@
                     <i class="fa-solid fa-circle-question text-slate-500 text-xs" title="Cart or Product Page link"></i>
                 </label>
                 <input type="url" id="store_url" name="store_url" required placeholder="https://example.com/cart" class="w-full bg-[#090d14] border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-sm transition">
-                <p class="text-xs text-slate-500 mt-2">Example: Cart page or direct product page URL.</p>
+                <p class="text-xs text-slate-500 mt-2">Select only the checks you want verified. The scanner reports whether each selected factor is actually present on the live page.</p>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Active Trust Elements</label>
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Trust Factors to Scan</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-300">
                     <label class="flex items-center space-x-3 bg-[#090d14] p-3 rounded-xl border border-slate-800 hover:border-slate-700 cursor-pointer transition">
                         <input type="checkbox" name="trust_elements[]" value="payment_icons" class="rounded border-slate-700 bg-[#090d14] text-emerald-600 focus:ring-emerald-500">
