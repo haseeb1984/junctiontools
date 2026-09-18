@@ -1,14 +1,15 @@
 <?php
+require __DIR__ . '/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
-require __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/security/rate-limit.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->safeLoad();
 
 header('Cache-Control: no-store');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: contact.html?status=invalid', true, 303);
+    header('Location: contact?status=invalid', true, 303);
     exit;
 }
 
@@ -33,30 +34,30 @@ function jt_is_allowed_origin(string $url, array $allowedHosts): bool {
 }
 
 if ($origin !== '' && !jt_is_allowed_origin($origin, $allowedHosts)) {
-    header('Location: contact.html?status=invalid', true, 303);
+    header('Location: contact?status=invalid', true, 303);
     exit;
 }
 
 if ($origin === '' && $referer !== '' && !jt_is_allowed_origin($referer, $allowedHosts)) {
-    header('Location: contact.html?status=invalid', true, 303);
+    header('Location: contact?status=invalid', true, 303);
     exit;
 }
 
 // Reject oversized request bodies before parsing user input.
 $contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
 if ($contentLength > 32 * 1024) {
-    header('Location: contact.html?status=invalid', true, 303);
+    header('Location: contact?status=invalid', true, 303);
     exit;
 }
 
 if (!jt_rate_limit('contact-form', 5, 300)) {
-    header('Location: contact.html?status=duplicate', true, 303);
+    header('Location: contact?status=duplicate', true, 303);
     exit;
 }
 
 // HONEYPOT SPAM CHECK
 if (!empty($_POST['website_url'])) {
-    header('Location: contact.html?status=success', true, 303);
+    header('Location: contact?status=success', true, 303);
     exit;
 }
 
@@ -66,24 +67,24 @@ $message = trim((string)($_POST['message'] ?? ''));
 
 // Strict input length limits prevent oversized payloads and mail abuse.
 if (mb_strlen($name) > 120 || mb_strlen($email) > 254 || mb_strlen($message) > 5000) {
-    header('Location: contact.html?status=invalid', true, 303);
+    header('Location: contact?status=invalid', true, 303);
     exit;
 }
 
 if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $message === '') {
-    header('Location: contact.html?status=invalid', true, 303);
+    header('Location: contact?status=invalid', true, 303);
     exit;
 }
 
 // Keep secrets out of source control. Configure these in the hosting environment.
-$host = getenv('JUNCTIONTOOLS_DB_HOST') ?: 'localhost';
-$db = getenv('JUNCTIONTOOLS_DB_NAME') ?: '';
-$user = getenv('JUNCTIONTOOLS_DB_USER') ?: '';
-$pass = getenv('JUNCTIONTOOLS_DB_PASS') ?: '';
+$host = $_ENV['JUNCTIONTOOLS_DB_HOST'] ?? 'localhost';
+$db   = $_ENV['JUNCTIONTOOLS_DB_NAME'] ?? '';
+$user = $_ENV['JUNCTIONTOOLS_DB_USER'] ?? '';
+$pass = $_ENV['JUNCTIONTOOLS_DB_PASS'] ?? '';
 $charset = 'utf8mb4';
 
-if ($db === '' || $user === '' || $pass === '') {
-    header('Location: contact.html?status=error', true, 303);
+if ($db === '' || $user === '' ) {
+    header('Location: contact?status=error', true, 303);
     exit;
 }
 
@@ -102,20 +103,19 @@ try {
     );
     $stmtCheck->execute([$email]);
     if ($stmtCheck->fetch()) {
-        header('Location: contact.html?status=duplicate', true, 303);
+        header('Location: contact?status=duplicate', true, 303);
         exit;
     }
-
     $stmt = $pdo->prepare(
         "INSERT INTO tool_suggestions (name, email, message) VALUES (?, ?, ?)"
     );
     $stmt->execute([$name, $email, $message]);
 
-    $smtpHost = getenv('JUNCTIONTOOLS_SMTP_HOST') ?: '';
-    $smtpUser = getenv('JUNCTIONTOOLS_SMTP_USER') ?: '';
-    $smtpPass = getenv('JUNCTIONTOOLS_SMTP_PASS') ?: '';
-    $mailFrom = getenv('JUNCTIONTOOLS_MAIL_FROM') ?: $smtpUser;
-    $mailTo = getenv('JUNCTIONTOOLS_MAIL_TO') ?: $smtpUser;
+    $smtpHost = $_ENV['JUNCTIONTOOLS_SMTP_HOST'] ?: '';
+    $smtpUser = $_ENV['JUNCTIONTOOLS_SMTP_USER'] ?: '';
+    $smtpPass = $_ENV['JUNCTIONTOOLS_SMTP_PASS'] ?: '';
+    $mailFrom = $_ENV['JUNCTIONTOOLS_MAIL_FROM'] ?: $smtpUser;
+    $mailTo = $_ENV['JUNCTIONTOOLS_MAIL_TO'] ?: $smtpUser;
 
     // Database submission remains successful even if notification configuration is absent.
     if ($smtpHost !== '' && $smtpUser !== '' && $smtpPass !== '' && $mailFrom !== '' && $mailTo !== '') {
@@ -140,11 +140,11 @@ try {
         $mail->send();
     }
 
-    header('Location: contact.html?status=success', true, 303);
+    header('Location: contact?status=success', true, 303);
     exit;
 } catch (Throwable $e) {
     // Never expose database/SMTP exception details to the public response.
     error_log('JunctionTools contact form error: ' . $e->getMessage());
-    header('Location: contact.html?status=error', true, 303);
+    header('Location: contact?status=error', true, 303);
     exit;
 }
