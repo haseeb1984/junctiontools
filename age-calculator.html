@@ -29,6 +29,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .date-picker-wrap { position: relative; }
+        .date-picker-wrap .date-input { color-scheme: dark; padding-right: 2.75rem; }
+        .date-picker-wrap .date-input::-webkit-calendar-picker-indicator {
+            opacity: 1;
+            visibility: visible;
+            cursor: pointer;
+            filter: invert(1) brightness(1.4);
+        }
+        .date-picker-icon {
+            position: absolute;
+            right: 0.9rem;
+            bottom: 0.85rem;
+            color: #34d399;
+            pointer-events: none;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="ageCalculator()">
     <div id="header-container"></div>
@@ -50,13 +68,15 @@
         </div>
         <div class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-6 shadow-xl">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+                <div class="date-picker-wrap">
                     <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Date of Birth</label>
-                    <input type="date" x-model="birthDate" @change="calculate()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none">
+                    <input type="date" x-model="birthDate" @change="calculate()" class="date-input w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none" aria-label="Date of Birth">
+                    <i class="fa-solid fa-calendar-days date-picker-icon" aria-hidden="true"></i>
                 </div>
-                <div>
+                <div class="date-picker-wrap">
                     <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Calculate Age On</label>
-                    <input type="date" x-model="asOfDate" @change="calculate()" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none">
+                    <input type="date" x-model="asOfDate" @change="calculate()" class="date-input w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none" aria-label="Calculate Age On">
+                    <i class="fa-solid fa-calendar-days date-picker-icon" aria-hidden="true"></i>
                 </div>
             </div>
             <p x-show="error" x-text="error" class="text-sm text-red-400"></p>
