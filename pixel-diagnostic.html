@@ -104,36 +104,37 @@
             <span x-text="errorMessage"></span>
         </div>
 
-        <!-- DIAGNOSTIC RESULTS SECTION -->
-        <div x-cloak x-show="scanned" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-clipboard-check text-emerald-400"></i> Free Scan Results for <span class="text-emerald-400 truncate max-w-xs" x-text="pageUrl"></span>
-                </h2>
-                <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="pixelsFound > 0 ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-amber-950 text-amber-300 border border-amber-500/30'" x-text="pixelsFound > 0 ? pixelsFound + ' Pixel(s) Found' : 'No Pixels Detected'"></span>
-            </div>
+       <!-- DIAGNOSTIC RESULTS SECTION -->
+<div x-cloak x-show="scanned" class="bg-[#0f172a] border border-slate-800/80 rounded-xl p-6 space-y-6 shadow-xl">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-check text-emerald-400"></i> Free Scan Results for <span class="text-emerald-400 truncate max-w-xs" x-text="pageUrl"></span>
+        </h2>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="pixelsFound > 0 ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/30' : 'bg-amber-950 text-amber-300 border border-amber-500/30'" x-text="pixelsFound > 0 ? pixelsFound + ' Pixel(s) Found' : 'No Pixels Detected'"></span>
+    </div>
 
-            <div class="space-y-4 text-sm">
-                <template v-if="pixelsFound > 0">
-                    <template x-for="(pixel, index) in filteredPixels" :key="index">
-                        <div class="flex items-center justify-between bg-[#090d14] p-4 rounded-lg border border-slate-800/80">
-                            <div class="flex items-start gap-3">
-                                <i class="fa-solid fa-circle-check text-emerald-400 mt-1 text-lg"></i>
-                                <div>
-                                    <p class="font-semibold text-white" x-text="pixel.name"></p>
-                                    <p class="text-slate-400 text-xs mt-0.5">ID / Signature: <span class="text-slate-200 font-mono" x-text="pixel.id"></span></p>
-                                </div>
-                            </div>
-                            <span class="bg-emerald-950/80 text-emerald-300 text-xs px-2.5 py-1 rounded border border-emerald-500/30 font-semibold" x-text="pixel.status"></span>
-                        </div>
-                    </template>
-                </template>
-                <div x-show="filteredPixels.length === 0" class="bg-[#090d14] p-6 rounded-lg border border-slate-800 text-center text-slate-400">
-                    <i class="fa-solid fa-circle-info text-amber-400 mb-2 text-xl"></i>
-                    <p>No matching pixels detected for the selected filter on this target URL.</p>
+    <div class="space-y-4 text-sm">
+        <!-- FIXED: Replaced Vue framework element with clean Alpine syntax -->
+        <template x-for="(pixel, index) in filteredPixels" :key="index">
+            <div class="flex items-center justify-between bg-[#090d14] p-4 rounded-lg border border-slate-800/80">
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-circle-check text-emerald-400 mt-1 text-lg"></i>
+                    <div>
+                        <p class="font-semibold text-white" x-text="pixel.name"></p>
+                        <p class="text-slate-400 text-xs mt-0.5">ID / Signature: <span class="text-slate-200 font-mono" x-text="pixel.id"></span></p>
+                    </div>
                 </div>
+                <span class="bg-emerald-950/80 text-emerald-300 text-xs px-2.5 py-1 rounded border border-emerald-500/30 font-semibold" x-text="pixel.status"></span>
             </div>
+        </template>
+
+        <!-- No matching pixels fallback window -->
+        <div x-show="filteredPixels.length === 0" class="bg-[#090d14] p-6 rounded-lg border border-slate-800 text-center text-slate-400">
+            <i class="fa-solid fa-circle-info text-amber-400 mb-2 text-xl"></i>
+            <p>No matching pixels detected for the selected filter on this target URL.</p>
         </div>
+    </div>
+</div>
     </main>
 
     <!-- FOOTER CALL HERE -->
