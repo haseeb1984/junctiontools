@@ -6,6 +6,10 @@ error_reporting(E_ALL);
 //error_reporting(1);
 header('Content-Type: application/json');
 
+// Secure outbound fetching for URL-based scanners.
+require_once __DIR__ . '/security/url-validator.php';
+require_once __DIR__ . '/security/safe-http.php';
+
 // Sirf POST request accept karein
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
@@ -53,29 +57,155 @@ if (!in_array($scanType, $customTools)) {
 
 // --- TRUST INSPECTOR LOGIC ---
 if ($scanType === 'trust_inspector') {
-    $storeUrl = isset($input['store_url']) ? trim($input['store_url']) : '';
-    $trustElements = isset($input['trust_elements']) ? $input['trust_elements'] : [];
+    $storeUrl = isset($input['store_url']) ? trim((string)$input['store_url']) : '';
+    $trustElements = isset($input['trust_elements']) && is_array($input['trust_elements'])
+        ? array_values(array_unique(array_map('strval', $input['trust_elements'])))
+        : [];
 
-    if (empty($storeUrl)) {
+    $allowedTrustElements = [
+        'payment_icons' => 'Payment Method Icons',
+        'money_back' => 'Money-Back Guarantee Seal',
+        'ssl_badge' => 'SSL Lock / Security Badge',
+        'reviews_summary' => 'Customer Reviews Summary'
+    ];
+
+    if ($storeUrl === '') {
         echo json_encode(['success' => false, 'message' => 'Please provide a valid store page URL.']);
         exit;
     }
 
-    $count = count($trustElements);
-    $confidenceIndex = $count * 25; // 4 elements = 100% confidence
-    $tips = [];
-
-    if ($confidenceIndex >= 75) {
-        $tips[] = "Great job! Your store displays strong trust signals to reassure buyers.";
-    } else {
-        $tips[] = "Consider adding missing trust badges (like money-back guarantees or security seals) to boost buyer confidence.";
+    $unknown = array_diff($trustElements, array_keys($allowedTrustElements));
+    if ($unknown) {
+        echo json_encode(['success' => false, 'message' => 'One or more selected trust checks are not supported.']);
+        exit;
     }
 
-    $message = "Buyer Confidence Index: <strong>{$confidenceIndex}%</strong><br>Active Elements Detected: {$count}/4<br>" . implode('<br>', $tips);
+    if (!$trustElements) {
+        echo json_encode(['success' => false, 'message' => 'Select at least one trust factor to scan.']);
+        exit;
+    }
+
+    // A selected checkbox is a request to VERIFY that factor; it is never
+    // treated as proof that the factor already exists. Unselected factors are
+    // deliberately omitted from the result.
+    [$validUrl, $normalizedUrl] = jt_validate_external_url($storeUrl);
+    if (!$validUrl) {
+        echo json_encode(['success' => false, 'message' => $normalizedUrl]);
+        exit;
+    }
+
+    $response = jt_safe_http_get($normalizedUrl, [
+        'timeout' => 12,
+        'connect_timeout' => 5,
+        'max_bytes' => 2097152,
+        'user_agent' => 'JunctionTools-TrustInspector/1.0 (+https://junctiontools.com)'
+    ]);
+
+    if (!$response['success']) {
+        echo json_encode([
+            'success' => false,
+            'message' => $response['message'] ?: 'Unable to fetch the target page.'
+        ]);
+        exit;
+    }
+
+    $pageHtml = (string)$response['body'];
+    libxml_use_internal_errors(true);
+    $dom = new DOMDocument();
+    @$dom->loadHTML($pageHtml, LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_NONET);
+    libxml_clear_errors();
+    $xpath = new DOMXPath($dom);
+
+    $visibleText = preg_replace('/\s+/u', ' ', trim((string)$dom->textContent));
+    $htmlLower = strtolower($pageHtml);
+
+    // Payment icons: verify visible labels/attributes commonly used by
+    // payment-brand/icon components instead of assuming the checkbox is true.
+    $hasPaymentIcons = false;
+    foreach ($xpath->query('//img | //svg | //i | //span | //div') as $node) {
+        $attributes = strtolower(
+            $node->getAttribute('alt') . ' ' .
+            $node->getAttribute('title') . ' ' .
+            $node->getAttribute('aria-label') . ' ' .
+            $node->getAttribute('class') . ' ' .
+            $node->getAttribute('id') . ' ' .
+            $node->getAttribute('data-payment-method') . ' ' .
+            $node->getAttribute('data-payment')
+        );
+        if (preg_match('/\b(visa|mastercard|master card|american express|amex|discover|paypal|apple pay|google pay|klarna|stripe|maestro|unionpay|payment method|payment methods|accepted payments?)\b/i', $attributes)) {
+            $hasPaymentIcons = true;
+            break;
+        }
+    }
+
+    $hasMoneyBack = (bool)preg_match(
+        '/\b(money[- ]back|satisfaction|refund|return)\b.{0,100}\b(guarantee|guaranteed)\b|\b(guarantee|guaranteed)\b.{0,100}\b(money[- ]back|refund|satisfaction|return)\b/i',
+        $visibleText
+    );
+
+    // Do not equate HTTPS itself with a visible SSL badge. This check looks
+    // for a security/trust badge or explicit security wording on the page.
+    $hasSslBadge = (bool)preg_match(
+        '/\b(ssl|secure checkout|secure payment|security badge|security seal|verified by visa|mastercard identity check|pci compliant|pci[- ]dss)\b/i',
+        $visibleText . ' ' . $htmlLower
+    );
+
+    $hasReviewsSummary = false;
+    $jsonScripts = $xpath->query('//script[contains(translate(@type,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"ld+json")]');
+    foreach ($jsonScripts as $script) {
+        $json = json_decode(trim($script->textContent), true);
+        if (!is_array($json)) continue;
+        $nodes = isset($json['@graph']) && is_array($json['@graph']) ? $json['@graph'] : [$json];
+        foreach ($nodes as $node) {
+            if (!is_array($node)) continue;
+            if (isset($node['aggregateRating']) || isset($node['review']) || isset($node['reviewCount']) || isset($node['ratingValue'])) {
+                $hasReviewsSummary = true;
+                break 2;
+            }
+        }
+    }
+    if (!$hasReviewsSummary) {
+        $hasReviewsSummary = (bool)preg_match(
+            '/\b(reviews?|ratings?|rated)\b.{0,80}(\d+(?:\.\d+)?\s*(?:\/\s*5|out of 5|stars?)|stars?|\(\d+[+]?\))/i',
+            $visibleText
+        );
+    }
+
+    $detected = [
+        'payment_icons' => $hasPaymentIcons,
+        'money_back' => $hasMoneyBack,
+        'ssl_badge' => $hasSslBadge,
+        'reviews_summary' => $hasReviewsSummary
+    ];
+
+    $results = [];
+    $foundCount = 0;
+    foreach ($trustElements as $key) {
+        $present = $detected[$key];
+        if ($present) $foundCount++;
+        $results[] = [
+            'key' => $key,
+            'name' => $allowedTrustElements[$key],
+            'present' => $present,
+            'status' => $present ? 'Present' : 'Not detected'
+        ];
+    }
+
+    $messageParts = [];
+    foreach ($results as $result) {
+        $messageParts[] = '<strong>' . htmlspecialchars($result['name'], ENT_QUOTES, 'UTF-8') . ':</strong> ' .
+            ($result['present'] ? "<span class='text-emerald-400 font-semibold'>Present</span>" : "<span class='text-amber-400 font-semibold'>Not detected</span>");
+    }
+
+    $message = 'Live page scan completed. Only the trust factors you selected were evaluated.<br>' .
+        implode('<br>', $messageParts);
 
     echo json_encode([
         'success' => true,
-        'confidenceIndex' => $confidenceIndex,
+        'url' => $normalizedUrl,
+        'checked' => $results,
+        'checkedCount' => count($results),
+        'foundCount' => $foundCount,
         'message' => $message
     ]);
     exit;
@@ -192,31 +322,83 @@ if ($scanType === 'copy_analyzer') {
 
 // --- READABILITY EVALUATOR LOGIC ---
 if ($scanType === 'readability_evaluator') {
-    $textContent = isset($input['text_content']) ? trim($input['text_content']) : '';
-    
-    $words = str_word_count(strip_tags($textContent));
-    $sentences = max(1, preg_match_all('/[.!?]+/', $textContent, $matches));
-    $characters = mb_strlen(str_replace(' ', '', $textContent));
-    
-    // Approximate Flesch-Kincaid style metrics
-    $avgWordsPerSentence = round($words / $sentences, 1);
-    $readingEase = max(0, min(100, round(206.835 - (1.015 * ($words / $sentences)) - (84.6 * ($characters / max(1, $words))), 1)));
-    
-    $gradeLevel = "Standard (Easy to Read)";
-    if ($readingEase < 50) {
-        $gradeLevel = "Advanced / College Level";
-    } elseif ($readingEase > 80) {
-        $gradeLevel = "Very Easy (5th-6th Grade)";
+    $textContent = trim((string)($input['text_content'] ?? ''));
+    $plainText = trim(strip_tags($textContent));
+
+    if ($plainText === '') {
+        echo json_encode(['success' => false, 'message' => 'Please provide text to evaluate.']);
+        exit;
     }
 
+    $words = preg_split('/\s+/u', $plainText, -1, PREG_SPLIT_NO_EMPTY);
+    $wordCount = is_array($words) ? count($words) : 0;
+    $sentenceMatches = [];
+    $sentenceCount = max(1, (int)preg_match_all('/[^.!?]+(?:[.!?]+|$)/u', $plainText, $sentenceMatches));
+
+    // Flesch Reading Ease uses syllables per word. The previous implementation
+    // used characters per word, which made the formula return 0 for ordinary
+    // prose. This heuristic counts vowel groups and handles common silent-e
+    // endings so English text produces a useful score.
+    $syllableCount = 0;
+    foreach ($words as $word) {
+        $cleanWord = preg_replace('/[^\p{L}\p{N}\']/u', '', $word);
+        if ($cleanWord === '') continue;
+
+        $parts = preg_split('/[-\x{2010}-\x{2015}]+/u', $cleanWord, -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($parts as $part) {
+            $lowerWord = mb_strtolower($part, 'UTF-8');
+            if (preg_match('/^[a-z]+$/i', $lowerWord)) {
+                $syllables = (int)preg_match_all('/[aeiouy]+/i', $lowerWord, $dummy);
+                $syllables = max(1, $syllables);
+                if (strlen($lowerWord) > 2 && preg_match('/(?:e|es|ed)$/i', $lowerWord) && !preg_match('/(?:le|ye)$/i', $lowerWord)) {
+                    $syllables--;
+                }
+                if (preg_match('/[^aeiou]le$/i', $lowerWord)) {
+                    $syllables++;
+                }
+            } else {
+                $syllables = (int)preg_match_all('/[aeiouy]+/iu', $lowerWord, $dummy);
+                $syllables = max(1, $syllables);
+            }
+            $syllableCount += $syllables;
+        }
+    }
+
+    $wordsPerSentence = $wordCount / max(1, $sentenceCount);
+    $syllablesPerWord = $wordCount > 0 ? $syllableCount / $wordCount : 0;
+
+    $readingEase = $wordCount > 0
+        ? 206.835 - (1.015 * $wordsPerSentence) - (84.6 * $syllablesPerWord)
+        : 0;
+    $readingEase = round(max(0, min(100, $readingEase)), 1);
+
+    $grade = $wordCount > 0
+        ? 0.39 * $wordsPerSentence + 11.8 * $syllablesPerWord - 15.59
+        : 0;
+    $grade = round(max(0, $grade), 1);
+
+    if ($readingEase >= 90) $gradeLevel = 'Very Easy';
+    elseif ($readingEase >= 80) $gradeLevel = 'Easy';
+    elseif ($readingEase >= 70) $gradeLevel = 'Fairly Easy';
+    elseif ($readingEase >= 60) $gradeLevel = 'Standard';
+    elseif ($readingEase >= 50) $gradeLevel = 'Fairly Difficult';
+    elseif ($readingEase >= 30) $gradeLevel = 'Difficult';
+    else $gradeLevel = 'Very Difficult';
+
+    $avgWordsPerSentence = round($wordsPerSentence, 1);
     $message = "Reading Ease Score: <strong>{$readingEase} / 100</strong><br>" .
-               "Estimated Level: <span class='text-emerald-400 font-semibold'>{$gradeLevel}</span><br>" .
-               "Total Words: {$words} | Sentences: {$sentences} | Avg. Words/Sentence: {$avgWordsPerSentence}";
+               "Estimated Reading Level: <span class='text-emerald-400 font-semibold'>{$gradeLevel}</span><br>" .
+               "Flesch-Kincaid Grade: <strong>{$grade}</strong><br>" .
+               "Total Words: {$wordCount} | Sentences: {$sentenceCount} | Avg. Words/Sentence: {$avgWordsPerSentence}";
 
     if (ob_get_length()) ob_clean();
     echo json_encode([
         'success' => true,
         'readingEase' => $readingEase,
+        'fleschKincaidGrade' => $grade,
+        'wordCount' => $wordCount,
+        'sentenceCount' => $sentenceCount,
+        'syllableCount' => $syllableCount,
         'message' => $message
     ]);
     exit;
