@@ -13,11 +13,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Basic browser-origin check to reduce cross-site form submissions (CSRF).
+// Allow the production site plus local development hosts used by the project.
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $referer = $_SERVER['HTTP_REFERER'] ?? '';
-$allowedOrigin = 'https://junctiontools.com';
-if (($origin !== '' && rtrim($origin, '/') !== $allowedOrigin)
-    || ($origin === '' && $referer !== '' && stripos($referer, $allowedOrigin . '/') !== 0)) {
+$allowedHosts = ['junctiontools.com', 'www.junctiontools.com', 'localhost', '127.0.0.1', '::1'];
+
+function jt_is_allowed_origin(string $url, array $allowedHosts): bool {
+    if ($url === '') {
+        return true;
+    }
+
+    $parts = parse_url($url);
+    $host = strtolower($parts['host'] ?? '');
+    if ($host === '' || !in_array($host, $allowedHosts, true)) {
+        return false;
+    }
+
+    return true;
+}
+
+if ($origin !== '' && !jt_is_allowed_origin($origin, $allowedHosts)) {
+    header('Location: contact.html?status=invalid', true, 303);
+    exit;
+}
+
+if ($origin === '' && $referer !== '' && !jt_is_allowed_origin($referer, $allowedHosts)) {
     header('Location: contact.html?status=invalid', true, 303);
     exit;
 }
