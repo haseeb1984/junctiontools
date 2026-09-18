@@ -40,12 +40,17 @@
         }
         .date-picker-icon {
             position: absolute;
-            right: 0.9rem;
-            bottom: 0.85rem;
+            right: 0.75rem;
+            bottom: 0.72rem;
             color: #34d399;
-            pointer-events: none;
-            font-size: 0.9rem;
+            background: transparent;
+            border: 0;
+            padding: 0.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+            z-index: 2;
         }
+        .date-picker-icon:hover { color: #6ee7b7; }
     </style>
 </head>
 <body class="bg-[#090d14] text-slate-100 min-h-screen flex flex-col font-sans" x-data="ageCalculator()">
@@ -70,13 +75,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="date-picker-wrap">
                     <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Date of Birth</label>
-                    <input type="date" x-model="birthDate" @change="calculate()" class="date-input w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none" aria-label="Date of Birth">
-                    <i class="fa-solid fa-calendar-days date-picker-icon" aria-hidden="true"></i>
+                    <input x-ref="birthPicker" type="date" x-model="birthDate" @change="calculate()" class="date-input w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none" aria-label="Date of Birth">
+                    <button type="button" class="date-picker-icon" aria-label="Open calendar for Date of Birth" title="Open calendar" @click="openPicker('birthPicker')"><i class="fa-solid fa-calendar-days"></i></button>
                 </div>
                 <div class="date-picker-wrap">
                     <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Calculate Age On</label>
-                    <input type="date" x-model="asOfDate" @change="calculate()" class="date-input w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none" aria-label="Calculate Age On">
-                    <i class="fa-solid fa-calendar-days date-picker-icon" aria-hidden="true"></i>
+                    <input x-ref="asOfPicker" type="date" x-model="asOfDate" @change="calculate()" class="date-input w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none" aria-label="Calculate Age On">
+                    <button type="button" class="date-picker-icon" aria-label="Open calendar for Calculate Age On" title="Open calendar" @click="openPicker('asOfPicker')"><i class="fa-solid fa-calendar-days"></i></button>
                 </div>
             </div>
             <p x-show="error" x-text="error" class="text-sm text-red-400"></p>
@@ -98,6 +103,15 @@
             const iso = d => d.toISOString().slice(0, 10);
             return {
                 birthDate: '1990-01-01', asOfDate: iso(today), result: null, error: '',
+                openPicker(refName) {
+                    const input = this.$refs[refName];
+                    if (!input) return;
+                    if (typeof input.showPicker === 'function') {
+                        try { input.showPicker(); return; } catch (e) {}
+                    }
+                    input.focus();
+                    input.click();
+                },
                 calculate() {
                     this.error = ''; this.result = null;
                     const birth = new Date(this.birthDate + 'T00:00:00');
