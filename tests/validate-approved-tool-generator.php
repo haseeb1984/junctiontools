@@ -19,7 +19,14 @@ if($status!==0 || !is_file($file)){fwrite(STDERR,"Approved generation failed.\n"
 $html=(string)file_get_contents($file);
 foreach(['<title>Age Calculator | Free Online Tool | JunctionTools</title>','<link rel="canonical" href="https://junctiontools.com/age-calculator">','Date of Birth','Calculate Age On','id="birth_date"','id="as_of_date"'] as $needle){if(strpos($html,$needle)===false){fwrite(STDERR,"Generated page missing: {$needle}\n");exit(1);}}
 foreach(['eval(','fetch(','XMLHttpRequest'] as $forbidden){if(stripos($html,$forbidden)!==false){fwrite(STDERR,"Forbidden generated pattern: {$forbidden}\n");exit(1);}}
-if(preg_match_all('/<script\\s+src=[\"\\']([^\"\\']+)[\"\\']/i',$html,$scriptMatches)){\n  $allowedScripts=['https://cdn.tailwindcss.com','https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js'];\n  foreach($scriptMatches[1] as $src){if(!in_array($src,$allowedScripts,true)){fwrite(STDERR,"Unapproved generated script source: {$src}\\n");exit(1);}}
+if(preg_match_all('/<script\\s+src=["\\']([^"\\']+)["\\']/i',$html,$scriptMatches)){
+  $allowedScripts=['https://cdn.tailwindcss.com','https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js'];
+  foreach($scriptMatches[1] as $src){
+    if(!in_array($src,$allowedScripts,true)){
+      fwrite(STDERR,"Unapproved generated script source: {$src}\n");
+      exit(1);
+    }
+  }
 }
 $traversalSpec=tempnam(sys_get_temp_dir(),'jt-traversal-spec-');
 $traversalApproval=tempnam(sys_get_temp_dir(),'jt-traversal-approval-');
