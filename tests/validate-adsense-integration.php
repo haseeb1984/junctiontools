@@ -9,12 +9,14 @@ if (!is_file($htaccess)) {
 }
 
 $source = (string) file_get_contents($htaccess);
+
+// Validate the central response-body injection contract while tolerating
+// escaped quotes as represented inside Apache's Substitute directive.
 $required = [
     '<IfModule mod_substitute.c>',
     'AddOutputFilterByType SUBSTITUTE text/html',
     'SubstituteMaxLineLength 10m',
     'pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2009027605349204',
-    'crossorigin="anonymous"',
     's|</head>|',
 ];
 
@@ -23,6 +25,14 @@ foreach ($required as $needle) {
         fwrite(STDERR, "AdSense integration contract missing: {$needle}\n");
         exit(1);
     }
+}
+
+if (!preg_match(
+    '/adsbygoogle\.js\?client=ca-pub-2009027605349204[^\r\n]*crossorigin=\\?"anonymous\\?"/',
+    $source
+)) {
+    fwrite(STDERR, "AdSense script tag contract missing or malformed.\n");
+    exit(1);
 }
 
 if (substr_count($source, 'ca-pub-2009027605349204') !== 1) {
