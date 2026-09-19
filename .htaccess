@@ -16,7 +16,7 @@ Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains
 <IfModule mod_substitute.c>
     AddOutputFilterByType SUBSTITUTE text/html
     SubstituteMaxLineLength 10m
-    Substitute "s|</head>|<script async src=\"https://pagead.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2009027605349204\" crossorigin=\"anonymous\"></script></head>|i"
+    Substitute "s|</head>|<script async src=\"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2009027605349204\" crossorigin=\"anonymous\"></script></head>|i"
 </IfModule>
 
 Options -Indexes
