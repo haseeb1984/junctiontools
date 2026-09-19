@@ -1,0 +1,35 @@
+name: Phase 12 Generator Path Safety Verification
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, phase-12/generator-path-safety]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generator-path-safety:
+    name: Generator path traversal validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: PHP syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -l tools/generate-approved-tools.php
+          php -l tests/validate-approved-tool-generator.php
+      - name: Validate approval-gated generator
+        run: php tests/validate-approved-tool-generator.php
