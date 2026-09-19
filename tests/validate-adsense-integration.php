@@ -28,7 +28,7 @@ foreach ($required as $needle) {
 }
 
 if (!preg_match(
-    '/adsbygoogle\.js\?client=ca-pub-2009027605349204[^\r\n]*crossorigin=\\?"anonymous\\?"/',
+    '/adsbygoogle\.js\?client=ca-pub-2009027605349204[^\r\n]*crossorigin=\\\\?"anonymous\\\\?"/',
     $source
 )) {
     fwrite(STDERR, "AdSense script tag contract missing or malformed.\n");
