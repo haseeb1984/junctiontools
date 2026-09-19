@@ -15,7 +15,7 @@ $required = [
     'typeof qrcode!==\'function\'',
     'qr.isDark',
     'Download PNG',
-    'errorCorrectionLevel',
+    'x-model="level"',
     'Private by Design',
     'How to Use',
     'qrGenerator()'
