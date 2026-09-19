@@ -18,6 +18,22 @@ if($status!==0 || !is_file($file)){fwrite(STDERR,"Approved generation failed.\n"
 $html=(string)file_get_contents($file);
 foreach(['<title>Age Calculator | Free Online Tool | JunctionTools</title>','<link rel="canonical" href="https://junctiontools.com/age-calculator">','Date of Birth','Calculate Age On','id="birth_date"','id="as_of_date"'] as $needle){if(strpos($html,$needle)===false){fwrite(STDERR,"Generated page missing: {$needle}\n");exit(1);}}
 foreach(['eval(','fetch(','XMLHttpRequest','<script src='] as $forbidden){if(stripos($html,$forbidden)!==false){fwrite(STDERR,"Forbidden generated pattern: {$forbidden}\n");exit(1);}}
+$traversalSpec=tempnam(sys_get_temp_dir(),'jt-traversal-spec-');
+$traversalApproval=tempnam(sys_get_temp_dir(),'jt-traversal-approval-');
+$traversalDir=$dir.'/safe-output'; mkdir($traversalDir);
+file_put_contents($traversalSpec,json_encode(['specifications'=>[[
+ 'spec_status'=>'draft','generation_eligible'=>false,
+ 'seo'=>['description'=>'Traversal test','title'=>'Traversal Test'],
+ 'tool'=>['name'=>'Traversal Test','slug'=>'../outside-generated','implementation_template'=>'generic-form'],
+ 'inputs'=>['fields'=>[['name'=>'input','type'=>'text']]],
+ 'content'=>['how_to_use'=>['Step one','Step two','Step three']]
+]]],JSON_PRETTY_PRINT));
+file_put_contents($traversalApproval,json_encode(['approvals'=>[['slug'=>'../outside-generated','approved'=>true]]],JSON_PRETTY_PRINT));
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($traversalSpec).' '.escapeshellarg($traversalApproval).' '.escapeshellarg($traversalDir);
+exec($cmd,$traversalLines,$traversalStatus);
+if($traversalStatus===0 || is_file($dir.'/outside-generated.html')){fwrite(STDERR,"Path traversal slug was accepted.\n");exit(1);}
+@unlink($traversalSpec); @unlink($traversalApproval); @rmdir($traversalDir);
+
 $empty=tempnam(sys_get_temp_dir(),'jt-empty-'); file_put_contents($empty,json_encode(['approvals'=>[]])); $emptyDir=$dir.'/empty'; mkdir($emptyDir);
 $cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($empty).' '.escapeshellarg($emptyDir); exec($cmd,$lines2,$status2);
 if($status2!==0 || count(glob($emptyDir.'/*.html'))!==0){fwrite(STDERR,"Unapproved specification was generated.\n");exit(1);}
