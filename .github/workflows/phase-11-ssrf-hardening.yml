@@ -1,0 +1,36 @@
+name: Phase 11 SSRF Hardening Verification
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - phase-11/ssrf-hardening
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ssrf-hardening:
+    name: SSRF hardening contract validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: PHP syntax checks
+        run: |
+          php -l security/url-validator.php
+          php -l security/safe-http.php
+          php -l tests/validate-ssrf-hardening.php
+
+      - name: Validate SSRF hardening
+        run: php tests/validate-ssrf-hardening.php
