@@ -38,6 +38,7 @@ $expected = [
     'approved-generation',
     'runtime-validation',
     'deployment-plan',
+    'site-navigation-sync',
     'search-console-feedback',
     'automatic-publishing-gate',
 ];
