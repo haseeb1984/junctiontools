@@ -166,6 +166,21 @@ function jt_fetch_url(string $url, array $options = []): array
     $connectTimeout = min(max((int)($options['connect_timeout'] ?? 5), 1), 10);
     $maxBytes = min(max((int)($options['max_bytes'] ?? 2_000_000), 16_384), 5_000_000);
     $userAgent = (string)($options['user_agent'] ?? 'JunctionTools-SafeScanner/1.0');
+
+    // Pin the public DNS answer used for validation into the same cURL request.
+    // This closes the DNS-rebinding/TOCTOU gap between validation and connect.
+    $parts = @parse_url($normalized);
+    $host = strtolower(rtrim((string)($parts['host'] ?? ''), '.'));
+    $port = (int)($parts['port'] ?? (strtolower((string)($parts['scheme'] ?? '')) === 'https' ? 443 : 80));
+    $resolvedIps = jt_resolve_public_ips($host);
+    if ($resolvedIps === []) {
+        return ['ok' => false, 'error' => 'Target host could not be pinned to a public IP address.', 'status' => 0, 'body' => '', 'headers' => '', 'content_type' => '', 'certificate' => []];
+    }
+    $resolveEntries = [];
+    foreach ($resolvedIps as $ip) {
+        $resolveEntries[] = $host . ':' . $port . ':' . $ip;
+    }
+
     $captureCertificate = (($options['certificate_info'] ?? false) === true) && str_starts_with(strtolower($normalized), 'https://');
 
     $ch = curl_init($normalized);
@@ -187,6 +202,7 @@ function jt_fetch_url(string $url, array $options = []): array
         CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
         CURLOPT_MAXFILESIZE => $maxBytes,
         CURLOPT_ENCODING => '',
+        CURLOPT_RESOLVE => $resolveEntries,
     ];
 
     // Certificate metadata is collected from the same TLS-verified cURL
