@@ -9,7 +9,8 @@ file_put_contents($spec,json_encode(['specifications'=>[[
  'spec_status'=>'draft','generation_eligible'=>false,
  'seo'=>['description'=>'Free age calculator.','title'=>'Age Calculator | Free Online Tool | JunctionTools'],
  'tool'=>['name'=>'Age Calculator','slug'=>'age-calculator','implementation_template'=>'date-age-calculator'],
- 'inputs'=>['fields'=>[['name'=>'birth_date','type'=>'date'],['name'=>'as_of_date','type'=>'date']]]
+ 'inputs'=>['fields'=>[['name'=>'birth_date','type'=>'date'],['name'=>'as_of_date','type'=>'date']]],
+ 'content'=>['how_to_use'=>['Enter your birth date.','Choose the calculation date.','Click Calculate Age.']]
 ]]],JSON_PRETTY_PRINT));
 file_put_contents($approval,json_encode(['approvals'=>[['slug'=>'age-calculator','approved'=>true,'approved_by'=>'ci-test','approved_at'=>'2026-09-15T00:00:00Z']]],JSON_PRETTY_PRINT));
 $cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($dir); exec($cmd,$lines,$status);
