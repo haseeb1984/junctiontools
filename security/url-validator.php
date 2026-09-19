@@ -19,33 +19,39 @@ function jt_is_private_or_reserved_ip(string $ip): bool
     return true;
 }
 
-function jt_resolves_to_public_ip(string $host): bool
+function jt_resolve_public_ips(string $host): array
 {
     if (filter_var($host, FILTER_VALIDATE_IP)) {
-        return !jt_is_private_or_reserved_ip($host);
+        return jt_is_private_or_reserved_ip($host) ? [] : [$host];
     }
 
     $host = strtolower(rtrim($host, '.'));
     if ($host === '' || $host === 'localhost' || str_ends_with($host, '.localhost')) {
-        return false;
+        return [];
     }
 
     $records = @dns_get_record($host, DNS_A | DNS_AAAA);
     if (!$records) {
-        return false;
+        return [];
     }
 
-    $resolved = 0;
+    $ips = [];
     foreach ($records as $record) {
         $ip = $record['ip'] ?? ($record['ipv6'] ?? null);
-        if ($ip === null || jt_is_private_or_reserved_ip($ip)) {
-            return false;
+        if (!is_string($ip) || jt_is_private_or_reserved_ip($ip)) {
+            return [];
         }
-        $resolved++;
+        $ips[] = $ip;
     }
 
-    return $resolved > 0;
+    return array_values(array_unique($ips));
 }
+
+function jt_resolves_to_public_ip(string $host): bool
+{
+    return jt_resolve_public_ips($host) !== [];
+}
+
 
 function jt_validate_external_url(string $url, bool $httpsOnly = false): array
 {
