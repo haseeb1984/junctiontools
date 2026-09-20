@@ -84,11 +84,18 @@ function hcr_run(array $o): array {
     $missing=[];
     foreach(['json','mbstring','openssl','curl','filter','hash','fileinfo','ctype'] as $ext) if(!extension_loaded($ext)) $missing[]=$ext;
     $checks[] = hcr_check('required-extensions','extensions',true,$missing===[],'Required extensions check.', ['violations'=>$missing]);
-    $available=[];
-    foreach(['exec','shell_exec','system','passthru','proc_open','popen','pcntl_fork','pcntl_exec','pcntl_signal','dl'] as $fn) {
-        if(function_exists($fn) && stripos((string)ini_get('disable_functions'),$fn)===false) $available[]=$fn;
+    $forbidden=['exec','shell_exec','system','passthru','proc_open','popen','pcntl_fork','pcntl_exec','pcntl_signal','dl'];
+    $violations=[];
+    $rii=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS));
+    foreach($rii as $file) {
+        if(!$file->isFile() || $file->getExtension()!=='php') continue;
+        $relative=str_replace($root.'/','',$file->getPathname());
+        if(str_starts_with($relative,'tests/') || str_starts_with($relative,'vendor/')) continue;
+        $source=file_get_contents($file->getPathname());
+        if(!is_string($source)) throw new RuntimeException('Unable to read PHP source.');
+        foreach($forbidden as $fn) if(preg_match('/\\b'.preg_quote($fn,'/').'\\s*\\(/',$source)) $violations[]=$relative.':'.$fn;
     }
-    $checks[] = hcr_check('forbidden-functions','forbidden_functions',true,$available===[],'Forbidden function check.', ['violations'=>$available]);
+    $checks[] = hcr_check('forbidden-functions','forbidden_functions',true,$violations===[],'Production PHP source forbidden-function scan.',['violations'=>$violations]);
     foreach(['config','security','tools','tests','storage/runtime','storage/logs','storage/cache'] as $dir) {
         $path=$root.'/'.$dir;
         $checks[] = hcr_check('directory-'.str_replace('/','-',$dir),'filesystem',true,is_dir($path),"Directory {$dir} check.",['input'=>$path]);
