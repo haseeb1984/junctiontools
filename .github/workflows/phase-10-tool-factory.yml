@@ -32,6 +32,8 @@ jobs:
           php -l tools/run-demand-refresh.php
           php -l tools/build-tool-specs.php
           php -l tools/generate-approved-tools.php
+          php -l security/build-security-gate.php
+          php -l tests/validate-build-security-gate-generator.php
           php -l tools/sync-site-navigation.php
           php -l tools/build-search-console-feedback.php
           php -l tools/build-search-console-generation-queue.php
@@ -52,6 +54,9 @@ jobs:
 
       - name: Validate tool specification content contract
         run: php tests/validate-tool-specs.php
+
+      - name: Validate pre-build Security Gate and generator enforcement
+        run: php tests/validate-build-security-gate-generator.php
 
       - name: Validate generated tool layout and content order
         run: php tests/validate-generated-runtime.php
