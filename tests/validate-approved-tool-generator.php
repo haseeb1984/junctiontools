@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$root=dirname(__DIR__); $tool=$root.'/tools/generate-approved-tools.php';
+$root=dirname(__DIR__); $tool=$root.'/tools/generate-approved-tools.php'; require_once $root.'/security/build-security-gate.php';
 if (!is_file($tool)) { fwrite(STDERR,"Approved tool generator missing.\n"); exit(1); }
 $dir=sys_get_temp_dir().'/jt-generated-'.bin2hex(random_bytes(4)); mkdir($dir,0775,true);
 $spec=tempnam(sys_get_temp_dir(),'jt-spec-'); $approval=tempnam(sys_get_temp_dir(),'jt-approval-');
@@ -10,10 +10,18 @@ file_put_contents($spec,json_encode(['specifications'=>[[
  'seo'=>['description'=>'Free age calculator.','title'=>'Age Calculator | Free Online Tool | JunctionTools'],
  'tool'=>['name'=>'Age Calculator','slug'=>'age-calculator','implementation_template'=>'date-age-calculator'],
  'inputs'=>['fields'=>[['name'=>'birth_date','type'=>'date'],['name'=>'as_of_date','type'=>'date']]],
- 'content'=>['how_to_use'=>['Enter your birth date.','Choose the calculation date.','Click Calculate Age.']]
+ 'content'=>['how_to_use'=>['Enter your birth date.','Choose the calculation date.','Click Calculate Age.']],
+ 'privacy_security'=>['processing'=>'browser_only','network_requests'=>false,'external_dependencies'=>false,'security_requirements'=>['No network access.','No server-side storage.']]
 ]]],JSON_PRETTY_PRINT));
 file_put_contents($approval,json_encode(['approvals'=>[['slug'=>'age-calculator','approved'=>true,'approved_by'=>'ci-test','approved_at'=>'2026-09-15T00:00:00Z']]],JSON_PRETTY_PRINT));
-$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($dir); exec($cmd,$lines,$status);
+$securityDecision=tempnam(sys_get_temp_dir(),'jt-security-decision-');
+$specData=json_decode((string)file_get_contents($spec),true);
+$policy=(string)file_get_contents($root.'/config/build-security-gate.json');
+$policyData=json_decode($policy,true);
+$conditions=$policyData['required_conditions'];
+$decision=['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'evaluated_at'=>gmdate('Y-m-d\\TH:i:s\\Z'),'evaluator_id'=>BUILD_SECURITY_GATE_EVALUATOR,'source'=>['opportunity_id'=>'ci-test','specification_slug'=>'age-calculator'],'decision'=>'allow','type'=>'new_tool','conditions'=>$conditions,'blocked_conditions'=>[],'safe_to_build'=>true,'approval_requirements'=>['generation_approval'=>true,'enhancement_approval'=>false],'evidence'=>['spec_sha256'=>bsg_sha256($specData['specifications'][0]),'policy_sha256'=>bsg_sha256($policyData)]];
+file_put_contents($securityDecision,json_encode(['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'decisions'=>[$decision]],JSON_PRETTY_PRINT));
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($dir).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision); exec($cmd,$lines,$status);
 $file=$dir.'/age-calculator.html';
 if($status!==0 || !is_file($file)){fwrite(STDERR,"Approved generation failed.\n");exit(1);}
 $html=(string)file_get_contents($file);
@@ -48,5 +56,5 @@ if($traversalStatus===0 || is_file($dir.'/outside-generated.html')){fwrite(STDER
 $empty=tempnam(sys_get_temp_dir(),'jt-empty-'); file_put_contents($empty,json_encode(['approvals'=>[]])); $emptyDir=$dir.'/empty'; mkdir($emptyDir);
 $cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($empty).' '.escapeshellarg($emptyDir); exec($cmd,$lines2,$status2);
 if($status2!==0 || count(glob($emptyDir.'/*.html'))!==0){fwrite(STDERR,"Unapproved specification was generated.\n");exit(1);}
-@unlink($spec); @unlink($approval); @unlink($empty); @unlink($file); @rmdir($emptyDir); @rmdir($dir);
+@unlink($spec); @unlink($approval); @unlink($securityDecision); @unlink($empty); @unlink($file); @rmdir($emptyDir); @rmdir($dir);
 echo "Approval-gated tool generator validation: PASS\n";
