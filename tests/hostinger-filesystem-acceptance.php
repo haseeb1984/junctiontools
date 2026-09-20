@@ -68,6 +68,10 @@ function hfa_safe_relative(string $root, string $relative): ?string {
     $parent = dirname($candidate);
     $parentReal = realpath($parent);
     if ($parentReal === false || !hfa_within($root, $parentReal)) return null;
+    if (file_exists($candidate) || is_link($candidate)) {
+        $candidateReal = realpath($candidate);
+        if ($candidateReal === false || !hfa_within($root, $candidateReal)) return null;
+    }
     return $candidate;
 }
 
@@ -198,7 +202,7 @@ function hfa_run(): array {
     $case(19, 'symlink parent escape rejected', function() use ($root, $outside) {
         $link = $root.'/assets/parent';
         if (!@symlink($outside, $link)) return true;
-        return hfa_safe_relative($root, 'assets/parent/../sentinel.txt') === null;
+        return hfa_safe_relative($root, 'assets/parent/sentinel.txt') === null;
     });
     $case(20, 'valid canonical path accepted', function() use ($root) {
         $p = hfa_safe_relative($root, 'storage/runtime/probe.txt');
