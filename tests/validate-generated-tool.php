@@ -1,18 +1,49 @@
 <?php
 declare(strict_types=1);
-$root=dirname(__DIR__);$generator=$root.'/tools/generate-approved-tools.php';require_once $root.'/security/build-security-gate.php';
+$root=dirname(__DIR__);
+$generator=$root.'/tools/generate-approved-tools.php';
+require_once $root.'/security/build-security-gate.php';
+
 if(!is_file($generator)){fwrite(STDERR,"Generator missing.\n");exit(1);}
-$spec=tempnam(sys_get_temp_dir(),'jt-g-spec-');$approval=tempnam(sys_get_temp_dir(),'jt-g-app-');$out=sys_get_temp_dir().'/jt-generated-'.bin2hex(random_bytes(4));mkdir($out,0775,true);
+
+$spec=tempnam(sys_get_temp_dir(),'jt-g-spec-');
+$approval=tempnam(sys_get_temp_dir(),'jt-g-app-');
+$out=sys_get_temp_dir().'/jt-generated-'.bin2hex(random_bytes(4));
+mkdir($out,0775,true);
+
 $specData=['specifications'=>[
- ['spec_status'=>'draft','generation_eligible'=>false,'seo'=>['title'=>'Age Calculator | Free Online Tool | JunctionTools','description'=>'Free age calculator.'], 'content'=>['how_to_use'=>['Enter the required dates.','Choose the calculation date.','Click Calculate Age to view the result.']],'tool'=>['name'=>'Age Calculator','slug'=>'age-calculator','implementation_template'=>'date-age-calculator'],'privacy_security=>['processing'=>'browser_only','network_requests'=>false,'external_dependencies'=>false,'security_requirements'=>['No network access.','No server-side storage.']],'inputs'=>['fields'=>[['name'=>'birth_date','type'=>'date','required'=>true],['name'=>'as_of_date','type'=>'date','required'=>true]]]],
- ['spec_status'=>'draft','generation_eligible'=>false,'seo'=>['title'=>'QR Code Generator | Free Online Tool | JunctionTools','description'=>'Free QR generator.'], 'content'=>['Enter the content to encode.','Choose the error correction and size.','Click Run to generate the result.']],'tool'=>['name'=>'QR Code Generator','slug'=>'qr-code-generator','implementation_template'=>'qr-generator'],'privacy_security=>['processing'=>'browser_only','network_requests'=>false,'external_dependencies'=>false,'security_requirements'=>['No network access.','No server-side storage.']],'inputs'=>['fields'=>[['name'=>'content','type'=>'text','required'=>true],['name'=>'error_correction','type'=>'enum','required'=>true,'values'=>['low','medium','quartile','high']],['name'=>'size','type'=>'integer','required'=>true]]]]
+ ['spec_status'=>'draft','generation_eligible'=>false,'seo'=>['title'=>'Age Calculator | Free Online Tool | JunctionTools','description'=>'Free age calculator.'],'content'=>['how_to_use'=>['Enter the required dates.','Choose the calculation date.','Click Calculate Age to view the result.']],'tool'=>['name'=>'Age Calculator','slug'=>'age-calculator','implementation_template'=>'date-age-calculator'],'privacy_security'=>['processing'=>'browser_only','network_requests'=>false,'external_dependencies'=>false,'security_requirements'=>['No network access.','No server-side storage.']],'inputs'=>['fields'=>[['name'=>'birth_date','type'=>'date','required'=>true],['name'=>'as_of_date','type'=>'date','required'=>true]]]],
+ ['spec_status'=>'draft','generation_eligible'=>false,'seo'=>['title'=>'QR Code Generator | Free Online Tool | JunctionTools','description'=>'Free QR generator.'],'content'=>['how_to_use'=>['Enter the content to encode.','Choose the error correction and size.','Click Run to generate the result.']],'tool'=>['name'=>'QR Code Generator','slug'=>'qr-code-generator','implementation_template'=>'qr-generator'],'privacy_security'=>['processing'=>'browser_only','network_requests'=>false,'external_dependencies'=>false,'security_requirements'=>['No network access.','No server-side storage.']],'inputs'=>['fields'=>[['name'=>'content','type'=>'text','required'=>true],['name'=>'error_correction','type'=>'enum','required'=>true,'values'=>['low','medium','quartile','high']],['name'=>'size','type'=>'integer','required'=>true]]]]
 ]];
-file_put_contents($spec,json_encode($specData,JSON_PRETTY_PRINT));file_put_contents($approval,json_encode(['approvals'=>[['slug'=>'age-calculator','approved'=>true],['slug'=>'qr-code-generator','approved'=>true]]],JSON_PRETTY_PRINT));
-$securityDecision=tempnam(sys_get_temp_dir(),'jt-g-security-');$policyData=json_decode((string)file_get_contents($root.'/config/build-security-gate.json'),true);$decisions=[];foreach($specData['specifications'] as $s){$decisions[]=['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'evaluated_at'=>gmdate('Y-m-d\\TH:i:s\\Z'),'evaluator_id'=>BUILD_SECURITY_GATE_EVALUATOR,'source'=>['opportunity_id'=>'ci-generated-tool','specification_slug'=>$s['tool']['slug']],'decision'=>'allow','type'=>'new_tool','conditions'=>$policyData['required_conditions'],'blocked_conditions'=>[],'safe_to_build'=>true,'approval_requirements'=>['generation_approval'=>true,'enhancement_approval'=>false],'evidence'=>['spec_sha256'=>bsg_sha256($s),'policy_sha256'=>bsg_sha256($policyData)]];}file_put_contents($securityDecision,json_encode(['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'decisions'=>$decisions],JSON_PRETTY_PRINT));
-$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($generator).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($out).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision);exec($cmd,$lines,$status);if($status!==0){fwrite(STDERR,"Generator failed.\n");exit(1);}
-$age=(string)file_get_contents($out.'/age-calculator.html');$qr=(string)file_get_contents($out.'/qr-code-generator.html');
+
+file_put_contents($spec,json_encode($specData,JSON_PRETTY_PRINT));
+file_put_contents($approval,json_encode(['approvals'=>[['slug'=>'age-calculator','approved'=>true],['slug'=>'qr-code-generator','approved'=>true]]],JSON_PRETTY_PRINT));
+
+$securityDecision=tempnam(sys_get_temp_dir(),'jt-g-security-');
+$policyData=json_decode((string)file_get_contents($root.'/config/build-security-gate.json'),true);
+$decisions=[];
+foreach($specData['specifications'] as $s){
+ $decisions[]=['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'evaluated_at'=>gmdate('Y-m-d\TH:i:s\Z'),'evaluator_id'=>BUILD_SECURITY_GATE_EVALUATOR,'source'=>['opportunity_id'=>'ci-generated-tool','specification_slug'=>$s['tool']['slug']],'decision'=>'allow','type'=>'new_tool','conditions'=>$policyData['required_conditions'],'blocked_conditions'=>[],'safe_to_build'=>true,'approval_requirements'=>['generation_approval'=>true,'enhancement_approval'=>false],'evidence'=>['spec_sha256'=>bsg_sha256($s),'policy_sha256'=>bsg_sha256($policyData)]];
+}
+file_put_contents($securityDecision,json_encode(['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'decisions'=>$decisions],JSON_PRETTY_PRINT));
+
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($generator).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($out).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision);
+exec($cmd,$lines,$status);
+if($status!==0){fwrite(STDERR,"Generator failed.\n");exit(1);}
+
+$age=(string)file_get_contents($out.'/age-calculator.html');
+$qr=(string)file_get_contents($out.'/qr-code-generator.html');
 $checks=[[$age,'<title>Age Calculator | Free Online Tool | JunctionTools</title>','age title'],[$age,'<link rel="canonical" href="https://junctiontools.com/age-calculator">','age canonical'],[$age,'id="birth_date"','age birth field'],[$age,'id="as_of_date"','age calculation field'],[$age,'Date.UTC(','age deterministic logic'],[$qr,'<title>QR Code Generator | Free Online Tool | JunctionTools</title>','qr title'],[$qr,'<link rel="canonical" href="https://junctiontools.com/qr-code-generator">','qr canonical'],[$qr,'id="content"','qr content field'],[$qr,'id="error_correction"','qr enum field'],[$qr,'id="size"','qr size field']];
 foreach($checks as [$html,$needle,$label])if(strpos($html,$needle)===false){fwrite(STDERR,"Missing {$label}.\n");exit(1);}
 foreach([$age,$qr] as $html){foreach(['eval(','new Function(','document.write(','innerHTML =','fetch(','XMLHttpRequest','WebSocket(','<script src=','http://'] as $needle)if(stripos($html,$needle)!==false){fwrite(STDERR,"Forbidden generated pattern: {$needle}\n");exit(1);}if(substr_count($html,'<script>')!==1||substr_count($html,'</script>')!==1||substr_count($html,'<title>')!==1||substr_count($html,'rel="canonical"')!==1){fwrite(STDERR,"Invalid generated document structure.\n");exit(1);}}
-$empty=tempnam(sys_get_temp_dir(),'jt-g-empty-');$emptyOut=$out.'/unapproved';mkdir($emptyOut);file_put_contents($empty,json_encode(['approvals'=>[]]));$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($generator).' '.escapeshellarg($spec).' '.escapeshellarg($empty).' '.escapeshellarg($emptyOut);exec($cmd,$ignored,$emptyStatus);if($emptyStatus!==0||count(glob($emptyOut.'/*.html'))!==0){fwrite(STDERR,"Unapproved generation bypass detected.\n");exit(1);}
-@unlink($spec);@unlink($approval);@unlink($securityDecision);@unlink($empty);@unlink($out.'/age-calculator.html');@unlink($out.'/qr-code-generator.html');@rmdir($emptyOut);@rmdir($out);echo "Generated tool validation: PASS\n";
+
+$empty=tempnam(sys_get_temp_dir(),'jt-g-empty-');
+$emptyOut=$out.'/unapproved';
+mkdir($emptyOut);
+file_put_contents($empty,json_encode(['approvals'=>[]]));
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($generator).' '.escapeshellarg($spec).' '.escapeshellarg($empty).' '.escapeshellarg($emptyOut);
+exec($cmd,$ignored,$emptyStatus);
+if($emptyStatus!==0||count(glob($emptyOut.'/*.html'))!==0){fwrite(STDERR,"Unapproved generation bypass detected.\n");exit(1);}
+
+@unlink($spec);@unlink($approval);@unlink($securityDecision);@unlink($empty);@unlink($out.'/age-calculator.html');@unlink($out.'/qr-code-generator.html');@rmdir($emptyOut);@rmdir($out);
+echo "Generated tool validation: PASS\n";
