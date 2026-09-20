@@ -63,8 +63,9 @@ function bsg_validate_timestamp(string $value): bool {
     return $time <= new DateTimeImmutable('now');
 }
 
-function bsg_allowed_templates(): array {
-    return ['generic-form', 'date-age-calculator', 'calculator-form', 'text-utility', 'qr-generator'];
+function bsg_allowed_templates(array $policy): array {
+    $templates = $policy['approved_templates'] ?? [];
+    return is_array($templates) ? array_values(array_filter($templates, 'is_string')) : [];
 }
 
 function bsg_evaluate(array $spec, array $decision, array $policy): array {
@@ -138,7 +139,7 @@ function bsg_evaluate(array $spec, array $decision, array $policy): array {
     }
 
     $template = (string)($tool['implementation_template'] ?? '');
-    if (!in_array($template, bsg_allowed_templates(), true)) {
+    if (!in_array($template, bsg_allowed_templates($policy), true)) {
         return bsg_reject('security_gate_rejected', 'Implementation template is not approved by the build policy.');
     }
 
