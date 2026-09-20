@@ -1,0 +1,27 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"Hostinger Compatibility Result",
+  "type":"object",
+  "required":["schema_version","test_suite","status","exit_code","timestamp","environment","summary","checks"],
+  "properties":{
+    "schema_version":{"const":"1.0.0"},
+    "test_suite":{"const":"hostinger-compatibility"},
+    "status":{"enum":["PASS","FAIL"]},
+    "exit_code":{"enum":[0,1,2,3,4]},
+    "timestamp":{"type":"string","format":"date-time"},
+    "environment":{"type":"object","required":["php_version","php_major_minor","php_role","os","cron_required"],"properties":{
+      "php_version":{"type":"string"},"php_major_minor":{"type":"string","pattern":"^\\d+\\.\\d+$"},
+      "php_role":{"enum":["production","compatibility","forward"]},"os":{"type":"string"},"cron_required":{"type":"boolean"}
+    }},
+    "summary":{"type":"object","required":["total","passed","failed","skipped"],"properties":{
+      "total":{"type":"integer","minimum":0},"passed":{"type":"integer","minimum":0},"failed":{"type":"integer","minimum":0},"skipped":{"type":"integer","minimum":0}
+    }},
+    "checks":{"type":"array","items":{"type":"object","required":["id","category","status","required","message"],"properties":{
+      "id":{"type":"string","pattern":"^[a-z0-9]+(?:[._-][a-z0-9]+)*$"},
+      "category":{"enum":["php_version","extensions","forbidden_functions","filesystem","permissions","traversal","symlink","cron","runtime","deployment"]},
+      "status":{"enum":["PASS","FAIL","SKIP"]},"required":{"type":"boolean"},"message":{"type":"string"},
+      "actual":{},"expected":{},"input":{"type":["string","null"]},"reason":{"type":["string","null"]},
+      "violations":{"type":"array","items":{"type":"string"}},"details":{"type":"object"}
+    }}
+  }
+}
