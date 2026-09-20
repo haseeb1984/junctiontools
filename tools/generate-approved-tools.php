@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/security/build-security-gate.php';
 
 /** Generate executable pages only for explicitly approved draft specifications. */
-if($argc<3){fwrite(STDERR,"Usage: php tools/generate-approved-tools.php <specs.json> <approvals.json> [output-dir]\n");exit(2);}
+if($argc<3){fwrite(STDERR,"Usage: php tools/generate-approved-tools.php <specs.json> <approvals.json> [output-dir] [security-policy.json] [security-decisions.json]\n");exit(2);}
 $specFile=$argv[1];$approvalFile=$argv[2];$outputDir=$argv[3]??dirname(__DIR__).'/generated-tools';
 $securityPolicyFile=$argv[4]??dirname(__DIR__).'/config/build-security-gate.json';
 $securityDecisionFile=$argv[5]??dirname(__DIR__).'/config/build-security-gate-decisions.json';
