@@ -1,0 +1,55 @@
+name: Hostinger Compatibility Acceptance
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    name: PHP ${{ matrix.php }} Hostinger acceptance
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.role == 'forward' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {php: '8.3', role: 'production'}
+          - {php: '8.4', role: 'compatibility'}
+          - {php: '8.5', role: 'forward'}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, mbstring, openssl
+          coverage: none
+          tools: phpunit
+      - name: Syntax check
+        run: |
+          php -l tests/validate-hostinger-compatibility.php
+          php -l tests/HostingerCompatibilityResultValidationTest.php
+          php -l tests/HostingerCompatibilityRunnerProcessTest.php
+      - name: Run PHPUnit
+        run: phpunit --colors=never tests/HostingerCompatibilityResultValidationTest.php tests/HostingerCompatibilityRunnerProcessTest.php
+      - name: Run acceptance runner
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/hostinger-fixture/{config,security,tools,tests,storage/runtime,storage/logs,storage/cache}
+          printf '%s\n' '{}' > artifacts/hostinger-fixture/config/.probe
+          chmod 0644 artifacts/hostinger-fixture/config/.probe
+          php tests/validate-hostinger-compatibility.php --json --php-version=${{ matrix.php }} --php-role=${{ matrix.role }} --root="$GITHUB_WORKSPACE/artifacts/hostinger-fixture" --no-cron > artifacts/hostinger-result.json
+          php -r '$j=json_decode(file_get_contents("artifacts/hostinger-result.json"),true,512,JSON_THROW_ON_ERROR); if(!isset($j["schema_version"],$j["test_suite"],$j["status"],$j["exit_code"],$j["summary"],$j["checks"])) exit(1); echo "Hostinger result: ".$j["status"].PHP_EOL;'
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hostinger-compatibility-${{ matrix.php }}
+          path: artifacts/hostinger-result.json
+          if-no-files-found: warn
