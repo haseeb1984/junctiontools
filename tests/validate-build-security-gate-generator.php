@@ -39,6 +39,7 @@ function validDecision(array $spec,array $policy):array {
     return [
         'schema_version'=>'1.0.0','policy_version'=>$policy['policy_version'],
         'generated_at'=>gmdate('Y-m-d\TH:i:s\Z'),
+        'evaluated_at'=>gmdate('Y-m-d\\TH:i:s\\Z'),
         'evaluator_id'=>'build-security-gate-v1',
         'source'=>['opportunity_id'=>'security-test','specification_slug'=>$spec['tool']['slug']],
         'type'=>'new_tool',
