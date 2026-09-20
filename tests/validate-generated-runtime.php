@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$root=dirname(__DIR__); $generator=$root.'/tools/generate-approved-tools.php';
+$root=dirname(__DIR__); $generator=$root.'/tools/generate-approved-tools.php'; require_once $root.'/security/build-security-gate.php';
 if(!is_file($generator)){fwrite(STDERR,"Generator missing.\n");exit(1);}
 $spec=tempnam(sys_get_temp_dir(),'jt-r-spec-'); $approval=tempnam(sys_get_temp_dir(),'jt-r-app-');
 $out=sys_get_temp_dir().'/jt-runtime-'.bin2hex(random_bytes(4)); mkdir($out,0775,true);
@@ -10,7 +10,8 @@ $specData=['specifications'=>[
  ['spec_status'=>'draft','generation_eligible'=>false,'seo'=>['description'=>'Free QR code generator.'],'tool'=>['name'=>'QR Code Generator','slug'=>'qr-code-generator','implementation_template'=>'qr-generator'],'content'=>['how_to_use'=>['Enter content.','Choose options.','Generate and download.'],'use_cases'=>['Links','Print materials'],'tips'=>['Test the code.','Use strong contrast.']],'inputs'=>['fields'=>[['name'=>'input','type'=>'text']]]]
 ]];
 file_put_contents($spec,json_encode($specData)); file_put_contents($approval,json_encode(['approvals'=>[['slug'=>'age-calculator','approved'=>true],['slug'=>'qr-code-generator','approved'=>true]]]));
-$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($generator).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($out); exec($cmd,$lines,$status);
+$securityDecision=tempnam(sys_get_temp_dir(),'jt-r-security-'); $policyData=json_decode((string)file_get_contents($root.'/config/build-security-gate.json'),true); $decisions=[]; foreach($specData['specifications'] as $s){$slug=$s['tool']['slug'];$decisions[]=['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'evaluated_at'=>gmdate('Y-m-d\\TH:i:s\\Z'),'evaluator_id'=>BUILD_SECURITY_GATE_EVALUATOR,'source'=>['opportunity_id'=>'ci-runtime','specification_slug'=>$slug],'decision'=>'allow','type'=>'new_tool','conditions'=>$policyData['required_conditions'],'blocked_conditions'=>[],'safe_to_build'=>true,'approval_requirements'=>['generation_approval'=>true,'enhancement_approval'=>false],'evidence'=>['spec_sha256'=>bsg_sha256($s),'policy_sha256'=>bsg_sha256($policyData)]];} file_put_contents($securityDecision,json_encode(['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'decisions'=>$decisions]));
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($generator).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($out).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision); exec($cmd,$lines,$status);
 if($status!==0){fwrite(STDERR,"Generation failed.\n");exit(1);}
 $files=glob($out.'/*.html') ?: [];
 if(count($files)!==2){fwrite(STDERR,"Expected 2 generated artifacts, found ".count($files).".\n");exit(1);}
@@ -35,5 +36,5 @@ $age=(string)file_get_contents($out.'/age-calculator.html');
 foreach(['id="birth_date"','id="as_of_date"','Date.UTC('] as $needle){if(strpos($age,$needle)===false){fwrite(STDERR,"Age calculator runtime contract missing: {$needle}\n");exit(1);}}
 $qr=(string)file_get_contents($out.'/qr-code-generator.html');
 if(strpos($qr,'id="input"')===false || strpos($qr,'id="run"')===false){fwrite(STDERR,"QR generator runtime contract missing.\n");exit(1);}
-@unlink($spec);@unlink($approval);foreach($files as $file)@unlink($file);@rmdir($out);
+@unlink($spec);@unlink($approval);@unlink($securityDecision);foreach($files as $file)@unlink($file);@rmdir($out);
 echo "Generated runtime validation: PASS\n";
