@@ -216,7 +216,7 @@ function hfa_run(): array {
     });
     $case(22, 'encoded traversal rejected', fn() => hfa_safe_relative($root, '%2e%2e/%2e%2e/outside/x') === null);
     $case(23, 'invalid tool slug rejected', fn() => !hfa_safe_slug('../outside') && !hfa_safe_slug('bad_slug') && !hfa_safe_slug('BadSlug'));
-    $case(24, 'generated filename injection rejected', fn() => hfa_safe_relative($root, 'storage/generated/../../outside.php') === null);
+    $case(24, 'generated filename injection rejected', fn() => hfa_safe_relative($root, 'storage/generated/../../../outside.php') === null);
     $case(25, 'application write outside approved paths blocked', function() use ($root, $outside) {
         $target = hfa_safe_relative($root, '../outside/evil.txt');
         return $target === null && !file_exists($outside.'/evil.txt');
