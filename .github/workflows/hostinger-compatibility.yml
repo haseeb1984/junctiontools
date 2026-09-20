@@ -36,6 +36,7 @@ jobs:
           php -l tests/validate-hostinger-compatibility.php
           php -l tests/HostingerCompatibilityResultValidationTest.php
           php -l tests/HostingerCompatibilityRunnerProcessTest.php
+          php -l tests/hostinger-filesystem-acceptance.php
       - name: Run PHPUnit
         run: phpunit --colors=never tests/HostingerCompatibilityResultValidationTest.php tests/HostingerCompatibilityRunnerProcessTest.php
       - name: Run acceptance runner
@@ -51,5 +52,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: hostinger-compatibility-${{ matrix.php }}
-          path: artifacts/hostinger-result.json
+          path: artifacts/hostinger-*-result.json
           if-no-files-found: warn
