@@ -16,7 +16,7 @@ final class HostingerCompatibilityRunnerProcessTest extends TestCase {
         foreach($it as $f) $f->isDir()&&!$f->isLink()?rmdir($f->getPathname()):unlink($f->getPathname());
         rmdir($this->root);
     }
-    private function run(string $scenario): array {
+    private function executeRunner(string $scenario): array {
         $version=PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;
         $role=$version==='8.3'?'production':($version==='8.4'?'compatibility':'forward');
         $cmd=[PHP_BINARY,$this->runner,'--json','--php-version='.$version,'--php-role='.$role,'--root='.$this->root,'--no-cron'];
@@ -29,17 +29,17 @@ final class HostingerCompatibilityRunnerProcessTest extends TestCase {
         return [$exit,trim($stdout),trim($stderr)];
     }
     public function testValidResultExitsZero(): void {
-        [$exit,$out,$err]=$this->run('');
+        [$exit,$out,$err]=$this->executeRunner('');
         $this->assertSame(0,$exit,$err); $json=json_decode($out,true,512,JSON_THROW_ON_ERROR);
         $this->assertSame('PASS',$json['status']); $this->assertSame(0,$json['exit_code']);
     }
     public function testAcceptanceFailureExitsOne(): void {
-        [$exit,$out,$err]=$this->run('acceptance-failure');
+        [$exit,$out,$err]=$this->executeRunner('acceptance-failure');
         $this->assertSame(1,$exit,$err); $json=json_decode($out,true,512,JSON_THROW_ON_ERROR);
         $this->assertSame('FAIL',$json['status']); $this->assertSame(1,$json['exit_code']); $this->assertGreaterThan(0,$json['summary']['failed']);
     }
     public function testInvariantViolationExitsFour(): void {
-        [$exit,$out,$err]=$this->run('invariant-violation');
+        [$exit,$out,$err]=$this->executeRunner('invariant-violation');
         $this->assertSame(4,$exit); $this->assertStringContainsString('HOSTINGER_COMPATIBILITY_RUNNER_ERROR',$err);
     }
 }
