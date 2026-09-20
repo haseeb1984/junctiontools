@@ -63,7 +63,7 @@ function hcr_options(array $argv): array {
         elseif(str_starts_with($arg,'--root=')) $o['root']=substr($arg,7);
         elseif(str_starts_with($arg,'--php-version=')) $o['php-version']=substr($arg,14);
         elseif(str_starts_with($arg,'--php-role=')) $o['php-role']=substr($arg,11);
-        elseif(str_starts_with($arg,'--test-scenario=')) $o['test-scenario']=substr($arg,17);
+        elseif(str_starts_with($arg,'--test-scenario=')) $o['test-scenario']=substr($arg,16);
         elseif($arg==='--strict') {}
         elseif($arg==='--skip-symlink') {}
         elseif($arg==='--help') { echo "Hostinger compatibility runner\n"; exit(0); }
