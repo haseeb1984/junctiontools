@@ -76,10 +76,13 @@ function hfa_safe_slug(string $slug): bool {
 }
 
 function hfa_remove_tree(string $path, string $root): void {
-    if (!hfa_within($root, $path) && realpath($path) !== realpath($root)) {
+    $rootReal = realpath($root);
+    $lexical = str_replace('\\\\', '/', $path);
+    $rootLexical = rtrim(str_replace('\\\\', '/', $root), '/');
+    if ($rootReal === false || ($lexical !== $rootLexical && !str_starts_with($lexical, $rootLexical . '/'))) {
         throw new RuntimeException("Refusing cleanup outside fixture root: {$path}");
     }
-    if (is_link($path) || is_file($path)) {
+    if (is_link($path) || is_file($path) || is_link($path)) {
         unlink($path);
         return;
     }
@@ -239,7 +242,9 @@ function hfa_run(): array {
     });
     $case(31, 'no arbitrary fallback writes', function() use ($root, $outside) {
         $before = file_get_contents($outside.'/sentinel.txt');
-        @file_put_contents(sys_get_temp_dir().'/junctiontools-fallback-probe.txt', 'fallback');
+        $fallback = sys_get_temp_dir().'/junctiontools-fallback-probe-'.bin2hex(random_bytes(4)).'.txt';
+        $created = @file_put_contents($fallback, 'fallback') !== false;
+        if ($created) @unlink($fallback);
         return file_get_contents($outside.'/sentinel.txt') === $before && !file_exists($root.'/fallback.txt');
     });
     $case(32, 'cleanup remains contained to fixture root', function() use ($root, $outside) {
