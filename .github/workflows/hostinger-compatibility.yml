@@ -37,8 +37,15 @@ jobs:
           php -l tests/HostingerCompatibilityResultValidationTest.php
           php -l tests/HostingerCompatibilityRunnerProcessTest.php
           php -l tests/hostinger-filesystem-acceptance.php
+          php -l tests/hostinger-filesystem-acceptance.php
       - name: Run PHPUnit
         run: phpunit --colors=never tests/HostingerCompatibilityResultValidationTest.php tests/HostingerCompatibilityRunnerProcessTest.php
+      - name: Run 32-case filesystem and traversal acceptance
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          php tests/hostinger-filesystem-acceptance.php > artifacts/hostinger-filesystem-result.json
+          php -r '$j=json_decode(file_get_contents("artifacts/hostinger-filesystem-result.json"),true,512,JSON_THROW_ON_ERROR); if(($j["status"]??null)!=="PASS" || ($j["summary"]["total"]??0)!==32 || ($j["summary"]["passed"]??0)!==32 || ($j["summary"]["failed"]??0)!==0) { fwrite(STDERR,"32-case filesystem acceptance failed\\n"); exit(1); } echo "Hostinger filesystem acceptance: PASS (32/32)".PHP_EOL;'
       - name: Run acceptance runner
         run: |
           set -euo pipefail
