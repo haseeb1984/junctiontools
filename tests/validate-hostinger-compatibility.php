@@ -113,7 +113,15 @@ function hcr_run(array $o): array {
         $checks[]=hcr_check('invariant-probe','runtime',true,true,'Intentional duplicate.');
     }
     $summary=['total'=>count($checks),'passed'=>0,'failed'=>0,'skipped'=>0];
-    foreach($checks as $c) $summary[strtolower($c['status'])]++;
+    foreach($checks as $c) {
+        $key = match ($c['status']) {
+            'PASS' => 'passed',
+            'FAIL' => 'failed',
+            'SKIP' => 'skipped',
+            default => throw new RuntimeException('Invalid check status.')
+        };
+        $summary[$key]++;
+    }
     $status='PASS';
     foreach($checks as $c) if($c['required']===true && $c['status']==='FAIL') {$status='FAIL';break;}
     $exit=$status==='PASS'?HCR_PASS:HCR_ACCEPTANCE_FAILURE;
