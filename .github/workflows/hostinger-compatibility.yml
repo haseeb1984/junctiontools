@@ -37,7 +37,6 @@ jobs:
           php -l tests/HostingerCompatibilityResultValidationTest.php
           php -l tests/HostingerCompatibilityRunnerProcessTest.php
           php -l tests/hostinger-filesystem-acceptance.php
-          php -l tests/hostinger-filesystem-acceptance.php
       - name: Run PHPUnit
         run: phpunit --colors=never tests/HostingerCompatibilityResultValidationTest.php tests/HostingerCompatibilityRunnerProcessTest.php
       - name: Run 32-case filesystem and traversal acceptance
