@@ -1,15 +1,18 @@
 <?php
 declare(strict_types=1);
 
+require_once dirname(__DIR__) . '/security/build-security-gate.php';
+
 /** Generate executable pages only for explicitly approved draft specifications. */
 if($argc<3){fwrite(STDERR,"Usage: php tools/generate-approved-tools.php <specs.json> <approvals.json> [output-dir]\n");exit(2);}
 $specFile=$argv[1];$approvalFile=$argv[2];$outputDir=$argv[3]??dirname(__DIR__).'/generated-tools';
+$securityPolicyFile=$argv[4]??dirname(__DIR__).'/config/build-security-gate.json';
+$securityDecisionFile=$argv[5]??dirname(__DIR__).'/config/build-security-gate-decisions.json';
 $root=dirname(__DIR__);
 if(!is_file($specFile)||!is_file($approvalFile)){fwrite(STDERR,"Input file missing.\n");exit(1);}
 $specs=json_decode((string)file_get_contents($specFile),true);$approvals=json_decode((string)file_get_contents($approvalFile),true);
 if(!is_array($specs)||!is_array($specs['specifications']??null)||!is_array($approvals)||!is_array($approvals['approvals']??null)){fwrite(STDERR,"Invalid generator input.\n");exit(1);}
 $approved=[];foreach($approvals['approvals'] as $item){if(!is_array($item))continue;$slug=strtolower(trim((string)($item['slug']??'')));if($slug!==''&&($item['approved']??false)===true)$approved[$slug]=true;}
-if(!is_dir($outputDir)&&!mkdir($outputDir,0775,true)&&!is_dir($outputDir)){fwrite(STDERR,"Unable to create output directory.\n");exit(1);}
 $header=is_file($root.'/header.html')?(string)file_get_contents($root.'/header.html'):'';
 $footer=is_file($root.'/footer.html')?(string)file_get_contents($root.'/footer.html'):'';
 if($header===''||$footer===''){fwrite(STDERR,"Shared JunctionTools header/footer are required.\n");exit(1);}
@@ -20,10 +23,24 @@ function html_shell(string $slug,string $title,string $description,string $name,
 }
 function jsName(string $name):string{return preg_replace('/[^A-Za-z0-9_]/','_',trim($name))?:'input';}
 function renderFields(array $fields):string{$html='';foreach($fields as $field){if(!is_array($field))continue;$name=jsName((string)($field['name']??'input'));$label=ucwords(str_replace('_',' ',strtolower($name)));$type=(string)($field['type']??'text');if($type==='date')$input='<input id="'.$name.'" type="date" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none">';elseif($type==='integer')$input='<input id="'.$name.'" type="number" step="1" min="1" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none">';elseif($type==='enum'){ $input='<select id="'.$name.'" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none">';foreach(($field['values']??[]) as $value)$input.='<option value="'.esc((string)$value).'">'.esc(ucwords(str_replace('_',' ',(string)$value))).'</option>'; $input.='</select>';}else $input='<input id="'.$name.'" type="text" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none">';$html.='<div><label for="'.$name.'" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">'.esc($label).'</label>'.$input.'</div>';}return $html;}
+$authorizedSpecs=[];
+foreach($specs['specifications'] as $spec){
+ if(!is_array($spec))continue;
+ $tool=$spec['tool']??[];
+ $slug=strtolower(trim((string)($tool['slug']??'')));
+ if($slug===''||!isset($approved[$slug]))continue;
+ if(($spec['spec_status']??'')!=='draft'||($spec['generation_eligible']??true)!==false){fwrite(STDERR,"Refusing non-draft or generation-authorized spec: {$slug}\n");exit(1);}
+ if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) { fwrite(STDERR,"Invalid tool slug: {$slug}\n"); exit(1); }
+ $gate=bsg_load_and_evaluate($spec,$securityPolicyFile,$securityDecisionFile);
+ if(($gate['allowed']??false)!==true){
+   fwrite(STDERR, "Pre-build Security Gate rejected {$slug}: ".($gate['error_code']??'security_gate_rejected')." - ".($gate['message']??'Rejected.')."\n");
+   exit(1);
+ }
+ $authorizedSpecs[]=$spec;
+}
+if(!is_dir($outputDir)&&!mkdir($outputDir,0775,true)&&!is_dir($outputDir)){fwrite(STDERR,"Unable to create output directory.\n");exit(1);}
 $generated=0;
-foreach($specs['specifications'] as $spec){if(!is_array($spec))continue;$tool=$spec['tool']??[];$slug=strtolower(trim((string)($tool['slug']??'')));if($slug===''||!isset($approved[$slug]))continue;if(($spec['spec_status']??'')!=='draft'||($spec['generation_eligible']??true)!==false){fwrite(STDERR,"Refusing non-draft or generation-authorized spec: {$slug}\n");exit(1);}
-if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) { fwrite(STDERR,"Invalid tool slug: {$slug}\n"); exit(1); }
-$name=(string)($tool['name']??ucwords(str_replace('-',' ',$slug)));$description=(string)($spec['seo']['description']??('Free '.$name.' tool.'));$title=(string)($spec['seo']['title']??($name.' | Free Online Tool | JunctionTools'));$template=(string)($tool['implementation_template']??'generic-form');$fields=$spec['inputs']['fields']??[];$howTo=$spec['content']['how_to_use']??[];
+foreach($authorizedSpecs as $spec){$tool=$spec['tool']??[];$slug=strtolower(trim((string)($tool['slug']??'')));$name=(string)($tool['name']??ucwords(str_replace('-',' ',$slug)));$description=(string)($spec['seo']['description']??('Free '.$name.' tool.'));$title=(string)($spec['seo']['title']??($name.' | Free Online Tool | JunctionTools'));$template=(string)($tool['implementation_template']??'generic-form');$fields=$spec['inputs']['fields']??[];$howTo=$spec['content']['how_to_use']??[];
 if(!is_array($howTo)||count($howTo)<3){fwrite(STDERR,"Missing user-facing How to Use content for {$slug}.\n");exit(1);}
 if($template==='date-age-calculator'){
 $body='<section class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-6 shadow-xl"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2" for="birth_date">Date of Birth</label><input id="birth_date" type="date" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none"></div><div><label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2" for="as_of_date">Calculate Age On</label><input id="as_of_date" type="date" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none"></div></div><div class="flex gap-3"><button id="run" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Calculate Age</button><button id="reset" type="button" class="border border-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-semibold">Reset</button></div><p id="error" class="text-sm text-red-400"></p><section id="result" aria-live="polite" class="text-sm text-slate-300"></section></section>';
