@@ -115,7 +115,7 @@ $cases=[
         $out=$base.'/future-output';[$s]=runGenerator($generator,$specFile,$approvalFile,$out,$policyFile,$base.'/future.json');
         assertTrue($s!==0,'Future-dated security approval was accepted.');
     },
-    'unapproved template'=>function()use($base,$generator,$approvalFile,$policyFile){
+    'unapproved template'=>function()use($base,$generator,$approvalFile,$policyFile,$policy){
         $bad=validSpec();$bad['tool']['implementation_template']='arbitrary-php-exec';$badSpec=$base.'/bad-template-spec.json';writeJson($badSpec,['specifications'=>[$bad]]);
         $d=['schema_version'=>'1.0.0','policy_version'=>$policy['policy_version']??'1.0.0','decisions'=>[validDecision($bad,$policy)]];writeJson($base.'/bad-template-decision.json',$d);
         $out=$base.'/bad-template-output';[$s]=runGenerator($generator,$badSpec,$approvalFile,$out,$policyFile,$base.'/bad-template-decision.json');
