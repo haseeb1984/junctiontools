@@ -4,15 +4,103 @@
   "mode": "contract-first-dry-run",
   "automatic_production_publish": false,
   "stages": [
-    {"id":"search-demand","phase":3,"script":"tools/build-demand-opportunities.php","required_files":["config/search-demand.json"],"enabled":true},
-    {"id":"generation-queue","phase":3,"script":"tools/build-generation-queue.php","required_files":["config/google-demand-opportunities.json","config/tools.json"],"enabled":true},
-    {"id":"tool-specification","phase":4,"script":"tools/build-tool-specs.php","required_files":["config/tool-generation-queue.json"],"enabled":true},
-    {"id":"approved-generation","phase":5,"script":"tools/generate-approved-tools.php","required_files":["config/tool-generation-approvals.json"],"enabled":true},
-    {"id":"runtime-validation","phase":6,"script":"tests/validate-generated-runtime.php","required_files":["tests/validate-generated-runtime.php"],"enabled":true},
-    {"id":"deployment-plan","phase":7,"script":"tools/build-deployment-plan.php","required_files":["config/tool-generation-approvals.json"],"enabled":true},
-    {"id":"site-navigation-sync","phase":7,"script":"tools/sync-site-navigation.php","required_files":["config/tools.json","header.html","footer.html","index.html"],"enabled":true},
-    {"id":"search-console-feedback","phase":8,"script":"tools/build-search-console-generation-queue.php","required_files":["config/search-console-opportunities.json","config/tools.json"],"enabled":true},
-    {"id":"automatic-publishing-gate","phase":9,"script":"tools/evaluate-automatic-publishing.php","required_files":["config/automatic-publishing-policy.json"],"enabled":true}
+    {
+      "id": "search-demand",
+      "phase": 3,
+      "script": "tools/build-demand-opportunities.php",
+      "required_files": [
+        "config/search-demand.json"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "generation-queue",
+      "phase": 3,
+      "script": "tools/build-generation-queue.php",
+      "required_files": [
+        "config/google-demand-opportunities.json",
+        "config/tools.json"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "tool-specification",
+      "phase": 4,
+      "script": "tools/build-tool-specs.php",
+      "required_files": [
+        "config/tool-generation-queue.json"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "pre-build-security-gate",
+      "phase": 5,
+      "script": "security/build-security-gate.php",
+      "required_files": [
+        "config/build-security-gate.json",
+        "config/build-security-gate-decisions.json",
+        "security/build-security-gate.php"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "approved-generation",
+      "phase": 5,
+      "script": "tools/generate-approved-tools.php",
+      "required_files": [
+        "config/tool-generation-approvals.json"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "runtime-validation",
+      "phase": 6,
+      "script": "tests/validate-generated-runtime.php",
+      "required_files": [
+        "tests/validate-generated-runtime.php"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "deployment-plan",
+      "phase": 7,
+      "script": "tools/build-deployment-plan.php",
+      "required_files": [
+        "config/tool-generation-approvals.json"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "site-navigation-sync",
+      "phase": 7,
+      "script": "tools/sync-site-navigation.php",
+      "required_files": [
+        "config/tools.json",
+        "header.html",
+        "footer.html",
+        "index.html"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "search-console-feedback",
+      "phase": 8,
+      "script": "tools/build-search-console-generation-queue.php",
+      "required_files": [
+        "config/search-console-opportunities.json",
+        "config/tools.json"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "automatic-publishing-gate",
+      "phase": 9,
+      "script": "tools/evaluate-automatic-publishing.php",
+      "required_files": [
+        "config/automatic-publishing-policy.json"
+      ],
+      "enabled": true
+    }
   ],
   "safety": {
     "fail_closed": true,
