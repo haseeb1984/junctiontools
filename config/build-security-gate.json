@@ -3,7 +3,10 @@
   "policy_version": "1.0.0",
   "default_decision": "reject",
   "missing_decision": "reject",
-  "allowed_decisions": ["allow", "reject"],
+  "allowed_decisions": [
+    "allow",
+    "reject"
+  ],
   "required_conditions": {
     "valid_spec": true,
     "safe_slug": true,
@@ -32,5 +35,14 @@
     "missing_privacy_contract",
     "missing_security_requirements"
   ],
-  "allowed_evaluators": ["build-security-gate-v1"]
+  "allowed_evaluators": [
+    "build-security-gate-v1"
+  ],
+  "approved_templates": [
+    "generic-form",
+    "date-age-calculator",
+    "calculator-form",
+    "text-utility",
+    "qr-generator"
+  ]
 }
