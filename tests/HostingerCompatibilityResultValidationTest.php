@@ -13,7 +13,15 @@ final class HostingerCompatibilityResultValidationTest extends TestCase {
     }
     private function summary(array $checks): array {
         $s=['total'=>count($checks),'passed'=>0,'failed'=>0,'skipped'=>0];
-        foreach($checks as $c) $s[strtolower($c['status'])]++;
+        foreach($checks as $c) {
+            $key = match ($c['status']) {
+                'PASS' => 'passed',
+                'FAIL' => 'failed',
+                'SKIP' => 'skipped',
+                default => throw new RuntimeException('Invalid check status.')
+            };
+            $s[$key]++;
+        }
         return $s;
     }
     public function testPassContract(): void {
