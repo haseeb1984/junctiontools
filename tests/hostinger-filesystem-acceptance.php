@@ -50,7 +50,7 @@ function hfa_safe_relative(string $root, string $relative): ?string {
         $decoded = $next;
     }
     $normalized = str_replace('\\', '/', $decoded);
-    if ($normalized[0] === '/' || preg_match('/^[A-Za-z]:[\\\/]/', $decoded) || str_starts_with($normalized, '//')) {
+    if ($normalized[0] === '/' || preg_match('~^[A-Za-z]:[\\\\/]~', $decoded) || str_starts_with($normalized, '//')) {
         return null;
     }
     $parts = explode('/', $normalized);
@@ -267,9 +267,7 @@ function hfa_run(): array {
     $passed = count(array_filter($results, fn($r) => $r['status'] === 'PASS'));
     $failed = count($results) - $passed;
     try {
-        hfa_remove_tree($root, $base);
-        hfa_remove_tree($outside, $base);
-        if (is_dir($base)) rmdir($base);
+        hfa_remove_tree($base, $base);
     } catch (Throwable $e) {
         $results[] = hfa_result(32, 'fixture cleanup containment', false, $e->getMessage());
         $failed++;
