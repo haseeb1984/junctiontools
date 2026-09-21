@@ -56,7 +56,7 @@ if (!is_array($input)) {
     compat_json(['success' => false, 'message' => 'Invalid JSON request.'], 400);
 }
 
-if (!jt_rate_limit('scanner-compat', 10, 300)) {
+if (!jt_rate_limit('scanner', 10, 300)) {
     compat_json(['success' => false, 'message' => 'Too many scan requests. Please try again later.'], 429);
 }
 
