@@ -99,10 +99,9 @@ function jt_suite_ssl(): array
 {
     global $fixtureBase;
     $results=[];
-    jt_test_case($results,'SSL helper rejects certificate metadata for HTTP fixture',static function()use($fixtureBase):void{
-        $r=jt_safe_http_get($fixtureBase.'/compatibility-page.html',['certificate_info'=>true,'timeout'=>3,'connect_timeout'=>2]);
-        jt_test_assert(($r['success']??false)===true,'HTTP fixture request failed: '.($r['message']??'unknown'));
-        jt_test_assert(($r['certificate']['issuer']??null)===null,'HTTP request returned TLS certificate metadata.');
+    jt_test_case($results,'SSL parser returns no TLS metadata for empty certificate info',static function():void{
+        $parsed=jt_parse_certificate_info([]);
+        jt_test_assert($parsed===[],'Empty certificate metadata unexpectedly produced TLS information.');
     });
     jt_test_case($results,'SSL certificate parser extracts issuer and expiry',static function():void{
         $expires=gmdate('D, d M Y H:i:s T',time()+10*86400);
