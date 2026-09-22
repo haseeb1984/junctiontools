@@ -97,30 +97,39 @@ function jt_suite_compatibility(): array
 
 function jt_suite_ssl(): array
 {
+    global $fixtureBase;
     $results=[];
-    jt_test_case($results,'SSL helper rejects non-HTTPS certificate metadata',static function():void{
-        [$ok]=jt_validate_external_url('http://example.com');
-        jt_test_assert($ok===true,'HTTP URL validation unexpectedly failed.');
-        $r=jt_safe_http_get('http://example.com',['certificate_info'=>true,'timeout'=>3,'connect_timeout'=>2]);
+    jt_test_case($results,'SSL helper rejects certificate metadata for HTTP fixture',static function()use($fixtureBase):void{
+        $r=jt_safe_http_get($fixtureBase.'/compatibility-page.html',['certificate_info'=>true,'timeout'=>3,'connect_timeout'=>2]);
+        jt_test_assert(($r['success']??false)===true,'HTTP fixture request failed: '.($r['message']??'unknown'));
         jt_test_assert(($r['certificate']['issuer']??null)===null,'HTTP request returned TLS certificate metadata.');
     });
-    $sslUrl=getenv('JUNCTIONTOOLS_SSL_TEST_URL')?:'https://example.com';
-    jt_test_case($results,'SSL issuer/expiry/daysRemaining metadata',static function()use($sslUrl):void{
-        $r=jt_safe_http_get($sslUrl,['certificate_info'=>true,'timeout'=>12,'connect_timeout'=>5,'max_bytes'=>262144]);
-        jt_test_assert(($r['success']??false)===true,'HTTPS smoke test failed: '.($r['message']??'unknown'));
-        $c=$r['certificate']??null;
-        jt_test_assert(is_array($c),'Certificate metadata missing.');
-        jt_test_assert(trim((string)($c['issuer']??''))!=='','Certificate issuer missing.');
-        $expiry=(string)($c['expires']??'');
-        jt_test_assert(strtotime($expiry)!==false,'Certificate expiry invalid. Debug: '.json_encode($r['certificate_debug']??[],JSON_UNESCAPED_SLASHES));
-        jt_test_assert(is_int($c['daysRemaining']??null),'daysRemaining is not an integer.');
+    jt_test_case($results,'SSL certificate parser extracts issuer and expiry',static function():void{
+        $expires=gmdate('D, d M Y H:i:s T',time()+10*86400);
+        $parsed=jt_parse_certificate_info([['Issuer'=>'CN=JunctionTools CI Test CA','Expire date'=>$expires]]);
+        jt_test_assert(trim((string)($parsed['issuer']??''))==='CN=JunctionTools CI Test CA','Certificate issuer parsing failed.');
+        jt_test_assert(strtotime((string)($parsed['expires']??''))!==false,'Certificate expiry parsing failed.');
+        jt_test_assert(is_int($parsed['daysRemaining']??null),'daysRemaining is not an integer.');
+        jt_test_assert(($parsed['daysRemaining']??-999)>=9 && ($parsed['daysRemaining']??-999)<=10,'daysRemaining value is outside expected range.');
     });
-    jt_test_case($results,'SSL daysRemaining matches expiry',static function()use($sslUrl):void{
-        $r=jt_safe_http_get($sslUrl,['certificate_info'=>true,'timeout'=>12,'connect_timeout'=>5,'max_bytes'=>262144]);
-        jt_test_assert(($r['success']??false)===true,'HTTPS request failed.');
-        $c=$r['certificate']; $expected=(int)floor((strtotime((string)$c['expires'])-time())/86400);
-        jt_test_assert(abs($expected-(int)$c['daysRemaining'])<=1,'daysRemaining mismatch. Debug: '.json_encode($r['certificate_debug']??[],JSON_UNESCAPED_SLASHES));
+    jt_test_case($results,'SSL daysRemaining matches parsed expiry',static function():void{
+        $expiresTimestamp=time()+20*86400;
+        $parsed=jt_parse_certificate_info([['Issuer'=>'CN=JunctionTools CI Test CA','Expire date'=>gmdate('D, d M Y H:i:s T',$expiresTimestamp)]]);
+        $expected=(int)floor(($expiresTimestamp-time())/86400);
+        jt_test_assert(abs($expected-(int)$parsed['daysRemaining'])<=1,'daysRemaining mismatch for parsed certificate metadata.');
     });
+    $sslUrl=getenv('JUNCTIONTOOLS_SSL_TEST_URL');
+    if(is_string($sslUrl) && trim($sslUrl)!==''){
+        jt_test_case($results,'Configured SSL issuer/expiry/daysRemaining smoke test',static function()use($sslUrl):void{
+            $r=jt_safe_http_get($sslUrl,['certificate_info'=>true,'timeout'=>12,'connect_timeout'=>5,'max_bytes'=>262144]);
+            jt_test_assert(($r['success']??false)===true,'Configured HTTPS smoke test failed: '.($r['message']??'unknown'));
+            $c=$r['certificate']??null;
+            jt_test_assert(is_array($c),'Certificate metadata missing.');
+            jt_test_assert(trim((string)($c['issuer']??''))!=='','Certificate issuer missing.');
+            jt_test_assert(strtotime((string)($c['expires']??''))!==false,'Certificate expiry invalid. Debug: '.json_encode($r['certificate_debug']??[],JSON_UNESCAPED_SLASHES));
+            jt_test_assert(is_int($c['daysRemaining']??null),'daysRemaining is not an integer.');
+        });
+    }
     return $results;
 }
 
