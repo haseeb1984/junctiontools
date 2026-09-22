@@ -1,0 +1,330 @@
+{
+  "schema_version": "1.0.0",
+  "manifest_type": "junctiontools-production-release",
+  "release": {
+    "repository": "haseeb1984/junctiontools",
+    "commit_sha": "af305eb8a29f82f279afdca47c2d45f28c484fd8",
+    "target": "hostinger-shared-hosting",
+    "document_root": "public_html/",
+    "php": {
+      "production": "8.3",
+      "compatibility": [
+        "8.4"
+      ],
+      "forward": [
+        "8.5"
+      ]
+    },
+    "generation_runtime": false,
+    "cron_required": false
+  },
+  "artifact": {
+    "name": "junctiontools-af305eb8-hostinger",
+    "source_commit": "af305eb8a29f82f279afdca47c2d45f28c484fd8",
+    "manifest_path": "config/production-release-manifest.json",
+    "artifact_format": "zip",
+    "include_git_metadata": false,
+    "include_secrets": false
+  },
+  "included_paths": {
+    "exact": [
+      ".htaccess",
+      "index.html",
+      "about.html",
+      "contact.html",
+      "disclaimer.html",
+      "privacy-policy.html",
+      "terms.html",
+      "header.html",
+      "footer.html",
+      "meta-seo.html",
+      "robots.txt",
+      "sitemap.xml",
+      "favicon.ico",
+      "junction-favicon.png",
+      "age-calculator.html",
+      "aria-audit.html",
+      "aspect-ratio-calculator.html",
+      "asset-optimizer.html",
+      "base64-converter.html",
+      "bio-font-generator.html",
+      "cart-abandonment.html",
+      "case-converter.html",
+      "checkout-funnel.html",
+      "clean-text.html",
+      "color-palette-generator.html",
+      "contrast-checker.html",
+      "cross-browser.html",
+      "css-js-minifier.html",
+      "cta-analyzer.html",
+      "discount-calculator.html",
+      "ga4-verifier.html",
+      "invoice-generator.html",
+      "json-formatter.html",
+      "mobile-ux.html",
+      "pagespeed.html",
+      "pixel-diagnostic.html",
+      "product-copy.html",
+      "px-to-rem.html",
+      "qr-code-generator.html",
+      "readability.html",
+      "regex-tester.html",
+      "schema-validator.html",
+      "sha256-hash.html",
+      "social-asset-optimizer.html",
+      "ssl-checker.html",
+      "timestamp-converter.html",
+      "trust-inspector.html",
+      "uuid-generator.html",
+      "ux-evaluator.html",
+      "whatsapp-direct.html",
+      "word-counter.html",
+      "process-contact.php",
+      "scanner.php",
+      "scanner-compat.php",
+      "scanner-secure.php",
+      "security/rate-limit.php",
+      "security/safe-http.php",
+      "security/url-validator.php"
+    ],
+    "patterns": [
+      "vendor/**"
+    ],
+    "runtime_created_paths": {
+      "allowed_if_required": [
+        "storage/runtime/**",
+        "storage/logs/**",
+        "storage/cache/**",
+        "storage/generated/**"
+      ],
+      "must_not_be_source_artifact": true
+    }
+  },
+  "excluded_paths": {
+    "exact": [
+      ".gitignore",
+      "composer.json",
+      "composer.lock",
+      "default.php"
+    ],
+    "directories": [
+      ".git/",
+      " .github/",
+      "tests/",
+      "docs/",
+      "tools/"
+    ],
+    "config_directories": [
+      "config/"
+    ],
+    "security_build_files": [
+      "security/build-security-gate.php"
+    ],
+    "patterns": [
+      ".env",
+      "*.env",
+      ".env.*",
+      ".github/**",
+      ".git/**",
+      "tests/**",
+      "docs/**",
+      "tools/**",
+      "config/**",
+      "security/build-security-gate.php",
+      "*.log",
+      "*.sql",
+      "*.bak",
+      "*.old",
+      "*.orig",
+      "*.tmp",
+      "storage/**"
+    ],
+    "notes": [
+      "Release artifact must not contain CI, tests, documentation, Tool Factory, or pre-build Security Gate files.",
+      "Manifest is CI/release metadata and is not deployed to public_html.",
+      "Production secrets are supplied by Hostinger environment and never packaged."
+    ]
+  },
+  "validation_rules": {
+    "source": {
+      "commit_sha_exact": true,
+      "repository_exact": "haseeb1984/junctiontools",
+      "working_tree_must_match_commit": true,
+      "no_uncommitted_or_untracked_files": true
+    },
+    "path_allowlist": {
+      "mode": "deny_by_default",
+      "every_artifact_path_must_match_include_rule": true,
+      "no_path_may_match_exclude_rule": true,
+      "excluded_rule_precedence": "deny",
+      "no_absolute_paths": true,
+      "no_parent_traversal": true,
+      "no_null_bytes": true,
+      "no_backslash_path_escape": true,
+      "canonical_path_must_remain_under_artifact_root": true,
+      "symlink_entries_forbidden": true,
+      "symlink_targets_must_not_escape_root": true
+    },
+    "required_files": {
+      "all_exact_included_paths_must_exist": true,
+      "vendor_autoload_required": "vendor/autoload.php",
+      "php_runtime_files_required": [
+        "process-contact.php",
+        "scanner.php",
+        "scanner-compat.php",
+        "scanner-secure.php"
+      ],
+      "security_runtime_files_required": [
+        "security/rate-limit.php",
+        "security/safe-http.php",
+        "security/url-validator.php"
+      ]
+    },
+    "inventory": {
+      "expected_tool_html_count": 38,
+      "all_38_tool_paths_required": true,
+      "duplicate_paths": false,
+      "duplicate_case_insensitive_paths": false,
+      "unexpected_paths_fail": true
+    },
+    "secrets": {
+      ".env_forbidden": true,
+      "environment_variable_values_forbidden": true,
+      "private_keys_forbidden": true,
+      "credential_files_forbidden": true,
+      "github_tokens_forbidden": true,
+      "smtp_passwords_forbidden": true,
+      "database_passwords_forbidden": true
+    },
+    "git_metadata": {
+      "git_directory_forbidden": true,
+      "github_workflows_forbidden": true,
+      "github_actions_credentials_forbidden": true
+    },
+    "php": {
+      "syntax_check_all_php_files": true,
+      "production_php_version": "8.3",
+      "forbidden_functions": [
+        "exec",
+        "shell_exec",
+        "system",
+        "passthru",
+        "proc_open",
+        "popen",
+        "pcntl_fork",
+        "pcntl_exec",
+        "pcntl_signal",
+        "dl"
+      ],
+      "no_runtime_code_generation": true,
+      "no_runtime_composer_install": true,
+      "committed_vendor_required": true
+    },
+    "dependencies": {
+      "vendor_autoload_exists": true,
+      "composer_runtime_install_forbidden": true,
+      "dependency_source_must_be_committed_vendor": true
+    },
+    "permissions": {
+      "files": "0644",
+      "directories": "0755",
+      "writable_runtime_only": [
+        "storage/runtime/**",
+        "storage/logs/**",
+        "storage/cache/**"
+      ],
+      "generated_artifacts_read_only_in_production": true,
+      "world_writable_forbidden": true,
+      "mode_0777_forbidden": true
+    },
+    "runtime_storage": {
+      "storage_source_directory_forbidden": true,
+      "no_fallback_to_tmp": true,
+      "no_fallback_to_public_root": true,
+      "no_fallback_to_config": true,
+      "no_fallback_to_tools": true,
+      "required_runtime_directory_failure_mode": "fail_closed",
+      "optional_cache_failure_must_not_block_runtime": true
+    },
+    "network": {
+      "arbitrary_external_network_dependency_forbidden": true,
+      "generator_network_access_forbidden": true,
+      "runtime_scanners_must_use_approved_safe_http_layer": true
+    },
+    "web_security": {
+      ".env_http_access_forbidden": true,
+      "source_control_metadata_http_access_forbidden": true,
+      "CI_files_http_access_forbidden": true,
+      "test_files_http_access_forbidden": true,
+      "directory_listing_forbidden": true
+    },
+    "release_gate": {
+      "final_release_gate_commit_must_be_exact": "af305eb8a29f82f279afdca47c2d45f28c484fd8",
+      "final_release_gate_must_be_success": true,
+      "release_allowed_must_be_true": true,
+      "required_checks_must_all_be_success": true,
+      "required_checks": [
+        "Phase 0 verification gate",
+        "Generated tool runtime sandbox validation",
+        "Deployment approval gate validation",
+        "Search Console feedback validation",
+        "Automatic publishing gate validation",
+        "Tool factory contract validation",
+        "SSRF hardening contract validation",
+        "Generator path traversal validation",
+        "PHP 8.3 Hostinger acceptance",
+        "PHP 8.4 Hostinger acceptance"
+      ],
+      "php_8_5_hostinger_acceptance": "optional"
+    },
+    "integrity": {
+      "generate_sha256_manifest": true,
+      "hash_every_included_file": true,
+      "hash_algorithm": "sha256",
+      "record_source_commit": true,
+      "record_artifact_digest": true,
+      "release_manifest_must_be_immutable_after_build": true
+    },
+    "deployment": {
+      "upload_only_approved_artifact": true,
+      "deploy_to": "public_html/",
+      "backup_current_release_before_replace": true,
+      "atomic_or_staged_replace_preferred": true,
+      "post_deploy_smoke_tests_required": true,
+      "rollback_to_previous_verified_release_required": true
+    }
+  },
+  "production_environment": {
+    "required_php_extensions": [
+      "json",
+      "mbstring",
+      "openssl",
+      "curl",
+      "filter",
+      "hash",
+      "fileinfo",
+      "ctype",
+      "PDO",
+      "PDO_MySQL"
+    ],
+    "required_environment_variables": [
+      "JUNCTIONTOOLS_DB_HOST",
+      "JUNCTIONTOOLS_DB_NAME",
+      "JUNCTIONTOOLS_DB_USER",
+      "JUNCTIONTOOLS_DB_PASS",
+      "JUNCTIONTOOLS_SMTP_HOST",
+      "JUNCTIONTOOLS_SMTP_USER",
+      "JUNCTIONTOOLS_SMTP_PASS",
+      "JUNCTIONTOOLS_MAIL_FROM",
+      "JUNCTIONTOOLS_MAIL_TO"
+    ],
+    "secrets_must_not_be_in_artifact": true,
+    "dotenv_current_behavior": "process-contact.php loads .env from application directory via Dotenv::createImmutable(__DIR__); if .env is deployed there, HTTP access must be blocked."
+  },
+  "acceptance": {
+    "overall": "PASS only if every required validation rule passes",
+    "required_failure_exit_code": 1,
+    "runner_error_exit_code": 4,
+    "no_partial_release_on_validation_failure": true
+  }
+}
