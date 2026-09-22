@@ -109,7 +109,7 @@
     ],
     "directories": [
       ".git/",
-      " .github/",
+      ".github/",
       "tests/",
       "docs/",
       "tools/"
