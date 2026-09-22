@@ -1,0 +1,163 @@
+name: Final Release Gate
+
+on:
+  workflow_run:
+    workflows:
+      - Phase 0 Security Verification
+      - Phase 6 Generated Runtime Validation
+      - Phase 7 Approval Gate Validation
+      - Phase 8 Search Console Feedback
+      - Phase 9 Automatic Publishing Gate
+      - Phase 10 Continuous Tool Factory
+      - Phase 11 SSRF Hardening Verification
+      - Phase 12 Generator Path Safety Verification
+      - Hostinger Compatibility Acceptance
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: "Commit SHA to evaluate (defaults to current main SHA)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+  checks: read
+
+jobs:
+  final-release-gate:
+    name: Final release gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Resolve commit
+        id: commit
+        env:
+          EVENT_SHA: ${{ github.event.workflow_run.head_sha }}
+          INPUT_SHA: ${{ inputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_SHA:-}" ]; then
+            SHA="$INPUT_SHA"
+          elif [ -n "${EVENT_SHA:-}" ]; then
+            SHA="$EVENT_SHA"
+          else
+            SHA="${{ github.sha }}"
+          fi
+          case "$SHA" in
+            [0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]*) ;;
+            *) echo "Invalid commit SHA"; exit 1 ;;
+          esac
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.commit.outputs.sha }}
+          fetch-depth: 1
+
+      - name: Collect required check results
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+
+          python3 - <<'PY'
+          import json, os, subprocess, sys, time
+
+          required = [
+              "Phase 0 verification gate",
+              "Generated tool runtime sandbox validation",
+              "Deployment approval gate validation",
+              "Search Console feedback validation",
+              "Automatic publishing gate validation",
+              "Tool factory contract validation",
+              "SSRF hardening contract validation",
+              "Generator path traversal validation",
+              "PHP 8.3 Hostinger acceptance",
+              "PHP 8.4 Hostinger acceptance",
+          ]
+
+          sha = os.environ["SHA"]
+          url = f"https://api.github.com/repos/${{ github.repository }}/commits/{sha}/check-runs?per_page=100"
+
+          for attempt in range(1, 7):
+              raw = subprocess.check_output([
+                  "curl", "--fail", "--silent", "--show-error",
+                  "-H", "Accept: application/vnd.github+json",
+                  "-H", f"Authorization: Bearer {os.environ['GH_TOKEN']}",
+                  "-H", "X-GitHub-Api-Version: 2022-11-28",
+                  url
+              ], text=True)
+              data = json.loads(raw)
+              by_name = {c.get("name"): c for c in data.get("check_runs", [])}
+
+              missing = [n for n in required if n not in by_name]
+              incomplete = [
+                  n for n in required
+                  if n in by_name and by_name[n].get("status") != "completed"
+              ]
+
+              if not missing and not incomplete:
+                  break
+
+              if attempt < 6:
+                  time.sleep(10)
+          else:
+              print(json.dumps({
+                  "status": "FAIL",
+                  "reason": "required_checks_not_completed",
+                  "missing": missing,
+                  "incomplete": incomplete,
+                  "commit_sha": sha
+              }, indent=2))
+              sys.exit(1)
+
+          failures = []
+          results = []
+          for name in required:
+              c = by_name[name]
+              result = {
+                  "name": name,
+                  "status": c.get("status"),
+                  "conclusion": c.get("conclusion"),
+                  "details_url": c.get("details_url"),
+                  "started_at": c.get("started_at"),
+                  "completed_at": c.get("completed_at"),
+              }
+              results.append(result)
+              if c.get("status") != "completed" or c.get("conclusion") != "success":
+                  failures.append(result)
+
+          manifest = {
+              "schema_version": "1.0.0",
+              "gate": "final-release",
+              "status": "PASS" if not failures else "FAIL",
+              "commit_sha": sha,
+              "required_checks": required,
+              "optional_checks": ["PHP 8.5 Hostinger acceptance"],
+              "checks": results,
+              "failures": failures,
+              "release_allowed": not failures
+          }
+
+          with open("artifacts/final-release-gate.json", "w", encoding="utf-8") as f:
+              json.dump(manifest, f, indent=2)
+              f.write("\\n")
+
+          print(json.dumps(manifest, indent=2))
+          if failures:
+              sys.exit(1)
+          PY
+
+      - name: Upload final release gate manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-release-gate-${{ steps.commit.outputs.sha }}
+          path: artifacts/final-release-gate.json
+          if-no-files-found: error
+          retention-days: 30
