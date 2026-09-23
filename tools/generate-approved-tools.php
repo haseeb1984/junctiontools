@@ -4,14 +4,15 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/security/build-security-gate.php';
 
 /** Generate executable pages only for explicitly approved draft specifications. */
-if($argc<3){fwrite(STDERR,"Usage: php tools/generate-approved-tools.php <specs.json> <approvals.json> [output-dir] [security-policy.json] [security-decisions.json]\n");exit(2);}
+if($argc<3){fwrite(STDERR,"Usage: php tools/generate-approved-tools.php <specs.json> <approvals.json> [output-dir] [security-policy.json] [security-decisions.json] [tools.json]\n");exit(2);}
 $specFile=$argv[1];$approvalFile=$argv[2];$outputDir=$argv[3]??dirname(__DIR__).'/generated-tools';
 $securityPolicyFile=$argv[4]??dirname(__DIR__).'/config/build-security-gate.json';
 $securityDecisionFile=$argv[5]??dirname(__DIR__).'/config/build-security-gate-decisions.json';
+$registryFile=$argv[6]??dirname(__DIR__).'/config/tools.json';
 $root=dirname(__DIR__);
-if(!is_file($specFile)||!is_file($approvalFile)){fwrite(STDERR,"Input file missing.\n");exit(1);}
-$specs=json_decode((string)file_get_contents($specFile),true);$approvals=json_decode((string)file_get_contents($approvalFile),true);
-if(!is_array($specs)||!is_array($specs['specifications']??null)||!is_array($approvals)||!is_array($approvals['approvals']??null)){fwrite(STDERR,"Invalid generator input.\n");exit(1);}
+if(!is_file($specFile)||!is_file($approvalFile)||!is_file($registryFile)){fwrite(STDERR,"Input file missing.\n");exit(1);}
+$specs=json_decode((string)file_get_contents($specFile),true);$approvals=json_decode((string)file_get_contents($approvalFile),true);$registry=json_decode((string)file_get_contents($registryFile),true);
+if(!is_array($specs)||!is_array($specs['specifications']??null)||!is_array($approvals)||!is_array($approvals['approvals']??null)||!is_array($registry)||!is_array($registry['tools']??null)){fwrite(STDERR,"Invalid generator input.\n");exit(1);}
 $approved=[];foreach($approvals['approvals'] as $item){if(!is_array($item))continue;$slug=strtolower(trim((string)($item['slug']??'')));if($slug!==''&&($item['approved']??false)===true)$approved[$slug]=true;}
 $header=is_file($root.'/header.html')?(string)file_get_contents($root.'/header.html'):'';
 $footer=is_file($root.'/footer.html')?(string)file_get_contents($root.'/footer.html'):'';
@@ -31,6 +32,7 @@ foreach($specs['specifications'] as $spec){
  if($slug===''||!isset($approved[$slug]))continue;
  if(($spec['spec_status']??'')!=='draft'||($spec['generation_eligible']??true)!==false){fwrite(STDERR,"Refusing non-draft or generation-authorized spec: {$slug}\n");exit(1);}
  if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) { fwrite(STDERR,"Invalid tool slug: {$slug}\n"); exit(1); }
+ $duplicate=null; foreach($registry['tools'] as $registeredTool){ if(!is_array($registeredTool)) continue; $registeredSlug=strtolower(trim((string)($registeredTool['slug']??''))); $registeredName=strtolower(trim(preg_replace('/[^a-z0-9]+/i','-',(string)($registeredTool['name']??''))??'')); if($registeredSlug===$slug||$registeredName===$slug){$duplicate=$registeredTool;break;} } if($duplicate!==null){ fwrite(STDERR,"Duplicate existing tool rejected: {$slug} (existing slug: ".((string)($duplicate['slug']??$slug)).")\n"); exit(1); }
  $gate=bsg_load_and_evaluate($spec,$securityPolicyFile,$securityDecisionFile);
  if(($gate['allowed']??false)!==true){
    fwrite(STDERR, "Pre-build Security Gate rejected {$slug}: ".($gate['error_code']??'security_gate_rejected')." - ".($gate['message']??'Rejected.')."\n");
@@ -46,11 +48,6 @@ if($template==='date-age-calculator'){
 $body='<section class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-6 shadow-xl"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2" for="birth_date">Date of Birth</label><input id="birth_date" type="date" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none"></div><div><label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2" for="as_of_date">Calculate Age On</label><input id="as_of_date" type="date" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none"></div></div><div class="flex gap-3"><button id="run" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Calculate Age</button><button id="reset" type="button" class="border border-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-semibold">Reset</button></div><p id="error" class="text-sm text-red-400"></p><section id="result" aria-live="polite" class="text-sm text-slate-300"></section></section>';
 $script=<<<'JS'
 (()=>{const b=document.getElementById('birth_date'),a=document.getElementById('as_of_date'),r=document.getElementById('result'),e=document.getElementById('error');a.value=new Date().toISOString().slice(0,10);function run(){e.textContent='';r.textContent='';if(!b.value||!a.value){e.textContent='Please select both dates.';return;}const bd=new Date(b.value+'T00:00:00'),ad=new Date(a.value+'T00:00:00');if(Number.isNaN(bd.getTime())||Number.isNaN(ad.getTime())){e.textContent='Please enter valid dates.';return;}if(bd>ad){e.textContent='Date of birth cannot be after the calculation date.';return;}let y=ad.getFullYear()-bd.getFullYear(),m=ad.getMonth()-bd.getMonth(),d=ad.getDate()-bd.getDate();if(d<0){m--;d+=new Date(ad.getFullYear(),ad.getMonth(),0).getDate();}if(m<0){y--;m+=12;}const total=Math.floor((Date.UTC(ad.getFullYear(),ad.getMonth(),ad.getDate())-Date.UTC(bd.getFullYear(),bd.getMonth(),bd.getDate()))/86400000);r.textContent=`${y} years, ${m} months, ${d} days (${total} total days).`;}document.getElementById('run').addEventListener('click',run);document.getElementById('reset').addEventListener('click',()=>{b.value='';a.value=new Date().toISOString().slice(0,10);e.textContent='';r.textContent='';});})();
-JS;
-}elseif($template==='word-counter'){
-$body='<section class="bg-[#0f172a] border border-slate-800/80 p-6 rounded-2xl space-y-6 shadow-xl"><div><label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2" for="text">Text</label><textarea id="text" rows="10" class="w-full bg-[#090d14] border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-emerald-500 focus:outline-none" placeholder="Paste or type your text here..."></textarea></div><div class="flex gap-3"><button id="run" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold">Count Words</button><button id="reset" type="button" class="border border-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-semibold">Reset</button></div><output id="result" aria-live="polite" class="block text-sm text-slate-300"></output></section>';
-$script=<<<'JS'
-(()=>{const t=document.getElementById('text'),r=document.getElementById('result');function count(){const value=t.value;const trimmed=value.trim();const words=trimmed?trimmed.split(/\s+/u).length:0;const characters=value.length;const charactersNoSpaces=value.replace(/\s/gu,'').length;const lines=value?value.split(/\r?\n/u).length:0;r.textContent='Words: '+words+' | Characters: '+characters+' | Characters (no spaces): '+charactersNoSpaces+' | Lines: '+lines;}document.getElementById('run').addEventListener('click',count);document.getElementById('reset').addEventListener('click',()=>{t.value='';r.textContent='';});})();
 JS;
 }else{
 if(!is_array($fields)||count($fields)===0)$fields=[['name'=>'input','type'=>'text','required'=>true]];
