@@ -31,6 +31,7 @@ jobs:
           php -l tools/run-tool-factory.php
           php -l tools/run-demand-refresh.php
           php -l tools/build-tool-specs.php
+          php -l tools/build-generation-queue.php
           php -l tools/generate-approved-tools.php
           php -l security/build-security-gate.php
           php -l tests/validate-build-security-gate-generator.php
@@ -43,6 +44,7 @@ jobs:
           php -l tests/validate-demand-refresh.php
           php -l tests/validate-tool-factory-e2e.php
           php -l tests/validate-tool-specs.php
+          php -l tests/validate-demand-routing.php
           php -l tests/validate-generated-runtime.php
           php -l tests/validate-site-navigation-sync.php
           php -l tests/validate-adsense-integration.php
@@ -69,6 +71,9 @@ jobs:
 
       - name: Validate demand refresh chain
         run: php tests/validate-demand-refresh.php
+
+      - name: Validate existing-tool demand routes to SEO enhancement
+        run: php tests/validate-demand-routing.php
 
       - name: Validate full factory dry-run
         run: php tests/validate-tool-factory-e2e.php
