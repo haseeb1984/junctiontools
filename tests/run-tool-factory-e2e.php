@@ -175,27 +175,21 @@ try {
         );
     }
 
-    e2e_pass('Current approved generator executed through the Pre-Build Security Gate');
+    if ($status === 0) {
+        e2e_fail('Duplicate existing tool was incorrectly generated.');
+    }
+    $output = implode(PHP_EOL, $lines);
+    if (stripos($output, 'Duplicate existing tool rejected') === false) {
+        e2e_fail('Generator rejected Word Counter, but not through the duplicate-existing-tool guard. Output: ' . $output);
+    }
+    e2e_pass('Existing Word Counter is blocked from duplicate generation');
 
     $generated = $outputDir . '/word-counter.html';
-    if (!is_file($generated)) {
-        e2e_fail("Generated HTML missing: {$generated}");
+    if (is_file($generated)) {
+        e2e_fail('Duplicate Word Counter HTML was created despite the guard.');
     }
-    e2e_pass('Generated HTML exists');
-
-    $html = (string) file_get_contents($generated);
-    foreach (['<!DOCTYPE html', '<html', '<head', '<body', 'Dummy Text Reverser', '</html>'] as $fragment) {
-        if (stripos($html, $fragment) === false) {
-            e2e_fail("Generated HTML missing required fragment: {$fragment}");
-        }
-    }
-    foreach (['Word Counter','Count Words','id="text"','Words: ','Characters (no spaces):','split(/\\s+/u)'] as $fragment) {
-        if (stripos($html, $fragment) === false) {
-            e2e_fail("Generated Word Counter missing functionality fragment: {$fragment}");
-        }
-    }
-    e2e_pass('Generated Word Counter HTML and counting logic are valid');
-
+    e2e_pass('No duplicate Word Counter HTML was created');
+    
     e2e_remove_tree($base);
     e2e_pass('E2E temporary files cleaned');
     echo PHP_EOL . "JunctionTools Tool Factory E2E: PASS" . PHP_EOL;
