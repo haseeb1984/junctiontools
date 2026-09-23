@@ -1,0 +1,44 @@
+name: Tool Factory E2E Smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/generate-approved-tools.php'
+      - 'security/build-security-gate.php'
+      - 'config/build-security-gate.json'
+      - 'tests/fixtures/e2e-dummy-opportunity.json'
+      - 'tests/run-tool-factory-e2e.php'
+      - 'tests/run-tool-factory-e2e-ci.sh'
+      - 'header.html'
+      - 'footer.html'
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Run Tool Factory E2E
+        run: |
+          chmod +x tests/run-tool-factory-e2e-ci.sh
+          bash tests/run-tool-factory-e2e-ci.sh
+
+      - name: Upload E2E evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tool-factory-e2e-evidence
+          path: |
+            storage/e2e-test/
+            storage/e2e-test-ci/
+          if-no-files-found: ignore
+          retention-days: 7
