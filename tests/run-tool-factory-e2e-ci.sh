@@ -29,7 +29,7 @@ fi
 
 # Keep a CI copy of the log even when the PHP test exits early.
 set +e
-php "${PHP_TEST}" 2>&1 | tee "${LOG_FILE}"
+JUNCTIONTOOLS_E2E_OUTPUT_DIR="${E2E_OUTPUT_DIR}" php "${PHP_TEST}" 2>&1 | tee "${LOG_FILE}"
 TEST_EXIT=${PIPESTATUS[0]}
 set -e
 
