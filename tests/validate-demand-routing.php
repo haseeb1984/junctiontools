@@ -11,7 +11,8 @@ if(!mkdir($base,0700,true)){fwrite(STDERR,"Unable to create temp directory.\n");
 $opportunities=[
  'opportunities'=>[
   ['query'=>'free online word counter','normalized_query'=>'free-online-word-counter','score'=>80,'search_volume'=>10000,'country'=>'US','language'=>'en','confidence'=>'high'],
-  ['query'=>'unix timestamp converter','normalized_query'=>'unix-timestamp-converter','score'=>60,'search_volume'=>5000,'country'=>'US','language'=>'en','confidence'=>'medium']
+  ['query'=>'unix timestamp converter','normalized_query'=>'unix-timestamp-converter','score'=>60,'search_volume'=>5000,'country'=>'US','language'=>'en','confidence'=>'medium'],
+  ['query'=>'mortgage amortization calculator','normalized_query'=>'mortgage-amortization-calculator','score'=>50,'search_volume'=>3000,'country'=>'US','language'=>'en','confidence'=>'medium']
  ]
 ];
 file_put_contents($base.'/opportunities.json',json_encode($opportunities));
@@ -21,12 +22,14 @@ exec($cmd,$lines,$status);
 if($status!==0){fwrite(STDERR,"Routing script failed: ".implode(PHP_EOL,$lines)."\n");exit(1);}
 $data=json_decode((string)file_get_contents($out),true);
 if(!is_array($data)||!is_array($data['queue']??null)){fwrite(STDERR,"Invalid routing output.\n");exit(1);}
-$word=null;$new=null;
-foreach($data['queue'] as $row){if(($row['core_query']??'')==='free online word counter')$word=$row;if(($row['core_query']??'')==='unix timestamp converter')$new=$row;}
+$word=null;$timestamp=null;$new=null;
+foreach($data['queue'] as $row){if(($row['core_query']??'')==='free online word counter')$word=$row;if(($row['core_query']??'')==='unix timestamp converter')$timestamp=$row;if(($row['core_query']??'')==='mortgage amortization calculator')$new=$row;}
 if(!is_array($word)||($word['decision']??'')!=='enhancement'||($word['target_tool_slug']??'')!=='word-counter'||($word['implementation']??'')!=='enhance-existing-tool'){fwrite(STDERR,"Word Counter demand was not routed to existing-tool enhancement.\n");exit(1);}
 if(($word['enhancement_scope']['type']??'')!=='seo'||($word['enhancement_scope']['preserve_existing_functionality']??false)!==true){fwrite(STDERR,"Word Counter SEO enhancement scope is invalid.\n");exit(1);}
+if(!is_array($timestamp)||($timestamp['decision']??'')!=='enhancement'||($timestamp['target_tool_slug']??'')!=='timestamp-converter'||($timestamp['implementation']??'')!=='enhance-existing-tool'){fwrite(STDERR,"Unix timestamp demand was not routed to the existing Timestamp Converter.\n");exit(1);}
 if(!is_array($new)||($new['decision']??'')!=='candidate'||($new['target_tool_slug']??null)!==null){fwrite(STDERR,"New capability was not kept as a new-tool candidate.\n");exit(1);}
 echo "[PASS] Existing Word Counter demand routes to SEO enhancement.\n";
 echo "[PASS] No duplicate new-tool route is produced for Word Counter.\n";
+echo "[PASS] Unix timestamp demand routes to existing Timestamp Converter enhancement.\n";
 echo "[PASS] Unmatched demand remains a new-tool candidate.\n";
 exit(0);
