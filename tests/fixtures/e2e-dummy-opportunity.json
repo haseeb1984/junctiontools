@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "spec_version": "1.0.0",
+  "spec_status": "draft",
+  "generation_eligible": false,
+  "source": {
+    "opportunity_id": "e2e-dummy-001",
+    "cluster_id": "e2e-smoke",
+    "query": "dummy text utility",
+    "rank": 1
+  },
+  "tool": {
+    "name": "Dummy Text Reverser",
+    "slug": "dummy-text-reverser",
+    "category": "utility",
+    "implementation": "client_side",
+    "implementation_template": "text-utility",
+    "page": "/dummy-text-reverser",
+    "frontend": "dummy-text-reverser.html"
+  },
+  "purpose": "Safe browser-only dummy tool for the JunctionTools E2E generation smoke test.",
+  "inputs": {
+    "fields": [
+      {
+        "name": "input",
+        "type": "text",
+        "required": true
+      }
+    ]
+  },
+  "outputs": {
+    "fields": [
+      "result"
+    ]
+  },
+  "content": {
+    "how_to_use": [
+      "Enter text.",
+      "Click Run.",
+      "Review the generated result."
+    ]
+  },
+  "seo": {
+    "indexable": false,
+    "canonical": "https://junctiontools.com/dummy-text-reverser",
+    "title": "Dummy Text Reverser | JunctionTools E2E",
+    "description": "A controlled browser-only JunctionTools generation smoke test."
+  },
+  "privacy_security": {
+    "processing": "browser_only",
+    "network_requests": false,
+    "external_dependencies": false,
+    "privacy_note": "Input remains in the browser.",
+    "security_requirements": [
+      "No dynamic code execution",
+      "No external network requests",
+      "No server-side storage"
+    ]
+  },
+  "acceptance_criteria": [
+    "Generated HTML exists",
+    "Generated HTML contains the text utility UI"
+  ],
+  "quality_gates": [
+    "syntax_validation",
+    "security_scan"
+  ],
+  "publication_policy": "E2E test artifact only; never publish."
+}
