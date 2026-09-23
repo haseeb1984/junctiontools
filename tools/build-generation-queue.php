@@ -24,8 +24,10 @@ function normalize_demand_term(string $value): string {
 }
 function demand_tokens(string $value): array {
     $value = strtolower(preg_replace('/[^a-z0-9]+/i', ' ', $value) ?? '');
+    $aliases = ['unix' => 'timestamp'];
     $stop = ['a','an','and','for','free','how','in','my','of','online','the','to','tool','use','with'];
     $tokens = preg_split('/\s+/', trim($value), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    $tokens = array_map(static fn(string $t): string => $aliases[$t] ?? $t, $tokens);
     return array_values(array_unique(array_filter($tokens, static fn(string $t): bool => strlen($t) > 1 && !in_array($t, $stop, true))));
 }
 function find_existing_tool(string $query, array $tools): ?array {
