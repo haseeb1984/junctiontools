@@ -12,6 +12,7 @@ on:
       - 'tests/run-tool-factory-e2e-ci.sh'
       - 'header.html'
       - 'footer.html'
+      - '.github/workflows/tool-factory-e2e.yml'
   workflow_dispatch:
 
 jobs:
