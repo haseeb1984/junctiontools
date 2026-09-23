@@ -14,7 +14,80 @@ if (!is_array($data)||!is_array($data['queue']??null)){fwrite(STDERR,"Invalid ge
 $slugify=static fn(string $v):string=>strtolower(trim(preg_replace('/[^a-z0-9]+/i','-',$v)??'','-'));
 $specs=[];
 foreach($data['queue'] as $entry){
- if(!is_array($entry)||($entry['decision']??'')!=='candidate')continue;
+ if(!is_array($entry))continue;
+
+ if(($entry['decision']??'')==='enhancement'){
+  $query=trim((string)($entry['core_query']??''));
+  $targetSlug=strtolower(trim((string)($entry['target_tool_slug']??'')));
+  $scope=$entry['enhancement_scope']??null;
+  if($query===''||$targetSlug===''||!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/',$targetSlug)||!is_array($scope)||($scope['type']??'')!=='seo')continue;
+  $specs[]=[
+   'spec_version'=>'1.0.0',
+   'spec_status'=>'draft',
+   'generation_eligible'=>false,
+   'spec_type'=>'enhancement',
+   'source'=>[
+    'cluster_id'=>(string)($entry['cluster_id']??$targetSlug),
+    'query'=>$query,
+    'rank'=>(int)($entry['rank']??0),
+    'priority_score'=>(int)($entry['priority_score']??0),
+    'demand_signal'=>(int)($entry['demand_signal']??0),
+    'country'=>$entry['country']??'unspecified',
+    'language'=>$entry['language']??null,
+    'confidence'=>$entry['confidence']??'low',
+    'source_registry'=>$entry['source']??'unknown'
+   ],
+   'tool'=>[
+    'name'=>(string)($entry['existing_tool_match']??$targetSlug),
+    'slug'=>$targetSlug,
+    'page'=>'/'.$targetSlug,
+    'frontend'=>null
+   ],
+   'purpose'=>'Improve the existing JunctionTools page for the discovered search intent without creating a duplicate tool or changing core functionality.',
+   'enhancement'=>[
+    'type'=>'seo',
+    'target_tool_slug'=>$targetSlug,
+    'scope'=>[
+     'description'=>(string)($scope['description']??'Improve the existing tool page for the discovered search intent without changing its core functionality.'),
+     'requested_capabilities'=>array_values($scope['requested_capabilities']??['search-intent-aligned-title','meta-description','on-page-content','how-to-use-content']),
+     'affected_components'=>array_values($scope['affected_components']??['content','seo']),
+     'preserve_existing_functionality'=>true
+    ],
+    'content_requirements'=>[
+     'title'=>'Align the existing page title with the discovered search intent.',
+     'meta_description'=>'Align the existing meta description with the discovered search intent without keyword stuffing.',
+     'on_page_content'=>'Add or refine useful explanatory copy that directly addresses the discovered search intent.',
+     'how_to_use'=>'Ensure the existing tool has clear, intent-relevant How to Use guidance.'
+    ]
+   ],
+   'seo'=>[
+    'target_query'=>$query,
+    'indexable'=>true,
+    'must_preserve_existing_canonical'=>true,
+    'must_preserve_existing_functionality'=>true
+   ],
+   'security'=>[
+    'no_new_page'=>true,
+    'no_new_registry_entry'=>true,
+    'no_sitemap_mutation'=>true,
+    'no_runtime_code_generation'=>true,
+    'no_external_network_dependency'=>true
+   ],
+   'quality_gates'=>[
+    'target_tool_exists',
+    'enhancement_approval',
+    'security_gate_validation',
+    'seo_validation',
+    'content_validation',
+    'functional_regression_test',
+    'manual_review_before_publish'
+   ],
+   'publication_policy'=>'Draft enhancement only. Applying changes and publication require separate approval gates; this specification never authorizes duplicate tool generation or production publication.'
+  ];
+  continue;
+ }
+
+ if(($entry['decision']??'')!=='candidate')continue;
  $query=trim((string)($entry['core_query']??'')); $slug=$slugify((string)($entry['recommended_slug']??$query));
  if($query===''||$slug==='')continue; $lower=strtolower($query);
  $category='utility'; $implementation='client_side'; $template='generic-form';
@@ -69,5 +142,5 @@ foreach($data['queue'] as $entry){
   'acceptance_criteria'=>$functional,'quality_gates'=>['syntax_validation','spec_schema_validation','functional_test','security_scan','seo_validation','content_how_to_use_validation','manual_review_before_publish'],'publication_policy'=>'Draft specification only. Code generation, registry activation, sitemap publication, and deployment require later approval gates.'
  ];
 }
-$result=['schema_version'=>'1.0.0','generated_at'=>gmdate('Y-m-d'),'methodology'=>['purpose'=>'Compile demand candidates into structured implementation specifications before code generation.','automation_policy'=>'Specifications are drafts and never authorize code generation or publication by themselves.'],'specifications'=>$specs];
+$result=['schema_version'=>'1.0.0','generated_at'=>gmdate('Y-m-d'),'methodology'=>['purpose'=>'Compile demand candidates into new-tool specifications and existing-tool SEO/content enhancement specifications.','automation_policy'=>'Specifications are drafts and never authorize code generation, enhancement application, or publication by themselves. Existing capabilities are enhancement-only and never become duplicate new-tool specifications.'],'specifications'=>$specs];
 if(file_put_contents($output,json_encode($result,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL,LOCK_EX)===false){fwrite(STDERR,"Unable to write output.\n");exit(1);} echo 'Built '.count($specs)." draft tool specifications.\n";
