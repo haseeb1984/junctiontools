@@ -64,8 +64,8 @@ try {
         e2e_fail('Fixture or policy is invalid JSON.', E2E_INVALID);
     }
 
-    if (($spec['tool']['slug'] ?? '') !== 'dummy-text-reverser') {
-        e2e_fail('Unexpected dummy tool slug.', E2E_INVALID);
+    if (($spec['tool']['slug'] ?? '') !== 'word-counter') {
+        e2e_fail('Unexpected real tool slug.', E2E_INVALID);
     }
 
     $preserveDir = getenv('JUNCTIONTOOLS_E2E_OUTPUT_DIR');
@@ -140,7 +140,7 @@ try {
         'schema_version' => '1.0.0',
         'policy' => ['default' => 'deny'],
         'approvals' => [[
-            'slug' => 'dummy-text-reverser',
+            'slug' => 'word-counter',
             'approved' => true,
             'approved_by' => 'ci-e2e',
             'approved_at' => gmdate('Y-m-d\TH:i:s\Z')
@@ -177,7 +177,7 @@ try {
 
     e2e_pass('Current approved generator executed through the Pre-Build Security Gate');
 
-    $generated = $outputDir . '/dummy-text-reverser.html';
+    $generated = $outputDir . '/word-counter.html';
     if (!is_file($generated)) {
         e2e_fail("Generated HTML missing: {$generated}");
     }
@@ -189,7 +189,12 @@ try {
             e2e_fail("Generated HTML missing required fragment: {$fragment}");
         }
     }
-    e2e_pass('Generated HTML structure and dummy tool content are valid');
+    foreach (['Word Counter','Count Words','id="text"','Words: ','Characters (no spaces):','split(/\\s+/u)'] as $fragment) {
+        if (stripos($html, $fragment) === false) {
+            e2e_fail("Generated Word Counter missing functionality fragment: {$fragment}");
+        }
+    }
+    e2e_pass('Generated Word Counter HTML and counting logic are valid');
 
     e2e_remove_tree($base);
     e2e_pass('E2E temporary files cleaned');
