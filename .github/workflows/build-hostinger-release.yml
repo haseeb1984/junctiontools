@@ -17,24 +17,45 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # The release manifest lives on the current main branch, while its
+      # release.commit_sha identifies the immutable source commit to package.
+      # Keep those two refs separate: a manifest cannot safely contain its
+      # own commit SHA because changing the manifest changes that commit.
+      - name: Checkout release manifest from main
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Snapshot release manifest
+        run: |
+          set -euo pipefail
+          test -f config/production-release-manifest.json
+          cp config/production-release-manifest.json "$RUNNER_TEMP/production-release-manifest.json"
+
       - name: Resolve release commit
         id: commit
         env:
           INPUT_SHA: ${{ inputs.commit_sha }}
         run: |
           set -euo pipefail
-          SHA="${INPUT_SHA:-$(python3 -c 'import json; print(json.load(open("config/production-release-manifest.json"))["release"]["commit_sha"])' )}"
+          SHA="${INPUT_SHA:-$(python3 -c 'import json; print(json.load(open("'"$RUNNER_TEMP"'/production-release-manifest.json"))["release"]["commit_sha"])' )}"
           case "$SHA" in
             [0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]*) ;;
             *) echo "Invalid commit SHA"; exit 1 ;;
           esac
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout release commit
+      - name: Checkout release source commit
         uses: actions/checkout@v5
         with:
           ref: ${{ steps.commit.outputs.sha }}
           fetch-depth: 1
+
+      - name: Restore release manifest
+        run: |
+          set -euo pipefail
+          cp "$RUNNER_TEMP/production-release-manifest.json" config/production-release-manifest.json
 
       - name: Verify final release gate
         env:
