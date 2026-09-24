@@ -13,6 +13,7 @@ const pageFile = path.join(generatedDir, 'parking-fee-calculator.html');
 if (!fs.existsSync(pageFile)) throw new Error('Generated browser-test artifact is missing: ' + pageFile);
 
 const port = 41731;
+const BROWSER_TIMEOUT_MS = 30000;
 const server = spawn('php', ['-S', '127.0.0.1:' + port, '-t', generatedDir], { stdio: ['ignore', 'pipe', 'pipe'] });
 let serverOutput = '';
 server.stdout.on('data', d => { serverOutput += d.toString(); });
@@ -37,7 +38,9 @@ const waitForServer = () => new Promise((resolve, reject) => {
 
 (async () => {
   await waitForServer();
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true, timeout: BROWSER_TIMEOUT_MS });
+  page.setDefaultTimeout(10000);
+  page.setDefaultNavigationTimeout(15000);
   const page = await browser.newPage();
   const consoleErrors = [];
   const pageErrors = [];
@@ -49,7 +52,7 @@ const waitForServer = () => new Promise((resolve, reject) => {
     if (/^https?:/i.test(url) && !url.startsWith('http://127.0.0.1:' + port)) externalRequests.push(url);
   });
 
-  await page.goto('http://127.0.0.1:' + port + '/parking-fee-calculator.html', { waitUntil: 'networkidle' });
+  await page.goto('http://127.0.0.1:' + port + '/parking-fee-calculator.html', { waitUntil: 'domcontentloaded', timeout: 15000 });
   if (!await page.locator('h1').isVisible()) throw new Error('Generated tool h1 is not visible.');
   if (await page.title() !== 'Parking Fee Calculator | Free Online Tool | JunctionTools') throw new Error('Generated tool title is incorrect.');
   if (await page.locator('#run').count() !== 1 || await page.locator('#reset').count() !== 1) throw new Error('Run/Reset controls are missing.');
