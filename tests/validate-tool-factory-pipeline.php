@@ -36,6 +36,7 @@ $expected = [
     'generation-queue',
     'tool-specification',
     'pre-build-security-gate',
+    'approved-existing-tool-enhancement-staging',
     'approved-generation',
     'runtime-validation',
     'deployment-plan',
