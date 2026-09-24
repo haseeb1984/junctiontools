@@ -47,6 +47,7 @@ jobs:
           php -l tests/validate-tool-factory-production-e2e.php
           php -l tests/validate-tool-specs.php
           php -l tests/validate-demand-routing.php
+          php -l tests/validate-capability-demand-routing.php
           php -l tests/validate-tool-enhancement-spec.php
           php -l tests/validate-generated-runtime.php
           php -l tests/validate-site-navigation-sync.php
@@ -78,6 +79,9 @@ jobs:
 
       - name: Validate existing-tool demand routes to SEO enhancement
         run: php tests/validate-demand-routing.php
+
+      - name: Validate capability-first demand routing
+        run: php tests/validate-capability-demand-routing.php
 
       - name: Validate existing-tool enhancement specification contract
         run: php tests/validate-tool-enhancement-spec.php
