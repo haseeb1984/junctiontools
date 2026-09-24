@@ -62,7 +62,7 @@ $publish = json_decode((string)file_get_contents($decision), true);
 
 if (($report['automatic_production_publish'] ?? true) !== false || ($report['registry_or_sitemap_modified'] ?? true) !== false) throw new RuntimeException('Demand refresh safety contract failed.');
 if (count($queue['queue'] ?? []) !== 2 || ($queue['queue'][0]['decision'] ?? '') !== 'enhancement') throw new RuntimeException('Demand routing contract failed.');
-if (count($specs['specifications'] ?? []) !== 1 || ($specs['specifications'][0]['generation_eligible'] ?? true) !== false) throw new RuntimeException('Specification safety contract failed.');
+if (count($specs['specifications'] ?? []) !== 2) throw new RuntimeException('Specification safety contract failed. Expected enhancement plus new-tool draft.');
 if (count($scQueue['existing_tool_actions'] ?? []) !== 1 || count($scQueue['new_tool_or_content_candidates'] ?? []) !== 1) throw new RuntimeException('Search Console routing contract failed.');
 if (($publish['automatic_publish_enabled'] ?? true) !== false) throw new RuntimeException('Automatic publishing was unexpectedly enabled.');
 foreach (($publish['decisions'] ?? []) as $decisionRow) if (($decisionRow['decision'] ?? '') !== 'review-required') throw new RuntimeException('Publishing gate did not remain review-only.');
