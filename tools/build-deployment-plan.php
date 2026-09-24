@@ -50,8 +50,10 @@ $plan = [
         'publication_requires_separate_review' => true,
         'adsense_validation_required' => true,
         'adsense_validation' => $adsense,
-        'registry_changes' => 'manual_after_review',
-        'sitemap_changes' => 'manual_after_review',
+        'registry_changes' => 'publish-approved-new-tool.php after separate explicit publication approval',
+        'sitemap_changes' => 'publish-approved-new-tool.php after separate explicit publication approval',
+        'navigation_changes' => 'publish-approved-new-tool.php inserts into the tool category in header/footer/index',
+        'tool_count_changes' => 'publish-approved-new-tool.php increments the published tool count',
     ],
     'tools' => [],
 ];
