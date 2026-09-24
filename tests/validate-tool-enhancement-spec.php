@@ -62,7 +62,7 @@ if(($enhancement['privacy_security']['network_requests']??true)!==false||($enhan
 if(($enhancement['seo']['target_query']??'')!=='free online word counter'||($enhancement['seo']['must_preserve_existing_functionality']??false)!==true){
  fwrite(STDERR,"FAIL: enhancement SEO intent/functionality preservation contract is invalid.\n");exit(1);
 }
-if(!is_array($candidate)||($candidate['spec_type']??'enhancement')==='enhancement'){
+if(!is_array($candidate)||($candidate['spec_status']??'')!=='draft'||($candidate['generation_eligible']??true)!==false){
  fwrite(STDERR,"FAIL: genuinely new demand was not kept as a new-tool specification.\n");exit(1);
 }
 
