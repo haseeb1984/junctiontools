@@ -94,8 +94,9 @@ function nav_link(array $tool): string {
 function nav_card(array $tool): string {
     return '<a href="'.nav_esc($tool['slug']).'" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group"><div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid '.nav_esc($tool['icon']).' text-lg"></i></div><div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">'.nav_esc($tool['name']).'</h3><p class="text-xs text-slate-400">'.nav_esc($tool['description']).'</p></div></a>';
 }
-function update_shared_header(string $html, array $tools): string {
+function update_shared_header(string $html, array $tools, int $totalTools): string {
     if (!$tools) return $html;
+    $html = preg_replace('/All \d+ Tools/', 'All '.$totalTools.' Tools', $html, 1);
     $links = '';
     foreach ($tools as $tool) $links .= nav_link($tool);
     $desktop = '<div class="relative group"><button class="nav-trigger">New Tools <i class="fa-solid fa-chevron-down text-[9px]"></i></button><div class="dropdown">'.$links.'</div></div>';
@@ -138,8 +139,9 @@ function update_shared_footer(string $html, array $tools): string {
     }
     return $html;
 }
-function update_index_page(string $html, array $tools): string {
+function update_index_page(string $html, array $tools, int $totalTools): string {
     if (!$tools) return $html;
+    $html = preg_replace('/Access \d+ completely free online tools/', 'Access '.$totalTools.' completely free online tools', $html, 1);
     $cards = '';
     foreach ($tools as $tool) $cards .= nav_card($tool);
     $pattern = '/(<!-- CATEGORY 6: Newly Published Tools -->.*?<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">).*?(<\/div>\s*<\/section>)/s';
@@ -151,14 +153,15 @@ function update_index_page(string $html, array $tools): string {
 
 $newTools = nav_new_tools($specs, $approved);
 if ($newTools) {
-    $stagedHeader = update_shared_header($header, $newTools);
+    $totalTools = count($registry['tools']) + count($newTools);
+    $stagedHeader = update_shared_header($header, $newTools, $totalTools);
     $stagedFooter = update_shared_footer($footer, $newTools);
     $indexPath = $root.'/index.html';
     if (!is_file($indexPath)) {
         fwrite(STDERR, "Index page is required for new-tool publication staging.\n");
         exit(1);
     }
-    $stagedIndex = update_index_page((string)file_get_contents($indexPath), $newTools);
+    $stagedIndex = update_index_page((string)file_get_contents($indexPath), $newTools, $totalTools);
     foreach (['header.html'=>$stagedHeader,'footer.html'=>$stagedFooter,'index.html'=>$stagedIndex] as $relative=>$content) {
         $target = rtrim($outputDir,'/\\').'/'.$relative;
         if (file_put_contents($target, $content, LOCK_EX) === false) {
