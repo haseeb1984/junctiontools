@@ -23,7 +23,7 @@ jobs:
           INPUT_SHA: ${{ inputs.commit_sha }}
         run: |
           set -euo pipefail
-          SHA="${INPUT_SHA:-${{ github.sha }}}"
+          SHA="\${INPUT_SHA:-\$(python3 -c 'import json; print(json.load(open("config/production-release-manifest.json"))["release"]["commit_sha"])')}"
           case "$SHA" in
             [0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]*) ;;
             *) echo "Invalid commit SHA"; exit 1 ;;
