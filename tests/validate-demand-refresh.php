@@ -62,13 +62,25 @@ if (($queue['queue'][0]['decision'] ?? '') !== 'enhancement') {
     fwrite(STDERR, "Existing age calculator capability was not routed to enhancement.\n");
     exit(1);
 }
-if (!is_array($specs['specifications'] ?? null) || count($specs['specifications']) !== 1) {
-    fwrite(STDERR, "Expected exactly one new candidate specification.\n");
+if (!is_array($specs['specifications'] ?? null) || count($specs['specifications']) !== 2) {
+    fwrite(STDERR, "Expected one enhancement specification and one new-tool candidate specification.\n");
     exit(1);
 }
-if (($specs['specifications'][0]['spec_status'] ?? '') !== 'draft' || ($specs['specifications'][0]['generation_eligible'] ?? true) !== false) {
-    fwrite(STDERR, "Specification was not kept draft and generation-ineligible.\n");
+$enhancementSpec = null;
+$candidateSpec = null;
+foreach ($specs['specifications'] as $specification) {
+    if (($specification['spec_type'] ?? '') === 'enhancement') {
+        $enhancementSpec = $specification;
+    } elseif (($specification['spec_type'] ?? '') === 'new_tool') {
+        $candidateSpec = $specification;
+    }
+}
+if (!is_array($enhancementSpec) || ($enhancementSpec['tool']['slug'] ?? '') !== 'age-calculator' || ($enhancementSpec['generation_eligible'] ?? true) !== false) {
+    fwrite(STDERR, "Existing age calculator demand did not compile to a valid enhancement specification.\n");
     exit(1);
 }
-
+if (!is_array($candidateSpec) || ($candidateSpec['spec_status'] ?? '') !== 'draft' || ($candidateSpec['generation_eligible'] ?? true) !== false) {
+    fwrite(STDERR, "New-tool specification was not kept draft and generation-ineligible.\n");
+    exit(1);
+}
 echo "PASS: demand refresh is deterministic, review-only, and fail-safe.\n";
