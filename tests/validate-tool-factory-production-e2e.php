@@ -265,7 +265,7 @@ try {
     $indexCategory6 = strpos($stagedIndexHtml, '<!-- CATEGORY 6: Utilities & Generators -->');
     $indexParking = strpos($stagedIndexHtml, 'href="parking-fee-calculator"');
     if ($indexCategory6 === false || $indexParking === false || $indexParking < $indexCategory6) {
-        throw new RuntimeException('Staged index did not place the new calculator in the utilities/newly-published category section.');
+        throw new RuntimeException('Staged index did not place the new calculator in the Utilities & Generators category section.');
     }
 
     // 4C. Final publication approval is tested only against an isolated copy
