@@ -20,10 +20,10 @@ if (!is_array($opportunities) || !is_array($opportunities['opportunities'] ?? nu
 }
 
 function normalize_demand_term(string $value): string {
-    return strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $value) ?? '', '-'));
+    return strtolower(trim(preg_replace('~[^a-z0-9]+~i', '-', $value) ?? '', '-'));
 }
 function demand_tokens(string $value): array {
-    $value = strtolower(preg_replace('/[^a-z0-9]+/i', ' ', $value) ?? '');
+    $value = strtolower(preg_replace('~[^a-z0-9]+~i', ' ', $value) ?? '');
     $aliases = ['unix' => 'timestamp'];
     $stop = ['a','an','and','for','free','how','in','my','of','online','the','to','tool','use','with'];
     $tokens = preg_split('/\s+/', trim($value), -1, PREG_SPLIT_NO_EMPTY) ?: [];
@@ -35,45 +35,45 @@ function demand_profile(string $query): array {
     $profile = ['required_capabilities' => [], 'intent' => 'unknown'];
 
     $rules = [
-        ['/(?:word|character|line|sentence)\\s+(?:counter|count)|count\\s+(?:words|characters|lines|sentences)/i',
+        ['~(?:word|character|line|sentence)\\s+(?:counter|count)|count\\s+(?:words|characters|lines|sentences)~i',
             ['accept_text','analyze_text','count_text'], 'text-counting'],
-        ['/(?:uppercase|lowercase|title case|sentence case|capitalize|case)\\s+(?:converter|convert|changer|change)/i',
+        ['~(?:uppercase|lowercase|title case|sentence case|capitalize|case)\\s+(?:converter|convert|changer|change)~i',
             ['accept_text','transform_text','change_letter_case'], 'text-transformation'],
-        ['/(?:clean|cleanup|remove)\\s+(?:text|whitespace|spaces)|extra\\s+spaces?/i',
+        ['~(?:clean|cleanup|remove)\\s+(?:text|whitespace|spaces)|extra\\s+spaces?~i',
             ['accept_text','transform_text','clean_text'], 'text-cleaning'],
-        ['/(?:json)\\s+(?:formatter|format|beautifier|beautify|pretty)/i',
+        ['~(?:json)\\s+(?:formatter|format|beautifier|beautify|pretty)~i',
             ['accept_json','parse_json','format_json'], 'json-formatting'],
-        ['/(?:base64)/i',
+        ['~\bbase64\b~i',
             ['accept_text','encode_decode_base64'], 'base64-conversion'],
-        ['/(?:regex|regular expression).*?(?:tester|test|checker|check)/i',
+        ['~\b(?:regex|regular\s+expression)\b.*?(?:tester|test|checker|check)~i',
             ['accept_pattern','accept_text','test_regex'], 'regex-testing'],
-        ['/(?:unix|epoch|timestamp).*?(?:converter|convert)/i',
+        ['~\b(?:unix|epoch|timestamp)\b.*?(?:converter|convert)~i',
             ['accept_timestamp_or_date','convert_timestamp'], 'timestamp-conversion'],
-        ['/(?:qr|qrcode|qr code).*?(?:generator|generate)/i',
+        ['~\b(?:qr|qrcode|qr\s+code)\b.*?(?:generator|generate)~i',
             ['accept_text_or_url','generate_qr_code','download_png'], 'qr-generation'],
-        ['/(?:age).*?(?:calculator|calculate)/i',
+        ['~\bage\b.*?(?:calculator|calculate)~i',
             ['accept_birth_date','calculate_age'], 'age-calculation'],
         ['(?:discount).*?(?:calculator|calculate)/i',
             ['accept_price','accept_percentage','calculate_discount'], 'discount-calculation'],
-        ['/(?:invoice).*?(?:generator|generate|maker|create)/i',
+        ['~\binvoice\b.*?(?:generator|generate|maker|create)~i',
             ['accept_invoice_data','generate_invoice_document'], 'invoice-generation'],
-        ['/(?:uuid).*?(?:generator|generate)/i',
+        ['~\buuid\b.*?(?:generator|generate)~i',
             ['generate_uuid'], 'uuid-generation'],
-        ['/(?:sha.?256|sha.?256 hash|hash).*?(?:generator|generate|calculator|calculate)/i',
+        ['~(?:sha.?256|sha.?256 hash|hash).*?(?:generator|generate|calculator|calculate)~i',
             ['accept_text','generate_sha256_hash'], 'hash-generation'],
-        ['/(?:px|pixel).*?(?:to|\\-).*?(?:rem)/i',
+        ['~(?:px|pixel).*?(?:to|\\-).*?(?:rem)~i',
             ['accept_dimensions','convert_px_to_rem'], 'px-rem-conversion'],
-        ['/(?:whatsapp).*?(?:link|url)/i',
+        ['~\bwhatsapp\b.*?(?:link|url)~i',
             ['accept_phone_and_message','generate_whatsapp_url'], 'whatsapp-link-generation'],
-        ['/(?:color).*?(?:palette).*?(?:generator|generate)/i',
+        ['~\bcolor\b.*?\bpalette\b.*?(?:generator|generate)~i',
             ['accept_color','generate_color_palette'], 'color-palette-generation'],
-        ['/(?:aspect ratio).*?(?:calculator|calculate)/i',
+        ['~\baspect\s+ratio\b.*?(?:calculator|calculate)~i',
             ['accept_dimensions','calculate_aspect_ratio'], 'aspect-ratio-calculation'],
-        ['/(?:contrast|wcag).*?(?:checker|check|audit)/i',
+        ['~\b(?:contrast|wcag)\b.*?(?:checker|check|audit)~i',
             ['accept_url','evaluate_color_contrast'], 'contrast-audit'],
-        ['/(?:readability|flesch).*?(?:checker|check|calculator|score|test|audit)/i',
+        ['~\b(?:readability|flesch)\b.*?(?:checker|check|calculator|score|test|audit)~i',
             ['accept_url','evaluate_readability'], 'readability-audit'],
-        ['/(?:meta|meta tags).*?(?:seo|checker|audit)/i',
+        ['~\b(?:meta|meta\s+tags)\b.*?(?:seo|checker|audit)~i',
             ['accept_url','audit_meta_seo'], 'meta-seo-audit'],
     ];
 
