@@ -292,7 +292,9 @@ try {
         'review_type' => 'new-tool-publication',
         'policy' => [
             'default_decision' => 'reject-until-explicitly-approved',
-            'automatic_publication_allowed' => false
+            'automatic_publication_allowed' => false,
+            'registry_or_sitemap_modification_allowed' => true,
+            'production_publish_allowed' => true
         ],
         'tools' => [[
             'slug' => 'parking-fee-calculator',
