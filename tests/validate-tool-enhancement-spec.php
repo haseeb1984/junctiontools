@@ -57,6 +57,8 @@ if(($enhancement['tool']['slug']??'')!=='word-counter'||($enhancement['enhanceme
 if(($enhancement['generation_eligible']??true)!==false||($enhancement['security']['no_new_page']??false)!==true||($enhancement['security']['no_new_registry_entry']??false)!==true){
  fwrite(STDERR,"FAIL: enhancement spec permits duplicate/new-tool behavior.\n");exit(1);
 }
+if(($enhancement['tool']['implementation_template']??'')!=='existing-tool-seo-enhancement'){fwrite(STDERR,"FAIL: enhancement does not use the dedicated existing-tool SEO template.\n");exit(1);}
+if(($enhancement['privacy_security']['network_requests']??true)!==false||($enhancement['privacy_security']['external_dependencies']??true)!==false){fwrite(STDERR,"FAIL: enhancement security contract permits network/dependency changes.\n");exit(1);}
 if(($enhancement['seo']['target_query']??'')!=='free online word counter'||($enhancement['seo']['must_preserve_existing_functionality']??false)!==true){
  fwrite(STDERR,"FAIL: enhancement SEO intent/functionality preservation contract is invalid.\n");exit(1);
 }
