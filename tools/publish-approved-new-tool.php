@@ -244,14 +244,22 @@ function pub_registry_entry(array $spec): array {
     $slug = strtolower(trim((string) ($tool['slug'] ?? '')));
     $name = (string) ($tool['name'] ?? ucwords(str_replace('-', ' ', $slug)));
     $category = pub_category($spec);
+    $input = $tool['input'] ?? ($spec['inputs']['name'] ?? 'text');
+    if (isset($spec['inputs']['fields']) && is_array($spec['inputs']['fields'])) {
+        $input = implode('+', array_map(static fn($field) => is_array($field) ? (string) ($field['name'] ?? 'input') : (string) $field, $spec['inputs']['fields']));
+    }
+    $output = $tool['output'] ?? ($spec['outputs']['name'] ?? 'result');
+    if (isset($spec['outputs']['fields']) && is_array($spec['outputs']['fields'])) {
+        $output = implode('+', array_map(static fn($field) => is_array($field) ? (string) ($field['name'] ?? 'result') : (string) $field, $spec['outputs']['fields']));
+    }
     return [
         'id' => strtolower(trim((string) ($tool['id'] ?? str_replace('-', '_', $slug)))),
         'name' => $name,
         'slug' => $slug,
         'category' => $category,
         'type' => (string) ($tool['type'] ?? $tool['implementation'] ?? 'client_side'),
-        'input' => $tool['input'] ?? ($spec['inputs']['fields'] ?? 'text'),
-        'output' => $tool['output'] ?? ($spec['outputs']['fields'] ?? 'result'),
+        'input' => $input,
+        'output' => $output,
         'frontend' => $slug . '.html',
         'backend' => $tool['backend'] ?? null,
         'seo' => [
