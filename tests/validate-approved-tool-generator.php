@@ -61,7 +61,7 @@ if($status2!==0 || count(glob($emptyDir.'/*.html'))!==0){fwrite(STDERR,"Unapprov
 // Prove the real registry duplicate guard rejects an existing tool.
 $duplicateDir=$dir.'/duplicate-check'; mkdir($duplicateDir);
 $cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($duplicateDir).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision).' '.escapeshellarg($root.'/config/tools.json');
-exec($cmd,$duplicateLines,$duplicateStatus);
+exec($cmd . ' 2>&1',$duplicateLines,$duplicateStatus);
 if($duplicateStatus===0 || is_file($duplicateDir.'/age-calculator.html')){fwrite(STDERR,"Existing registry duplicate was generated.\n");exit(1);}
 if(strpos(implode("\n",$duplicateLines),'Duplicate existing tool rejected: age-calculator')===false){fwrite(STDERR,"Duplicate registry rejection message missing.\n");exit(1);}
 @unlink($spec); @unlink($approval); @unlink($securityDecision); @unlink($empty); @unlink($testRegistry); @unlink($file); @rmdir($emptyDir); @rmdir($duplicateDir); @rmdir($dir);
