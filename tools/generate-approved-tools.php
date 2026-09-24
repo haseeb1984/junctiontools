@@ -59,8 +59,8 @@ $html=html_shell($slug,$title,$description,$name,$howTo,$header,$footer,$body,$s
 
 /**
  * Build staged navigation/content updates for newly generated tools.
- * Production/shared files are never modified here; updated copies are written
- * beside the generated tool pages and must pass approval before publication.
+ * New tools are placed into the existing category buckets; production/shared
+ * files remain unchanged until the separate publication approval gate.
  */
 function nav_esc(string $value): string {
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
@@ -73,17 +73,32 @@ function nav_short_description(array $spec): string {
     $value = trim((string)($spec['seo']['short_description'] ?? $spec['seo']['description'] ?? 'New JunctionTools utility'));
     return $value !== '' ? $value : 'New JunctionTools utility';
 }
+function nav_bucket(string $category): string {
+    return match (strtolower(trim($category))) {
+        'speed-performance', 'analytics' => 'performance',
+        'accessibility', 'ux', 'seo' => 'ux-seo',
+        'ecommerce-conversion', 'business' => 'ecommerce',
+        'design', 'social-media', 'content', 'text' => 'design-content',
+        'developer', 'communication' => 'developer',
+        'calculators', 'generators' => 'utilities',
+        default => throw new RuntimeException('Unsupported new-tool category for navigation: '.$category),
+    };
+}
 function nav_new_tools(array $specs, array $approved): array {
     $tools = [];
     foreach ($specs['specifications'] ?? [] as $spec) {
         if (!is_array($spec)) continue;
         $slug = strtolower(trim((string)($spec['tool']['slug'] ?? '')));
         if ($slug === '' || !isset($approved[$slug])) continue;
+        $category = strtolower(trim((string)($spec['tool']['category'] ?? '')));
+        if ($category === '') throw new RuntimeException('New tool is missing a category: '.$slug);
         $tools[$slug] = [
             'slug' => $slug,
             'name' => (string)($spec['tool']['name'] ?? ucwords(str_replace('-', ' ', $slug))),
             'description' => nav_short_description($spec),
             'icon' => nav_icon($spec),
+            'category' => $category,
+            'bucket' => nav_bucket($category),
         ];
     }
     return array_values($tools);
@@ -94,95 +109,81 @@ function nav_link(array $tool): string {
 function nav_card(array $tool): string {
     return '<a href="'.nav_esc($tool['slug']).'" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group"><div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid '.nav_esc($tool['icon']).' text-lg"></i></div><div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">'.nav_esc($tool['name']).'</h3><p class="text-xs text-slate-400">'.nav_esc($tool['description']).'</p></div></a>';
 }
-function update_shared_header(string $html, array $tools, int $totalTools): string {
-    if (!$tools) return $html;
-    $html = preg_replace('/All \d+ Tools/', 'All '.$totalTools.' Tools', $html, 1);
-    $links = '';
-    foreach ($tools as $tool) $links .= nav_link($tool);
-    $desktop = '<div class="relative group"><button class="nav-trigger">New Tools <i class="fa-solid fa-chevron-down text-[9px]"></i></button><div class="dropdown">'.$links.'</div></div>';
-    if (str_contains($html, '<button class="nav-trigger">New Tools')) {
-        $html = preg_replace('/<div class="relative group"><button class="nav-trigger">New Tools.*?<\/div><\/div>/s', $desktop, $html, 1);
-    } else {
-        $needle = '</nav>';
-        if (!str_contains($html, $needle)) throw new RuntimeException('Header desktop navigation container missing.');
-        $html = str_replace($needle, $desktop.$needle, $html, $count);
-        if ($count !== 1) throw new RuntimeException('Header desktop navigation could not be updated.');
-    }
-    $mobileLinks = '';
-    foreach ($tools as $tool) $mobileLinks .= nav_link($tool);
-    $mobile = '<div><p class="font-bold text-slate-200 mb-1">New Tools</p><div class="grid gap-2 text-slate-400">'.$mobileLinks.'</div></div>';
-    if (str_contains($html, '<p class="font-bold text-slate-200 mb-1">New Tools</p>')) {
-        $html = preg_replace('/<div><p class="font-bold text-slate-200 mb-1">New Tools<\/p><div class="grid gap-2 text-slate-400">.*?<\/div><\/div>/s', $mobile, $html, 1);
-    } else {
-        $needle = '</div>\n  </div>\n  <button id="mobile-menu-btn"';
-        $pos = strpos($html, $needle);
-        if ($pos === false) throw new RuntimeException('Header mobile navigation container missing.');
-        $before = substr($html, 0, $pos);
-        $after = substr($html, $pos);
-        $before .= $mobile."\n        ";
-        $html = $before.$after;
-    }
-    return $html;
+function nav_update_header_bucket(string $html, string $bucket, array $tool): string {
+    $labels = [
+        'performance' => 'Performance',
+        'ux-seo' => 'UX & SEO',
+        'ecommerce' => 'E-Commerce',
+        'design-content' => 'Design & Content',
+        'developer' => 'Developer',
+        'utilities' => 'Utilities',
+    ];
+    $label = $labels[$bucket];
+    $link = nav_link($tool);
+    $pattern = '/(<div class="relative group"><button class="nav-trigger">'.preg_quote($label, '/').' .*?<div class="dropdown(?: right-0)?">)(.*?)(<\/div><\/div>)/s';
+    if (!preg_match($pattern, $html)) throw new RuntimeException('Header desktop category missing: '.$label);
+    $html = preg_replace($pattern, '$1$2'.$link.'$3', $html, 1);
+    $mobilePattern = '/(<div><p class="font-bold text-slate-200 mb-1">'.preg_quote($label, '/').'<\/p><div class="grid gap-2 text-slate-400">)(.*?)(<\/div><\/div>)/s';
+    if (!preg_match($mobilePattern, $html)) throw new RuntimeException('Header mobile category missing: '.$label);
+    return preg_replace($mobilePattern, '$1$2'.$link.'$3', $html, 1);
 }
-function update_shared_footer(string $html, array $tools): string {
-    if (!$tools) return $html;
-    $items = '';
-    foreach ($tools as $tool) $items .= '<li>'.nav_link($tool).'</li>';
-    $column = '<div class="space-y-2"><h4 class="font-bold text-white text-sm">New Tools</h4><ul class="space-y-1.5">'.$items.'</ul></div>';
-    if (str_contains($html, '<h4 class="font-bold text-white text-sm">New Tools</h4>')) {
-        $html = preg_replace('/<div class="space-y-2"><h4 class="font-bold text-white text-sm">New Tools<\/h4><ul class="space-y-1\.5">.*?<\/ul><\/div>/s', $column, $html, 1);
-    } else {
-        $needle = '</div>\n    <div class="flex flex-col md:flex-row';
-        if (!str_contains($html, $needle)) throw new RuntimeException('Footer tool navigation container missing.');
-        $html = str_replace($needle, $column."\n    ".$needle, $html, $count);
-        if ($count !== 1) throw new RuntimeException('Footer navigation could not be updated.');
-    }
-    return $html;
+function nav_update_footer_bucket(string $html, string $bucket, array $tool): string {
+    $labels = [
+        'performance' => 'Performance',
+        'ux-seo' => 'UX & SEO',
+        'ecommerce' => 'E-Commerce',
+        'design-content' => 'Design & Content',
+        'developer' => 'Developer',
+        'utilities' => 'Utilities',
+    ];
+    $label = $labels[$bucket];
+    $link = '<li>'.nav_link($tool).'</li>';
+    $pattern = '/(<div class="space-y-2"><h4 class="font-bold text-white text-sm">'.preg_quote($label, '/').'<\/h4><ul class="space-y-1\.5">)(.*?)(<\/ul><\/div>)/s';
+    if (!preg_match($pattern, $html)) throw new RuntimeException('Footer category missing: '.$label);
+    return preg_replace($pattern, '$1$2'.$link.'$3', $html, 1);
 }
-function update_index_page(string $html, array $tools, int $totalTools): string {
-    if (!$tools) return $html;
-    $html = preg_replace('/Access \d+ completely free online tools/', 'Access '.$totalTools.' completely free online tools', $html, 1);
-    $cards = '';
-    foreach ($tools as $tool) {
-        $slug = nav_esc($tool['slug']);
-        if (preg_match('/href=["\']'.preg_quote($slug, '/').'["\']/i', $html)) continue;
-        $cards .= nav_card($tool);
-    }
-    if ($cards === '') return $html;
-    $pattern = '/(<!-- CATEGORY 6: Newly Published Tools -->.*?<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">)(.*?)(<\/div>\s*<\/section>)/s';
-    if (!preg_match($pattern, $html, $match)) {
-        throw new RuntimeException('Index Newly Published Tools section is missing.');
-    }
-    return preg_replace($pattern, '$1$2'.$cards.'$3', $html, 1);
+function nav_update_index_bucket(string $html, string $bucket, array $tool): string {
+    $markers = [
+        'performance' => 'CATEGORY 1: Speed, Performance & Analytics',
+        'ux-seo' => 'CATEGORY 2: UX, Accessibility & SEO',
+        'ecommerce' => 'CATEGORY 3: E-Commerce, Conversion & Trust',
+        'design-content' => 'CATEGORY 4: Design, Media & Content',
+        'developer' => 'CATEGORY 5: Developer Utilities & Integrations',
+        'utilities' => 'CATEGORY 6: Newly Published Tools',
+    ];
+    $marker = $markers[$bucket];
+    $card = nav_card($tool);
+    $pattern = '/(<!-- '.preg_quote($marker, '/').' -->.*?<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">)(.*?)(<\/div>\s*<\/section>)/s';
+    if (!preg_match($pattern, $html)) throw new RuntimeException('Index category section missing: '.$marker);
+    return preg_replace($pattern, '$1$2'.$card.'$3', $html, 1);
 }
 
 $newTools = nav_new_tools($specs, $approved);
 if ($newTools) {
     $totalTools = count($registry['tools']) + count($newTools);
-    $stagedHeader = update_shared_header($header, $newTools, $totalTools);
-    $stagedFooter = update_shared_footer($footer, $newTools);
+    $stagedHeader = $header;
+    $stagedFooter = $footer;
+    $stagedIndex = (string)file_get_contents($root.'/index.html');
+    if ($stagedIndex === '') throw new RuntimeException('Index page is required for new-tool publication staging.');
+    $stagedHeader = preg_replace('/All \d+ Tools/', 'All '.$totalTools.' Tools', $stagedHeader, 1);
+    $stagedIndex = preg_replace('/Access \d+ completely free online tools/', 'Access '.$totalTools.' completely free online tools', $stagedIndex, 1);
     foreach ($newTools as $newTool) {
-        $toolPage = rtrim($outputDir,'/\\') . '/' . $newTool['slug'] . '.html';
-        if (!is_file($toolPage)) {
-            throw new RuntimeException('Generated page missing while applying staged navigation: ' . $newTool['slug']);
-        }
-        $toolHtml = (string) file_get_contents($toolPage);
+        $stagedHeader = nav_update_header_bucket($stagedHeader, $newTool['bucket'], $newTool);
+        $stagedFooter = nav_update_footer_bucket($stagedFooter, $newTool['bucket'], $newTool);
+        $stagedIndex = nav_update_index_bucket($stagedIndex, $newTool['bucket'], $newTool);
+    }
+    foreach ($newTools as $newTool) {
+        $toolPage = rtrim($outputDir,'/\\').'/'.$newTool['slug'].'.html';
+        if (!is_file($toolPage)) throw new RuntimeException('Generated page missing while applying staged navigation: '.$newTool['slug']);
+        $toolHtml = (string)file_get_contents($toolPage);
         $toolHtml = str_replace($header, $stagedHeader, $toolHtml);
         $toolHtml = str_replace($footer, $stagedFooter, $toolHtml);
-        if (file_put_contents($toolPage, $toolHtml, LOCK_EX) === false) {
-            throw new RuntimeException('Unable to apply staged navigation to generated page: ' . $newTool['slug']);
-        }
+        if (file_put_contents($toolPage, $toolHtml, LOCK_EX) === false) throw new RuntimeException('Unable to apply staged navigation: '.$newTool['slug']);
     }
-    $indexPath = $root.'/index.html';
-    if (!is_file($indexPath)) {
-        fwrite(STDERR, "Index page is required for new-tool publication staging.\n");
-        exit(1);
-    }
-    $stagedIndex = update_index_page((string)file_get_contents($indexPath), $newTools, $totalTools);
     foreach (['header.html'=>$stagedHeader,'footer.html'=>$stagedFooter,'index.html'=>$stagedIndex] as $relative=>$content) {
         $target = rtrim($outputDir,'/\\').'/'.$relative;
         if (file_put_contents($target, $content, LOCK_EX) === false) {
-            fwrite(STDERR, "Unable to write staged site file: {$relative}\n");
+            fwrite(STDERR, 'Unable to write staged site file: '.$relative."\n");
             exit(1);
         }
     }
