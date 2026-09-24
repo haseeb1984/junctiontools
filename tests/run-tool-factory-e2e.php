@@ -199,13 +199,7 @@ try {
 } catch (Throwable $e) {
     fwrite(STDERR, '[ERROR] ' . $e->getMessage() . PHP_EOL);
     exit(E2E_ERROR);
-}    if (is_file($generated)) {
-        e2e_fail('Duplicate Word Counter HTML was created despite the guard.');
-    }
-    e2e_pass('No duplicate Word Counter HTML was created');
-
-    e2e_remove_tree($base);
-        }
+}
         if (!mkdir($base, 0700, true)) {
             e2e_fail('Unable to create configured E2E directory.', E2E_UNAVAILABLE);
         }
