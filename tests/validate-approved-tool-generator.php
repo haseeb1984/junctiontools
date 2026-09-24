@@ -15,13 +15,15 @@ file_put_contents($spec,json_encode(['specifications'=>[[
 ]]],JSON_PRETTY_PRINT));
 file_put_contents($approval,json_encode(['approvals'=>[['slug'=>'age-calculator','approved'=>true,'approved_by'=>'ci-test','approved_at'=>'2026-09-15T00:00:00Z']]],JSON_PRETTY_PRINT));
 $securityDecision=tempnam(sys_get_temp_dir(),'jt-security-decision-');
+$testRegistry=tempnam(sys_get_temp_dir(),'jt-registry-');
+file_put_contents($testRegistry,json_encode(['tools'=>[]],JSON_PRETTY_PRINT));
 $specData=json_decode((string)file_get_contents($spec),true);
 $policy=(string)file_get_contents($root.'/config/build-security-gate.json');
 $policyData=json_decode($policy,true);
 $conditions=$policyData['required_conditions'];
 $decision=['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'evaluated_at'=>gmdate('Y-m-d\\TH:i:s\\Z'),'evaluator_id'=>BUILD_SECURITY_GATE_EVALUATOR,'source'=>['opportunity_id'=>'ci-test','specification_slug'=>'age-calculator'],'decision'=>'allow','type'=>'new_tool','conditions'=>$conditions,'blocked_conditions'=>[],'safe_to_build'=>true,'approval_requirements'=>['generation_approval'=>true,'enhancement_approval'=>false],'evidence'=>['spec_sha256'=>bsg_sha256($specData['specifications'][0]),'policy_sha256'=>bsg_sha256($policyData)]];
 file_put_contents($securityDecision,json_encode(['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'decisions'=>[$decision]],JSON_PRETTY_PRINT));
-$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($dir).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision); exec($cmd,$lines,$status);
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($dir).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision).' '.escapeshellarg($testRegistry); exec($cmd,$lines,$status);
 $file=$dir.'/age-calculator.html';
 if($status!==0 || !is_file($file)){fwrite(STDERR,"Approved generation failed.\n");exit(1);}
 $html=(string)file_get_contents($file);
@@ -48,13 +50,19 @@ file_put_contents($traversalSpec,json_encode(['specifications'=>[[
  'content'=>['how_to_use'=>['Step one','Step two','Step three']]
 ]]],JSON_PRETTY_PRINT));
 file_put_contents($traversalApproval,json_encode(['approvals'=>[['slug'=>'../outside-generated','approved'=>true]]],JSON_PRETTY_PRINT));
-$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($traversalSpec).' '.escapeshellarg($traversalApproval).' '.escapeshellarg($traversalDir);
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($traversalSpec).' '.escapeshellarg($traversalApproval).' '.escapeshellarg($traversalDir).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision).' '.escapeshellarg($testRegistry);
 exec($cmd,$traversalLines,$traversalStatus);
 if($traversalStatus===0 || is_file($dir.'/outside-generated.html')){fwrite(STDERR,"Path traversal slug was accepted.\n");exit(1);}
 @unlink($traversalSpec); @unlink($traversalApproval); @rmdir($traversalDir);
 
 $empty=tempnam(sys_get_temp_dir(),'jt-empty-'); file_put_contents($empty,json_encode(['approvals'=>[]])); $emptyDir=$dir.'/empty'; mkdir($emptyDir);
-$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($empty).' '.escapeshellarg($emptyDir); exec($cmd,$lines2,$status2);
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($empty).' '.escapeshellarg($emptyDir).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision).' '.escapeshellarg($testRegistry); exec($cmd,$lines2,$status2);
 if($status2!==0 || count(glob($emptyDir.'/*.html'))!==0){fwrite(STDERR,"Unapproved specification was generated.\n");exit(1);}
-@unlink($spec); @unlink($approval); @unlink($securityDecision); @unlink($empty); @unlink($file); @rmdir($emptyDir); @rmdir($dir);
+// Prove the real registry duplicate guard rejects an existing tool.
+$duplicateDir=$dir.'/duplicate-check'; mkdir($duplicateDir);
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($duplicateDir).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision).' '.escapeshellarg($root.'/config/tools.json');
+exec($cmd,$duplicateLines,$duplicateStatus);
+if($duplicateStatus===0 || is_file($duplicateDir.'/age-calculator.html')){fwrite(STDERR,"Existing registry duplicate was generated.\n");exit(1);}
+if(strpos(implode("\n",$duplicateLines),'Duplicate existing tool rejected: age-calculator')===false){fwrite(STDERR,"Duplicate registry rejection message missing.\n");exit(1);}
+@unlink($spec); @unlink($approval); @unlink($securityDecision); @unlink($empty); @unlink($testRegistry); @unlink($file); @rmdir($emptyDir); @rmdir($duplicateDir); @rmdir($dir);
 echo "Approval-gated tool generator validation: PASS\n";
