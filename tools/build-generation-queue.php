@@ -53,7 +53,7 @@ function demand_profile(string $query): array {
             ['accept_text_or_url','generate_qr_code','download_png'], 'qr-generation'],
         ['~\bage\b.*?(?:calculator|calculate)~i',
             ['accept_birth_date','calculate_age'], 'age-calculation'],
-        ['(?:discount).*?(?:calculator|calculate)/i',
+        ['~\bdiscount\b.*?(?:calculator|calculate)~i',
             ['accept_price','accept_percentage','calculate_discount'], 'discount-calculation'],
         ['~\binvoice\b.*?(?:generator|generate|maker|create)~i',
             ['accept_invoice_data','generate_invoice_document'], 'invoice-generation'],
