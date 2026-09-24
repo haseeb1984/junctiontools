@@ -235,11 +235,8 @@ try {
     foreach (['eval(', 'new Function(', 'fetch(', 'XMLHttpRequest', 'WebSocket(', 'localStorage', 'sessionStorage', 'document.write('] as $unsafe) {
         if (stripos($html, $unsafe) !== false) throw new RuntimeException('Unsafe runtime pattern found: ' . $unsafe);
     }
-    if (preg_match('/<(?:iframe|frame|source|video|audio)\\b[^>]+src=["\\'](?:https?:|\\/\\/)/i', $html)) {
-        throw new RuntimeException('External runtime resource found.');
-    }
-    if (preg_match('/<img\\b[^>]+src=["\\'](?:https?:|\\/\\/)/i', $html)) {
-        throw new RuntimeException('External image dependency found.');
+    foreach (['<iframe', '<frame', '<source', '<video', '<audio', '<img src="http://', '<img src="https://', '<img src="//'] as $external) {
+        if (stripos($html, $external) !== false) throw new RuntimeException('External runtime resource found: ' . $external);
     }
 
     // 6. Final approval/deployment plans. Both remain publication-blocked.
