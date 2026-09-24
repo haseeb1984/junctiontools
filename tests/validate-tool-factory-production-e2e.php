@@ -236,6 +236,24 @@ try {
     ]);
     $generated = $generatedDir . '/parking-fee-calculator.html';
     if (!is_file($generated)) throw new RuntimeException('Approved new-tool generation did not create parking-fee-calculator.html.');
+    foreach (['header.html','footer.html','index.html'] as $siteFile) {
+        $stagedSiteFile = $generatedDir . '/' . $siteFile;
+        if (!is_file($stagedSiteFile)) {
+            throw new RuntimeException('New-tool generation did not stage updated site file: ' . $siteFile);
+        }
+        $siteHtml = (string) file_get_contents($stagedSiteFile);
+        if (stripos($siteHtml, 'parking-fee-calculator') === false) {
+            throw new RuntimeException('Staged ' . $siteFile . ' does not contain the new tool navigation/content entry.');
+        }
+    }
+    $stagedIndexHtml = (string) file_get_contents($generatedDir . '/index.html');
+    if (stripos($stagedIndexHtml, 'Access 39 completely free online tools') === false) {
+        throw new RuntimeException('Staged index tool count was not updated from 38 to 39.');
+    }
+    $stagedHeaderHtml = (string) file_get_contents($generatedDir . '/header.html');
+    if (stripos($stagedHeaderHtml, 'All 39 Tools') === false) {
+        throw new RuntimeException('Staged header tool count was not updated from 38 to 39.');
+    }
 
     // Generated pages reuse the shared header, which references this image,
     // and the generated shell references the shared favicon. Copy both static
