@@ -3,7 +3,7 @@
   "manifest_type": "junctiontools-production-release",
   "release": {
     "repository": "haseeb1984/junctiontools",
-    "commit_sha": "242c4a76d6078e674eba393b3fdcd686c6fc5e7b",
+    "commit_sha": "600f0918061a20a9fb34c5194763450738bfcfe7",
     "target": "hostinger-shared-hosting",
     "document_root": "public_html/",
     "php": {
@@ -19,8 +19,8 @@
     "cron_required": false
   },
   "artifact": {
-    "name": "junctiontools-242c4a76-hostinger",
-    "source_commit": "242c4a76d6078e674eba393b3fdcd686c6fc5e7b",
+    "name": "junctiontools-600f0918-hostinger",
+    "source_commit": "600f0918061a20a9fb34c5194763450738bfcfe7",
     "manifest_path": "config/production-release-manifest.json",
     "artifact_format": "zip",
     "include_git_metadata": false,
@@ -259,7 +259,7 @@
       "directory_listing_forbidden": true
     },
     "release_gate": {
-      "final_release_gate_commit_must_be_exact": "242c4a76d6078e674eba393b3fdcd686c6fc5e7b",
+      "final_release_gate_commit_must_be_exact": "600f0918061a20a9fb34c5194763450738bfcfe7",
       "final_release_gate_must_be_success": true,
       "release_allowed_must_be_true": true,
       "required_checks_must_all_be_success": true,
