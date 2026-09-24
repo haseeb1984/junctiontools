@@ -101,7 +101,7 @@ $cases=[
         $out=$base.'/stale-spec-output';[$s]=runGenerator($generator,$base.'/changed-spec.json',$approvalFile,$out,$policyFile,$decisionFile);
         assertTrue($s!==0,'Stale spec approval was accepted.');
     },
-    'stale policy approval'=>function()use($base,$generator,$specFile,$approvalFile,$policyFile,$decisionFile){
+    'stale policy approval'=>function()use($base,$generator,$specFile,$approvalFile,$policyFile,$decisionFile,$policy){
         $changed=$policy;$changed['policy_version']='2.0.0';writeJson($base.'/changed-policy.json',$changed);
         $out=$base.'/stale-policy-output';[$s]=runGenerator($generator,$specFile,$approvalFile,$out,$base.'/changed-policy.json',$decisionFile);
         assertTrue($s!==0,'Stale policy approval was accepted.');
