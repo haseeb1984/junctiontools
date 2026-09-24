@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "review_type": "new-tool-publication",
+  "status": "pending-human-review",
+  "policy": {
+    "default_decision": "reject-until-explicitly-approved",
+    "automatic_publication_allowed": false,
+    "registry_or_sitemap_modification_allowed": true,
+    "production_publish_allowed": true
+  },
+  "tools": []
+}
