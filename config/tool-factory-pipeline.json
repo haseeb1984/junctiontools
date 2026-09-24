@@ -96,6 +96,17 @@
       "enabled": true
     },
     {
+      "id": "approved-new-tool-publication",
+      "phase": 7,
+      "script": "tools/publish-approved-new-tool.php",
+      "required_files": [
+        "config/tool-generation-publication-review.json",
+        "tools/publish-approved-new-tool.php"
+      ],
+      "execution_policy": "manual-final-approval-only",
+      "enabled": true
+    },
+    {
       "id": "site-navigation-sync",
       "phase": 7,
       "script": "tools/sync-site-navigation.php",
@@ -129,7 +140,8 @@
   ],
   "safety": {
     "fail_closed": true,
-    "never_modify_registry_or_sitemap": true,
+    "never_modify_registry_or_sitemap_during_generation_or_validation": true,
+    "registry_or_sitemap_changes_only_through_final_publication_gate": true,
     "never_publish_without_explicit_approval": true,
     "never_commit_credentials": true,
     "production_publish_requires_separate_review": true,
