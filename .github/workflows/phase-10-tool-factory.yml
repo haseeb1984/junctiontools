@@ -34,11 +34,13 @@ jobs:
           php -l tools/build-generation-queue.php
           php -l tools/generate-approved-tools.php
           php -l security/build-security-gate.php
+          php -l security/adsense-compliance-gate.php
           php -l tests/validate-build-security-gate-generator.php
           php -l tools/sync-site-navigation.php
           php -l tools/build-search-console-feedback.php
           php -l tools/build-search-console-generation-queue.php
           php -l tools/evaluate-automatic-publishing.php
+          php -l tools/build-deployment-plan.php
           php -l tools/build-enhancement-deployment-plan.php
           php -l tools/apply-approved-tool-enhancements.php
           php -l tests/validate-tool-factory-pipeline.php
