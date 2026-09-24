@@ -76,6 +76,17 @@
       "enabled": true
     },
     {
+      "id": "adsense-publication-gate",
+      "phase": 7,
+      "script": "security/adsense-compliance-gate.php",
+      "required_files": [
+        "security/adsense-compliance-gate.php",
+        "tests/validate-adsense-integration.php",
+        ".htaccess"
+      ],
+      "enabled": true
+    },
+    {
       "id": "deployment-plan",
       "phase": 7,
       "script": "tools/build-deployment-plan.php",
