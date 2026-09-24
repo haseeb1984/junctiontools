@@ -127,8 +127,31 @@ jobs:
                   all_files.append(rel)
 
           tools = [x for x in exact if x.endswith(".html")]
-          if len(tools) != 38:
-              raise SystemExit(f"Manifest tool HTML count is {len(tools)}, expected 38")
+          expected_tool_count = int(rules["inventory"]["expected_tool_html_count"])
+          if len(tools) != expected_tool_count:
+              raise SystemExit(
+                  f"Manifest tool HTML count is {len(tools)}, expected {expected_tool_count}"
+              )
+
+          # Keep the release inventory synchronized with the active production registry.
+          # The registry is the source of truth for the number and frontend filenames
+          # of active tools; the manifest remains the explicit release allowlist.
+          registry = json.loads((root / "config" / "tools.json").read_text(encoding="utf-8"))
+          active_tools = [t for t in registry.get("tools", [])
+                          if t.get("status") == "active" and t.get("frontend")]
+          active_frontends = sorted({str(t["frontend"]) for t in active_tools})
+          manifest_frontends = sorted(tools)
+          if len(active_frontends) != expected_tool_count:
+              raise SystemExit(
+                  f"Active registry tool count is {len(active_frontends)}, "
+                  f"manifest expects {expected_tool_count}"
+              )
+          if active_frontends != manifest_frontends:
+              missing = sorted(set(active_frontends) - set(manifest_frontends))
+              extra = sorted(set(manifest_frontends) - set(active_frontends))
+              raise SystemExit(
+                  f"Manifest/registry tool inventory mismatch: missing={missing}, extra={extra}"
+              )
 
           for rel in all_files:
               if included(rel) and forbidden(rel):
