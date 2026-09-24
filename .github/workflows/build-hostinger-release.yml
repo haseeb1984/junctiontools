@@ -147,20 +147,21 @@ jobs:
               if p.is_file():
                   all_files.append(rel)
 
-          tools = [x for x in exact if x.endswith(".html")]
+          # Keep the release inventory synchronized with the active production registry.
+          # Only registry frontends count as tools; site pages such as index.html,
+          # header.html and footer.html are release pages, not tool inventory entries.
+          registry = json.loads((root / "config" / "tools.json").read_text(encoding="utf-8"))
+          active_tools = [t for t in registry.get("tools", [])
+                          if t.get("status") == "active" and t.get("frontend")]
+          active_frontends = sorted({str(t["frontend"]) for t in active_tools})
           expected_tool_count = int(rules["inventory"]["expected_tool_html_count"])
+          tools = [x for x in exact if x in set(active_frontends)]
+
           if len(tools) != expected_tool_count:
               raise SystemExit(
                   f"Manifest tool HTML count is {len(tools)}, expected {expected_tool_count}"
               )
 
-          # Keep the release inventory synchronized with the active production registry.
-          # The registry is the source of truth for the number and frontend filenames
-          # of active tools; the manifest remains the explicit release allowlist.
-          registry = json.loads((root / "config" / "tools.json").read_text(encoding="utf-8"))
-          active_tools = [t for t in registry.get("tools", [])
-                          if t.get("status") == "active" and t.get("frontend")]
-          active_frontends = sorted({str(t["frontend"]) for t in active_tools})
           manifest_frontends = sorted(tools)
           if len(active_frontends) != expected_tool_count:
               raise SystemExit(
