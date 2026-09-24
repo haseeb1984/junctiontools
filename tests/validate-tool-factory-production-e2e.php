@@ -262,7 +262,7 @@ try {
     if (stripos($stagedFooterHtml, 'Utilities') === false || stripos($stagedFooterHtml, 'parking-fee-calculator') === false) {
         throw new RuntimeException('Staged footer did not place the new calculator in the Utilities category.');
     }
-    $indexCategory6 = strpos($stagedIndexHtml, '<!-- CATEGORY 6: Newly Published Tools -->');
+    $indexCategory6 = strpos($stagedIndexHtml, '<!-- CATEGORY 6: Utilities & Generators -->');
     $indexParking = strpos($stagedIndexHtml, 'href="parking-fee-calculator"');
     if ($indexCategory6 === false || $indexParking === false || $indexParking < $indexCategory6) {
         throw new RuntimeException('Staged index did not place the new calculator in the utilities/newly-published category section.');
