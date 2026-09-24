@@ -74,16 +74,6 @@ try {
         if (is_dir($base)) {
             e2e_remove_tree($base);
         }
-        if (!mkdir($base, 0700, true)) {
-            e2e_fail('Unable to create configured E2E directory.', E2E_UNAVAILABLE);
-        }
-    } else {
-        $base = sys_get_temp_dir() . '/jt-tool-factory-e2e-' . bin2hex(random_bytes(5));
-        if (!mkdir($base, 0700, true)) {
-            e2e_fail('Unable to create isolated E2E directory.', E2E_UNAVAILABLE);
-        }
-    }
-
     $specFile = $base . '/spec.json';
     $approvalFile = $base . '/approval.json';
     $decisionFile = $base . '/security-decision.json';
@@ -167,13 +157,6 @@ try {
     $lines = [];
     $status = 0;
     exec($command, $lines, $status);
-
-    if ($status !== 0) {
-        e2e_fail(
-            "Generator failed with exit code {$status}:\n" . implode(PHP_EOL, $lines),
-            E2E_FAIL
-        );
-    }
 
     if ($status === 0) {
         e2e_fail('Duplicate existing tool was incorrectly generated.');
