@@ -241,10 +241,6 @@ try {
         if (!is_file($stagedSiteFile)) {
             throw new RuntimeException('New-tool generation did not stage updated site file: ' . $siteFile);
         }
-        $siteHtml = (string) file_get_contents($stagedSiteFile);
-        if (stripos($siteHtml, 'parking-fee-calculator') === false) {
-            throw new RuntimeException('Staged ' . $siteFile . ' does not contain the new tool navigation/content entry.');
-        }
     }
     $stagedIndexHtml = (string) file_get_contents($generatedDir . '/index.html');
     if (stripos($stagedIndexHtml, 'Access 39 completely free online tools') === false) {
@@ -256,8 +252,96 @@ try {
         }
     }
     $stagedHeaderHtml = (string) file_get_contents($generatedDir . '/header.html');
+    $stagedFooterHtml = (string) file_get_contents($generatedDir . '/footer.html');
     if (stripos($stagedHeaderHtml, 'All 39 Tools') === false) {
         throw new RuntimeException('Staged header tool count was not updated from 38 to 39.');
+    }
+    if (stripos($stagedHeaderHtml, 'Utilities') === false || stripos($stagedHeaderHtml, 'parking-fee-calculator') === false) {
+        throw new RuntimeException('Staged header did not place the new calculator in the Utilities category.');
+    }
+    if (stripos($stagedFooterHtml, 'Utilities') === false || stripos($stagedFooterHtml, 'parking-fee-calculator') === false) {
+        throw new RuntimeException('Staged footer did not place the new calculator in the Utilities category.');
+    }
+    $indexCategory6 = strpos($stagedIndexHtml, '<!-- CATEGORY 6: Newly Published Tools -->');
+    $indexParking = strpos($stagedIndexHtml, 'href="parking-fee-calculator"');
+    if ($indexCategory6 === false || $indexParking === false || $indexParking < $indexCategory6) {
+        throw new RuntimeException('Staged index did not place the new calculator in the utilities/newly-published category section.');
+    }
+
+    // 4C. Final publication approval is tested only against an isolated copy
+    // of the site root. Production registry/sitemap/source hashes must remain
+    // unchanged; this exercises the real publication synchronizer without
+    // publishing anything from CI.
+    $publicationRoot = $tmp . '/publication-root';
+    if (!mkdir($publicationRoot, 0775, true) && !is_dir($publicationRoot)) {
+        throw new RuntimeException('Unable to create isolated publication root.');
+    }
+    foreach (['.htaccess','header.html','footer.html','index.html','favicon.ico','junction-favicon.png'] as $asset) {
+        if (!copy($root . '/' . $asset, $publicationRoot . '/' . $asset)) {
+            throw new RuntimeException('Unable to copy publication fixture asset: ' . $asset);
+        }
+    }
+    $publicationRegistry = $publicationRoot . '/tools.json';
+    $publicationSitemap = $publicationRoot . '/sitemap.xml';
+    if (!copy($registry, $publicationRegistry) || !copy($sitemap, $publicationSitemap)) {
+        throw new RuntimeException('Unable to copy isolated publication registry/sitemap.');
+    }
+    $publicationReview = $tmp . '/new-tool-publication-review.json';
+    $writeJson($publicationReview, [
+        'schema_version' => '1.0.0',
+        'review_type' => 'new-tool-publication',
+        'policy' => [
+            'default_decision' => 'reject-until-explicitly-approved',
+            'automatic_publication_allowed' => false
+        ],
+        'tools' => [[
+            'slug' => 'parking-fee-calculator',
+            'decision' => 'approved',
+            'reviewer' => 'production-like-e2e',
+            'reviewed_at' => gmdate('c'),
+            'notes' => 'Explicit final publication approval for isolated E2E fixture.'
+        ]]
+    ]);
+    $run('tools/publish-approved-new-tool.php', [
+        $demandOut . '/tool-specs.json',
+        $generationApprovals,
+        $publicationReview,
+        $generatedDir,
+        $publicationRoot,
+        $publicationRegistry,
+        $publicationSitemap
+    ]);
+    $publishedRegistry = $readJson($publicationRegistry);
+    if (count($publishedRegistry['tools'] ?? []) !== 39) {
+        throw new RuntimeException('Published isolated registry count was not incremented to 39.');
+    }
+    $publishedEntry = null;
+    foreach ($publishedRegistry['tools'] as $entry) {
+        if (is_array($entry) && ($entry['slug'] ?? '') === 'parking-fee-calculator') {
+            $publishedEntry = $entry;
+            break;
+        }
+    }
+    if (!is_array($publishedEntry) || ($publishedEntry['status'] ?? '') !== 'active' || ($publishedEntry['category'] ?? '') !== 'calculators') {
+        throw new RuntimeException('Published isolated registry entry is missing or has the wrong category/status.');
+    }
+    $publishedSitemap = (string) file_get_contents($publicationSitemap);
+    if (stripos($publishedSitemap, 'https://junctiontools.com/parking-fee-calculator') === false) {
+        throw new RuntimeException('Published isolated sitemap is missing the new tool.');
+    }
+    $publishedHeader = (string) file_get_contents($publicationRoot . '/header.html');
+    $publishedFooter = (string) file_get_contents($publicationRoot . '/footer.html');
+    $publishedIndex = (string) file_get_contents($publicationRoot . '/index.html');
+    foreach ([$publishedHeader, $publishedFooter, $publishedIndex] as $siteHtml) {
+        if (stripos($siteHtml, 'parking-fee-calculator') === false) {
+            throw new RuntimeException('Published isolated site navigation is missing the new tool.');
+        }
+    }
+    if (stripos($publishedHeader, 'All 39 Tools') === false || stripos($publishedIndex, 'Access 39 completely free online tools') === false) {
+        throw new RuntimeException('Published isolated site count did not increment to 39.');
+    }
+    if (!is_file($publicationRoot . '/parking-fee-calculator.html')) {
+        throw new RuntimeException('Published isolated root is missing the new tool page.');
     }
 
     // Generated pages reuse the shared header, which references this image,
