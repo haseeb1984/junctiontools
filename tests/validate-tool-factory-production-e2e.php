@@ -228,7 +228,7 @@ try {
     $html = (string) file_get_contents($generated);
     foreach ([
         '<!DOCTYPE html>', '<html lang="en">', '<meta name="viewport"',
-        '<main', '<h1>', 'How to Use', 'id="run"', 'id="reset"', '<script>'
+        '<main', '<h1', 'How to Use', 'id="run"', 'id="reset"', '<script>'
     ] as $needle) {
         if (stripos($html, $needle) === false) throw new RuntimeException('Generated runtime missing: ' . $needle);
     }
