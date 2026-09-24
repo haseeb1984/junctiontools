@@ -40,6 +40,8 @@ foreach($data['queue'] as $entry){
    'tool'=>[
     'name'=>(string)($entry['existing_tool_match']??$targetSlug),
     'slug'=>$targetSlug,
+    'implementation'=>'existing_tool_seo_content',
+    'implementation_template'=>'existing-tool-seo-enhancement',
     'page'=>'/'.$targetSlug,
     'frontend'=>null
    ],
@@ -65,6 +67,13 @@ foreach($data['queue'] as $entry){
     'indexable'=>true,
     'must_preserve_existing_canonical'=>true,
     'must_preserve_existing_functionality'=>true
+   ],
+   'privacy_security'=>[
+    'processing'=>'browser_only',
+    'network_requests'=>false,
+    'external_dependencies'=>false,
+    'privacy_note'=>'SEO/content enhancement changes page presentation only; user tool input remains governed by the existing tool implementation.',
+    'security_requirements'=>['no eval or dynamic code execution','do not alter existing tool JavaScript behavior','do not introduce external network requests','escape all generated content','do not change filesystem or registry boundaries']
    ],
    'security'=>[
     'no_new_page'=>true,
