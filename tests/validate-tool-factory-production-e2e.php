@@ -72,6 +72,12 @@ try {
     }
 
     require_once $root . '/security/build-security-gate.php';
+    require_once $root . '/security/adsense-compliance-gate.php';
+
+    $adsenseGate = adsense_compliance_evaluate($root);
+    if (($adsenseGate['allowed'] ?? false) !== true) {
+        throw new RuntimeException('AdSense publication gate failed: ' . ($adsenseGate['error_code'] ?? 'adsense_rejected'));
+    }
 
     $registryBefore = hash_file('sha256', $registry);
     $sitemapBefore = hash_file('sha256', $sitemap);
@@ -255,6 +261,7 @@ try {
         throw new RuntimeException('New-tool final approval did not remain publication-blocked.');
     }
     if (($newPlanData['tools'][0]['slug'] ?? '') !== 'parking-fee-calculator') throw new RuntimeException('New-tool approval plan missing generated tool.');
+    if (($newPlanData['policy']['adsense_validation_required'] ?? false) !== true || ($newPlanData['policy']['adsense_validation']['allowed'] ?? false) !== true) throw new RuntimeException('New-tool deployment plan did not carry a passing AdSense gate.');
 
     $enhPlan = $tmp . '/enhancement-deployment-plan.json';
     $run('tools/build-enhancement-deployment-plan.php', [$enhApprovals, $enhPlan]);
@@ -263,6 +270,7 @@ try {
         throw new RuntimeException('Enhancement final approval did not remain publication-blocked.');
     }
     if (($enhPlanData['enhancements'][0]['target_tool_slug'] ?? '') !== 'word-counter') throw new RuntimeException('Enhancement approval plan missing Word Counter.');
+    if (($enhPlanData['policy']['adsense_validation_required'] ?? false) !== true || ($enhPlanData['policy']['adsense_validation']['allowed'] ?? false) !== true) throw new RuntimeException('Enhancement deployment plan did not carry a passing AdSense gate.');
 
     // 7. Global invariant: no production state changed.
     if (hash_file('sha256', $registry) !== $registryBefore) throw new RuntimeException('Registry changed during production-like E2E.');
@@ -274,6 +282,7 @@ try {
     echo "[PASS] Security Gate approved both paths with exact SHA-256 evidence.\n";
     echo "[PASS] Approved enhancement staged without changing production source.\n";
     echo "[PASS] Approved new tool generated and runtime-validated.\n";
+    echo "[PASS] AdSense publication gate passed and was enforced by both deployment plans.\n";
     echo "[PASS] Final approval/deployment plans created with publication blocked.\n";
     echo "[PASS] Registry, sitemap, and production source remained unchanged.\n";
     echo "Production-like Tool Factory E2E: PASS\n";
