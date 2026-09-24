@@ -87,7 +87,7 @@ if (($existing['decision'] ?? '') !== 'enhancement' ||
     ($existing['match_type'] ?? '') !== 'capability' ||
     ($existing['existing_tool_match'] ?? '') !== 'word_counter' ||
     ($existing['target_tool_slug'] ?? '') !== 'text-stats' ||
-    ($existing['recommended_slug'] ?? 'unexpected') !== null ||
+    (!array_key_exists('recommended_slug', $existing) || $existing['recommended_slug'] !== null) ||
     ($existing['intent'] ?? '') !== 'text-counting' ||
     !in_array('count_text', $existing['matched_capabilities'] ?? [], true)) {
     fwrite(STDERR, "Capability match failed for a differently named existing tool.\n");
