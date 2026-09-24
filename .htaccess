@@ -24,6 +24,13 @@ Options -Indexes
     Require all denied
 </FilesMatch>
 
+# Shared static site components are intentionally public because the static HTML
+# pages load them client-side. Explicitly grant access so local Apache/XAMPP
+# authorization inherited from a stricter parent/vhost cannot return 403.
+<FilesMatch "^(header|footer)\.html$">
+    Require all granted
+</FilesMatch>
+
 <IfModule mod_authz_core.c>
     <FilesMatch "^(url-validator|safe-http|rate-limit)\.php$">
         Require all denied
