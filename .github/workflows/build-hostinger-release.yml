@@ -1,0 +1,201 @@
+name: Build Hostinger Release Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: "Release commit SHA (defaults to current main)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Curated Hostinger release package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Resolve release commit
+        id: commit
+        env:
+          INPUT_SHA: ${{ inputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          SHA="${INPUT_SHA:-${{ github.sha }}}"
+          case "$SHA" in
+            [0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]*) ;;
+            *) echo "Invalid commit SHA"; exit 1 ;;
+          esac
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout release commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.commit.outputs.sha }}
+          fetch-depth: 1
+
+      - name: Validate and build curated package
+        env:
+          RELEASE_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, shutil, stat, sys, zipfile
+
+          root = pathlib.Path(".").resolve()
+          manifest_path = root / "config" / "production-release-manifest.json"
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+          expected = os.environ["RELEASE_SHA"]
+          release = manifest["release"]
+          artifact = manifest["artifact"]
+          rules = manifest["validation_rules"]
+
+          if release["commit_sha"] != expected or artifact["source_commit"] != expected:
+              raise SystemExit(f"Release manifest commit mismatch: expected {expected}")
+
+          exact = manifest["included_paths"]["exact"]
+          patterns = manifest["included_paths"]["patterns"]
+          excluded = manifest["excluded_paths"]["exact"]
+          excluded_dirs = manifest["excluded_paths"]["directories"]
+          excluded_patterns = manifest["excluded_paths"]["patterns"]
+
+          def forbidden(path: str) -> bool:
+              p = pathlib.PurePosixPath(path)
+              if path in excluded:
+                  return True
+              if any(path == d or path.startswith(d.rstrip("/") + "/") for d in excluded_dirs):
+                  return True
+              if any(path == x or path.startswith(x.rstrip("/") + "/") for x in excluded_patterns if x.endswith("/")):
+                  return True
+              if any(path == x or pathlib.PurePosixPath(path).match(x) for x in excluded_patterns if not x.endswith("/")):
+                  return True
+              return False
+
+          def included(path: str) -> bool:
+              if path in exact:
+                  return True
+              return any(pathlib.PurePosixPath(path).match(p) for p in patterns)
+
+          for rel in exact:
+              p = root / rel
+              if not p.is_file():
+                  raise SystemExit(f"Missing required release file: {rel}")
+              if forbidden(rel):
+                  raise SystemExit(f"Required release path is excluded: {rel}")
+
+          vendor_autoload = root / "vendor" / "autoload.php"
+          if not vendor_autoload.is_file():
+              raise SystemExit("Missing vendor/autoload.php")
+
+          all_files = []
+          for p in root.rglob("*"):
+              rel = p.relative_to(root).as_posix()
+              if rel.startswith(".git/") or rel == ".git":
+                  continue
+              if p.is_symlink():
+                  if included(rel) or rel.startswith("vendor/"):
+                      raise SystemExit(f"Symlink entry forbidden: {rel}")
+                  continue
+              if p.is_file():
+                  all_files.append(rel)
+
+          tools = [x for x in exact if x.endswith(".html")]
+          if len(tools) != 38:
+              raise SystemExit(f"Manifest tool HTML count is {len(tools)}, expected 38")
+
+          for rel in all_files:
+              if included(rel) and forbidden(rel):
+                  raise SystemExit(f"Excluded path matched by include: {rel}")
+
+          # Build from the manifest only; no source-control, CI, tests, docs, config,
+          # Tool Factory, secrets, or runtime storage are copied.
+          out = root / "release"
+          if out.exists():
+              shutil.rmtree(out)
+          deploy = out / "public_html"
+          deploy.mkdir(parents=True)
+
+          selected = set(exact)
+          for rel in all_files:
+              if rel.startswith("vendor/"):
+                  selected.add(rel)
+
+          for rel in sorted(selected):
+              if forbidden(rel):
+                  raise SystemExit(f"Excluded artifact path: {rel}")
+              src = root / rel
+              if not src.is_file():
+                  raise SystemExit(f"Selected artifact file missing: {rel}")
+              dst = deploy / rel
+              dst.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(src, dst)
+
+          artifact_files = []
+          for p in deploy.rglob("*"):
+              if p.is_symlink():
+                  raise SystemExit(f"Symlink in artifact: {p.relative_to(deploy)}")
+              if p.is_file():
+                  rel = p.relative_to(deploy).as_posix()
+                  if forbidden(rel):
+                      raise SystemExit(f"Forbidden file in artifact: {rel}")
+                  artifact_files.append(rel)
+
+          required_runtime = ["process-contact.php","scanner.php","scanner-compat.php","scanner-secure.php",
+                              "security/rate-limit.php","security/safe-http.php","security/url-validator.php"]
+          for rel in required_runtime:
+              if not (deploy / rel).is_file():
+                  raise SystemExit(f"Required runtime file missing from artifact: {rel}")
+
+          vendor_files = list((deploy / "vendor").rglob("*"))
+          if not vendor_files or not (deploy / "vendor" / "autoload.php").is_file():
+              raise SystemExit("Committed vendor tree is missing from artifact")
+
+          # Basic secret/source-control checks.
+          bad_names = {".env", ".git", ".github"}
+          for rel in artifact_files:
+              parts = pathlib.PurePosixPath(rel).parts
+              if any(part in bad_names for part in parts):
+                  raise SystemExit(f"Forbidden metadata/secret path in artifact: {rel}")
+
+          checksums = []
+          for rel in sorted(artifact_files):
+              digest = hashlib.sha256((deploy / rel).read_bytes()).hexdigest()
+              checksums.append(f"{digest}  {rel}")
+          (out / "SHA256SUMS.txt").write_text("\n".join(checksums) + "\n", encoding="utf-8")
+
+          metadata = {
+              "schema_version": "1.0.0",
+              "artifact": artifact["name"],
+              "source_commit": expected,
+              "target": release["target"],
+              "document_root": release["document_root"],
+              "tool_html_count": len(tools),
+              "file_count": len(artifact_files),
+              "sha256_manifest": "SHA256SUMS.txt",
+              "publication_allowed": False,
+              "note": "Upload public_html/ contents only after final release gate approval; do not deploy CI/config/tool-factory files."
+          }
+          (out / "release-metadata.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+
+          zip_path = out / f'{artifact["name"]}.zip'
+          with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+              for rel in sorted(artifact_files):
+                  z.write(deploy / rel, rel)
+
+          print(json.dumps(metadata, indent=2))
+          print(f"Built {zip_path}")
+          PY
+
+      - name: Upload Hostinger package
+        uses: actions/upload-artifact@v4
+        with:
+          name: junctiontools-hostinger-release-${{ steps.commit.outputs.sha }}
+          path: |
+            release/*.zip
+            release/SHA256SUMS.txt
+            release/release-metadata.json
+          if-no-files-found: error
+          retention-days: 30
