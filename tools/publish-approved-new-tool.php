@@ -57,8 +57,14 @@ if (!is_array($specs) || !is_array($specs['specifications'] ?? null) ||
 
 if (($review['review_type'] ?? '') !== 'new-tool-publication' ||
     ($review['policy']['default_decision'] ?? 'reject-until-explicitly-approved') !== 'reject-until-explicitly-approved' ||
-    ($review['policy']['automatic_publication_allowed'] ?? true) !== false) {
+    ($review['policy']['automatic_publication_allowed'] ?? true) !== false ||
+    ($review['policy']['registry_or_sitemap_modification_allowed'] ?? false) !== true ||
+    ($review['policy']['production_publish_allowed'] ?? false) !== true) {
     fwrite(STDERR, "Unsafe new-tool publication policy.\n");
+    exit(1);
+}
+if (($generationApprovals['policy']['publication_requires_separate_review'] ?? true) !== true) {
+    fwrite(STDERR, "Generation approval policy must require separate publication review.\n");
     exit(1);
 }
 
