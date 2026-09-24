@@ -156,6 +156,18 @@ if ($newTools) {
     $totalTools = count($registry['tools']) + count($newTools);
     $stagedHeader = update_shared_header($header, $newTools, $totalTools);
     $stagedFooter = update_shared_footer($footer, $newTools);
+    foreach ($newTools as $newTool) {
+        $toolPage = rtrim($outputDir,'/\\') . '/' . $newTool['slug'] . '.html';
+        if (!is_file($toolPage)) {
+            throw new RuntimeException('Generated page missing while applying staged navigation: ' . $newTool['slug']);
+        }
+        $toolHtml = (string) file_get_contents($toolPage);
+        $toolHtml = str_replace($header, $stagedHeader, $toolHtml);
+        $toolHtml = str_replace($footer, $stagedFooter, $toolHtml);
+        if (file_put_contents($toolPage, $toolHtml, LOCK_EX) === false) {
+            throw new RuntimeException('Unable to apply staged navigation to generated page: ' . $newTool['slug']);
+        }
+    }
     $indexPath = $root.'/index.html';
     if (!is_file($indexPath)) {
         fwrite(STDERR, "Index page is required for new-tool publication staging.\n");
