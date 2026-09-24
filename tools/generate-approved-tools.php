@@ -56,4 +56,116 @@ $fieldNames=array_map(static fn($f)=>jsName((string)($f['name']??'input')),array
 $script="(()=>{const ids={$ids},r=document.getElementById('result');document.getElementById('run').addEventListener('click',()=>{const values=ids.map(id=>{const e=document.getElementById(id);return e?e.value.trim():'';});if(values.some(v=>!v)){r.textContent='Please complete the required inputs.';return;}r.textContent=values.join(' | ');});document.getElementById('reset').addEventListener('click',()=>{ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});r.textContent='';});})();";
 }
 $html=html_shell($slug,$title,$description,$name,$howTo,$header,$footer,$body,$script);$path=rtrim($outputDir,'/\\').'/'.$slug.'.html';if(file_put_contents($path,$html,LOCK_EX)===false){fwrite(STDERR,"Unable to write {$path}.\n");exit(1);}$generated++;}
-echo 'Generated '.$generated." approved tool page(s) using the shared JunctionTools layout. No registry or sitemap changes were made.\n";
+
+/**
+ * Build staged navigation/content updates for newly generated tools.
+ * Production/shared files are never modified here; updated copies are written
+ * beside the generated tool pages and must pass approval before publication.
+ */
+function nav_esc(string $value): string {
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+function nav_icon(array $spec): string {
+    $icon = trim((string)($spec['ui']['icon'] ?? $spec['tool']['icon'] ?? 'fa-screwdriver-wrench'));
+    return preg_match('/^fa-[a-z0-9-]+$/', $icon) ? $icon : 'fa-screwdriver-wrench';
+}
+function nav_short_description(array $spec): string {
+    $value = trim((string)($spec['seo']['short_description'] ?? $spec['seo']['description'] ?? 'New JunctionTools utility'));
+    return $value !== '' ? $value : 'New JunctionTools utility';
+}
+function nav_new_tools(array $specs, array $approved): array {
+    $tools = [];
+    foreach ($specs['specifications'] ?? [] as $spec) {
+        if (!is_array($spec)) continue;
+        $slug = strtolower(trim((string)($spec['tool']['slug'] ?? '')));
+        if ($slug === '' || !isset($approved[$slug])) continue;
+        $tools[$slug] = [
+            'slug' => $slug,
+            'name' => (string)($spec['tool']['name'] ?? ucwords(str_replace('-', ' ', $slug))),
+            'description' => nav_short_description($spec),
+            'icon' => nav_icon($spec),
+        ];
+    }
+    return array_values($tools);
+}
+function nav_link(array $tool): string {
+    return '<a href="'.nav_esc($tool['slug']).'">'.nav_esc($tool['name']).'</a>';
+}
+function nav_card(array $tool): string {
+    return '<a href="'.nav_esc($tool['slug']).'" class="tool-card bg-[#0f172a]/80 border border-emerald-900/30 hover:border-emerald-500 p-4 rounded-xl flex items-center space-x-4 transition group"><div class="bg-emerald-500/10 text-emerald-400 p-3 rounded-lg group-hover:bg-emerald-500 group-hover:text-black transition"><i class="fa-solid '.nav_esc($tool['icon']).' text-lg"></i></div><div><h3 class="font-semibold text-white group-hover:text-emerald-400 transition">'.nav_esc($tool['name']).'</h3><p class="text-xs text-slate-400">'.nav_esc($tool['description']).'</p></div></a>';
+}
+function update_shared_header(string $html, array $tools): string {
+    if (!$tools) return $html;
+    $links = '';
+    foreach ($tools as $tool) $links .= nav_link($tool);
+    $desktop = '<div class="relative group"><button class="nav-trigger">New Tools <i class="fa-solid fa-chevron-down text-[9px]"></i></button><div class="dropdown">'.$links.'</div></div>';
+    if (str_contains($html, '<button class="nav-trigger">New Tools')) {
+        $html = preg_replace('/<div class="relative group"><button class="nav-trigger">New Tools.*?<\/div><\/div>/s', $desktop, $html, 1);
+    } else {
+        $needle = '</nav>';
+        if (!str_contains($html, $needle)) throw new RuntimeException('Header desktop navigation container missing.');
+        $html = str_replace($needle, $desktop.$needle, $html, $count);
+        if ($count !== 1) throw new RuntimeException('Header desktop navigation could not be updated.');
+    }
+    $mobileLinks = '';
+    foreach ($tools as $tool) $mobileLinks .= nav_link($tool);
+    $mobile = '<div><p class="font-bold text-slate-200 mb-1">New Tools</p><div class="grid gap-2 text-slate-400">'.$mobileLinks.'</div></div>';
+    if (str_contains($html, '<p class="font-bold text-slate-200 mb-1">New Tools</p>')) {
+        $html = preg_replace('/<div><p class="font-bold text-slate-200 mb-1">New Tools<\/p><div class="grid gap-2 text-slate-400">.*?<\/div><\/div>/s', $mobile, $html, 1);
+    } else {
+        $needle = '</div>\n  </div>\n  <button id="mobile-menu-btn"';
+        $pos = strpos($html, $needle);
+        if ($pos === false) throw new RuntimeException('Header mobile navigation container missing.');
+        $before = substr($html, 0, $pos);
+        $after = substr($html, $pos);
+        $before .= $mobile."\n        ";
+        $html = $before.$after;
+    }
+    return $html;
+}
+function update_shared_footer(string $html, array $tools): string {
+    if (!$tools) return $html;
+    $items = '';
+    foreach ($tools as $tool) $items .= '<li>'.nav_link($tool).'</li>';
+    $column = '<div class="space-y-2"><h4 class="font-bold text-white text-sm">New Tools</h4><ul class="space-y-1.5">'.$items.'</ul></div>';
+    if (str_contains($html, '<h4 class="font-bold text-white text-sm">New Tools</h4>')) {
+        $html = preg_replace('/<div class="space-y-2"><h4 class="font-bold text-white text-sm">New Tools<\/h4><ul class="space-y-1\.5">.*?<\/ul><\/div>/s', $column, $html, 1);
+    } else {
+        $needle = '</div>\n    <div class="flex flex-col md:flex-row';
+        if (!str_contains($html, $needle)) throw new RuntimeException('Footer tool navigation container missing.');
+        $html = str_replace($needle, $column."\n    ".$needle, $html, $count);
+        if ($count !== 1) throw new RuntimeException('Footer navigation could not be updated.');
+    }
+    return $html;
+}
+function update_index_page(string $html, array $tools): string {
+    if (!$tools) return $html;
+    $cards = '';
+    foreach ($tools as $tool) $cards .= nav_card($tool);
+    $pattern = '/(<!-- CATEGORY 6: Newly Published Tools -->.*?<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">).*?(<\/div>\s*<\/section>)/s';
+    if (!preg_match($pattern, $html)) {
+        throw new RuntimeException('Index Newly Published Tools section is missing.');
+    }
+    return preg_replace($pattern, '$1'.$cards.'$2', $html, 1);
+}
+
+$newTools = nav_new_tools($specs, $approved);
+if ($newTools) {
+    $stagedHeader = update_shared_header($header, $newTools);
+    $stagedFooter = update_shared_footer($footer, $newTools);
+    $indexPath = $root.'/index.html';
+    if (!is_file($indexPath)) {
+        fwrite(STDERR, "Index page is required for new-tool publication staging.\n");
+        exit(1);
+    }
+    $stagedIndex = update_index_page((string)file_get_contents($indexPath), $newTools);
+    foreach (['header.html'=>$stagedHeader,'footer.html'=>$stagedFooter,'index.html'=>$stagedIndex] as $relative=>$content) {
+        $target = rtrim($outputDir,'/\\').'/'.$relative;
+        if (file_put_contents($target, $content, LOCK_EX) === false) {
+            fwrite(STDERR, "Unable to write staged site file: {$relative}\n");
+            exit(1);
+        }
+    }
+}
+
+echo 'Generated '.$generated." approved tool page(s) using the shared JunctionTools layout. Registry, sitemap, header, footer, and index remain unchanged; staged navigation files are emitted for approval.\n";
