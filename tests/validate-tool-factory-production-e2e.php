@@ -29,7 +29,15 @@ $cleanup = static function () use ($tmp): void {
     }
     @rmdir($tmp);
 };
-register_shutdown_function($cleanup);
+register_shutdown_function(static function () use ($cleanup, $tmp): void {
+    if (getenv('JT_E2E_KEEP_WORKSPACE') === '1') {
+        $pointerDir = dirname(__DIR__) . '/storage/e2e-test-ci';
+        if (!is_dir($pointerDir)) @mkdir($pointerDir, 0775, true);
+        @file_put_contents($pointerDir . '/production-e2e-workspace.txt', $tmp . PHP_EOL, LOCK_EX);
+        return;
+    }
+    $cleanup();
+});
 
 $run = static function (string $script, array $args) use ($root, $php): array {
     $cmd = escapeshellarg($php) . ' ' . escapeshellarg($root . '/' . ltrim($script, '/'));
