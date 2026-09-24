@@ -33,6 +33,7 @@ jobs:
           php -l tools/build-tool-specs.php
           php -l tools/build-generation-queue.php
           php -l tools/generate-approved-tools.php
+          php -l tools/publish-approved-new-tool.php
           php -l security/build-security-gate.php
           php -l security/adsense-compliance-gate.php
           php -l tests/validate-build-security-gate-generator.php
