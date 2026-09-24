@@ -202,7 +202,7 @@ function pub_update_index_bucket(string $html, string $bucket, array $tool): str
         'ecommerce' => 'CATEGORY 3: E-Commerce, Conversion & Trust',
         'design-content' => 'CATEGORY 4: Design, Media & Content',
         'developer' => 'CATEGORY 5: Developer Utilities & Integrations',
-        'utilities' => 'CATEGORY 6: Newly Published Tools',
+        'utilities' => 'CATEGORY 6: Utilities & Generators',
     ];
     $marker = $sections[$bucket];
     $card = pub_card($tool);
