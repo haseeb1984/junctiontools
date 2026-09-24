@@ -39,9 +39,9 @@ const waitForServer = () => new Promise((resolve, reject) => {
 (async () => {
   await waitForServer();
   const browser = await chromium.launch({ headless: true, timeout: BROWSER_TIMEOUT_MS });
+  const page = await browser.newPage();
   page.setDefaultTimeout(10000);
   page.setDefaultNavigationTimeout(15000);
-  const page = await browser.newPage();
   const consoleErrors = [];
   const pageErrors = [];
   const externalRequests = [];
@@ -83,7 +83,7 @@ const waitForServer = () => new Promise((resolve, reject) => {
   console.log('Tool Factory browser runtime E2E: PASS');
 
   await browser.close();
-})().catch(async err => {
+})().catch(async err =>(async err => {
   console.error('[FAIL] ' + err.message);
   process.exitCode = 1;
 }).finally(() => {
