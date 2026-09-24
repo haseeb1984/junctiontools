@@ -143,12 +143,17 @@ function update_index_page(string $html, array $tools, int $totalTools): string 
     if (!$tools) return $html;
     $html = preg_replace('/Access \d+ completely free online tools/', 'Access '.$totalTools.' completely free online tools', $html, 1);
     $cards = '';
-    foreach ($tools as $tool) $cards .= nav_card($tool);
-    $pattern = '/(<!-- CATEGORY 6: Newly Published Tools -->.*?<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">).*?(<\/div>\s*<\/section>)/s';
-    if (!preg_match($pattern, $html)) {
+    foreach ($tools as $tool) {
+        $slug = nav_esc($tool['slug']);
+        if (preg_match('/href=["\']'.preg_quote($slug, '/').'["\']/i', $html)) continue;
+        $cards .= nav_card($tool);
+    }
+    if ($cards === '') return $html;
+    $pattern = '/(<!-- CATEGORY 6: Newly Published Tools -->.*?<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">)(.*?)(<\/div>\s*<\/section>)/s';
+    if (!preg_match($pattern, $html, $match)) {
         throw new RuntimeException('Index Newly Published Tools section is missing.');
     }
-    return preg_replace($pattern, '$1'.$cards.'$2', $html, 1);
+    return preg_replace($pattern, '$1$2'.$cards.'$3', $html, 1);
 }
 
 $newTools = nav_new_tools($specs, $approved);
