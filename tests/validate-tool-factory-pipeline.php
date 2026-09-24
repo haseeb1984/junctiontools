@@ -24,7 +24,7 @@ if (($config['automatic_production_publish'] ?? true) !== false) {
 }
 
 $safety = $config['safety'] ?? [];
-foreach (['fail_closed', 'never_modify_registry_or_sitemap', 'never_publish_without_explicit_approval', 'never_commit_credentials', 'production_publish_requires_separate_review'] as $key) {
+foreach (['fail_closed', 'never_modify_registry_or_sitemap_during_generation_or_validation', 'registry_or_sitemap_changes_only_through_final_publication_gate', 'never_publish_without_explicit_approval', 'never_commit_credentials', 'production_publish_requires_separate_review'] as $key) {
     if (($safety[$key] ?? false) !== true) {
         fwrite(STDERR, "Safety policy missing or disabled: {$key}\n");
         exit(1);
@@ -41,6 +41,7 @@ $expected = [
     'runtime-validation',
     'adsense-publication-gate',
     'deployment-plan',
+    'approved-new-tool-publication',
     'site-navigation-sync',
     'search-console-feedback',
     'automatic-publishing-gate',
