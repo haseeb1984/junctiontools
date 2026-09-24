@@ -161,11 +161,18 @@ function bsg_evaluate(array $spec, array $decision, array $policy): array {
     } elseif ($decisionType === 'enhancement') {
         $target = strtolower(trim((string)($decision['enhancement']['target_tool_slug'] ?? '')));
         $scope = $decision['enhancement']['scope'] ?? [];
-        if ($target === '' || !is_array($scope) ||
+        if ($target === '' || $target !== $slug || !is_array($scope) ||
             ($scope['preserve_existing_functionality'] ?? false) !== true ||
             ($decision['approval_requirements']['enhancement_approval'] ?? false) !== true ||
             ($decision['approval_requirements']['generation_approval'] ?? true) !== false) {
-            return bsg_reject('security_gate_rejected', 'Enhancement scope or approval requirements are invalid.');
+            return bsg_reject('security_gate_rejected', 'Enhancement target, scope, or approval requirements are invalid.');
+        }
+        if (($spec['spec_type'] ?? '') !== 'enhancement' ||
+            ($spec['security']['no_new_page'] ?? false) !== true ||
+            ($spec['security']['no_new_registry_entry'] ?? false) !== true ||
+            ($spec['security']['no_sitemap_mutation'] ?? false) !== true ||
+            ($scope['type'] ?? '') !== 'seo') {
+            return bsg_reject('security_gate_rejected', 'SEO enhancement must be explicitly bounded to the existing tool with no new page or registry entry.');
         }
     } else {
         return bsg_reject('security_gate_rejected', 'Unknown security-gate decision type.');
