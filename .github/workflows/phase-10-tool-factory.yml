@@ -44,6 +44,7 @@ jobs:
           php -l tests/validate-tool-factory-pipeline.php
           php -l tests/validate-demand-refresh.php
           php -l tests/validate-tool-factory-e2e.php
+          php -l tests/validate-tool-factory-production-e2e.php
           php -l tests/validate-tool-specs.php
           php -l tests/validate-demand-routing.php
           php -l tests/validate-tool-enhancement-spec.php
@@ -83,6 +84,9 @@ jobs:
 
       - name: Validate full factory dry-run
         run: php tests/validate-tool-factory-e2e.php
+
+      - name: Validate production-like Tool Factory E2E
+        run: php tests/validate-tool-factory-production-e2e.php
 
       - name: Validate approved image resizer enhancement
         run: php tests/validate-tool-enhancement-approval.php
