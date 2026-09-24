@@ -19,6 +19,9 @@ $specData=['specifications'=>[
 file_put_contents($spec,json_encode($specData,JSON_PRETTY_PRINT));
 file_put_contents($approval,json_encode(['approvals'=>[['slug'=>'age-calculator','approved'=>true],['slug'=>'qr-code-generator','approved'=>true]]],JSON_PRETTY_PRINT));
 
+$registry=tempnam(sys_get_temp_dir(),'jt-g-registry-');
+file_put_contents($registry,json_encode(['tools'=>[]],JSON_PRETTY_PRINT));
+
 $securityDecision=tempnam(sys_get_temp_dir(),'jt-g-security-');
 $policyData=json_decode((string)file_get_contents($root.'/config/build-security-gate.json'),true);
 $decisions=[];
@@ -27,7 +30,7 @@ foreach($specData['specifications'] as $s){
 }
 file_put_contents($securityDecision,json_encode(['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'decisions'=>$decisions],JSON_PRETTY_PRINT));
 
-$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($generator).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($out).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision);
+$cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($generator).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($out).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision).' '.escapeshellarg($registry);
 exec($cmd,$lines,$status);
 if($status!==0){fwrite(STDERR,"Generator failed.\n");exit(1);}
 
@@ -45,5 +48,5 @@ $cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($generator).' '.escapeshellar
 exec($cmd,$ignored,$emptyStatus);
 if($emptyStatus!==0||count(glob($emptyOut.'/*.html'))!==0){fwrite(STDERR,"Unapproved generation bypass detected.\n");exit(1);}
 
-@unlink($spec);@unlink($approval);@unlink($securityDecision);@unlink($empty);@unlink($out.'/age-calculator.html');@unlink($out.'/qr-code-generator.html');@rmdir($emptyOut);@rmdir($out);
+@unlink($spec);@unlink($approval);@unlink($securityDecision);@unlink($registry);@unlink($empty);@unlink($out.'/age-calculator.html');@unlink($out.'/qr-code-generator.html');@rmdir($emptyOut);@rmdir($out);
 echo "Generated tool validation: PASS\n";
