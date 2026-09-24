@@ -96,11 +96,14 @@ jobs:
           JT_E2E_KEEP_WORKSPACE: '1'
         run: php tests/validate-tool-factory-production-e2e.php
 
+      - name: Install Playwright for browser runtime E2E
+        run: npm install --no-save --no-package-lock playwright@1.55.0
+
       - name: Install Chromium for browser runtime E2E
-        run: npx --yes playwright@1.55.0 install --with-deps chromium
+        run: npx playwright@1.55.0 install --with-deps chromium
 
       - name: Validate generated tool in a real browser
-        run: npm exec --yes --package=playwright@1.55.0 -- node tests/validate-tool-factory-browser-e2e.js
+        run: node tests/validate-tool-factory-browser-e2e.js
 
       - name: Validate approved image resizer enhancement
         run: php tests/validate-tool-enhancement-approval.php
