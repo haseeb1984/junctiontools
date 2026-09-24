@@ -30,29 +30,120 @@ function demand_tokens(string $value): array {
     $tokens = array_map(static fn(string $t): string => $aliases[$t] ?? $t, $tokens);
     return array_values(array_unique(array_filter($tokens, static fn(string $t): bool => strlen($t) > 1 && !in_array($t, $stop, true))));
 }
-function find_existing_tool(string $query, array $tools): ?array {
+function demand_profile(string $query): array {
     $normalized = normalize_demand_term($query);
-    $queryTokens = demand_tokens($query);
-    $best = null; $bestScore = 0.0;
-    foreach ($tools as $tool) {
-        if (!is_array($tool)) continue;
-        $name = (string)($tool['name'] ?? '');
-        $slug = (string)($tool['slug'] ?? '');
-        $nameNorm = normalize_demand_term($name);
-        $slugNorm = normalize_demand_term($slug);
-        if ($normalized === $nameNorm || $normalized === $slugNorm) return ['tool' => $tool, 'match_type' => 'exact', 'score' => 1.0];
+    $profile = ['required_capabilities' => [], 'intent' => 'unknown'];
 
-        $toolTokens = array_values(array_unique(array_merge(demand_tokens($name), demand_tokens($slug))));
-        if (!$queryTokens || !$toolTokens) continue;
-        $overlap = count(array_intersect($queryTokens, $toolTokens));
-        $coverage = $overlap / count($queryTokens);
-        $toolCoverage = $overlap / count($toolTokens);
-        $score = min($coverage, $toolCoverage);
-        if ($coverage >= 0.75 && $score > $bestScore) {
-            $best = ['tool' => $tool, 'match_type' => 'capability-token', 'score' => $score];
-            $bestScore = $score;
+    $rules = [
+        ['/(?:word|character|line|sentence)\\s+(?:counter|count)|count\\s+(?:words|characters|lines|sentences)/i',
+            ['accept_text','analyze_text','count_text'], 'text-counting'],
+        ['/(?:uppercase|lowercase|title case|sentence case|capitalize|case)\\s+(?:converter|convert|changer|change)/i',
+            ['accept_text','transform_text','change_letter_case'], 'text-transformation'],
+        ['/(?:clean|cleanup|remove)\\s+(?:text|whitespace|spaces)|extra\\s+spaces?/i',
+            ['accept_text','transform_text','clean_text'], 'text-cleaning'],
+        ['/(?:json)\\s+(?:formatter|format|beautifier|beautify|pretty)/i',
+            ['accept_json','parse_json','format_json'], 'json-formatting'],
+        ['/(?:base64)/i',
+            ['accept_text','encode_decode_base64'], 'base64-conversion'],
+        ['/(?:regex|regular expression).*?(?:tester|test|checker|check)/i',
+            ['accept_pattern','accept_text','test_regex'], 'regex-testing'],
+        ['/(?:unix|epoch|timestamp).*?(?:converter|convert)/i',
+            ['accept_timestamp_or_date','convert_timestamp'], 'timestamp-conversion'],
+        ['/(?:qr|qrcode|qr code).*?(?:generator|generate)/i',
+            ['accept_text_or_url','generate_qr_code','download_png'], 'qr-generation'],
+        ['/(?:age).*?(?:calculator|calculate)/i',
+            ['accept_birth_date','calculate_age'], 'age-calculation'],
+        ['(?:discount).*?(?:calculator|calculate)/i',
+            ['accept_price','accept_percentage','calculate_discount'], 'discount-calculation'],
+        ['/(?:invoice).*?(?:generator|generate|maker|create)/i',
+            ['accept_invoice_data','generate_invoice_document'], 'invoice-generation'],
+        ['/(?:uuid).*?(?:generator|generate)/i',
+            ['generate_uuid'], 'uuid-generation'],
+        ['/(?:sha.?256|sha.?256 hash|hash).*?(?:generator|generate|calculator|calculate)/i',
+            ['accept_text','generate_sha256_hash'], 'hash-generation'],
+        ['/(?:px|pixel).*?(?:to|\\-).*?(?:rem)/i',
+            ['accept_dimensions','convert_px_to_rem'], 'px-rem-conversion'],
+        ['/(?:whatsapp).*?(?:link|url)/i',
+            ['accept_phone_and_message','generate_whatsapp_url'], 'whatsapp-link-generation'],
+        ['/(?:color).*?(?:palette).*?(?:generator|generate)/i',
+            ['accept_color','generate_color_palette'], 'color-palette-generation'],
+        ['/(?:aspect ratio).*?(?:calculator|calculate)/i',
+            ['accept_dimensions','calculate_aspect_ratio'], 'aspect-ratio-calculation'],
+        ['/(?:contrast|wcag).*?(?:checker|check|audit)/i',
+            ['accept_url','evaluate_color_contrast'], 'contrast-audit'],
+        ['/(?:readability|flesch).*?(?:checker|check|calculator|score|test|audit)/i',
+            ['accept_url','evaluate_readability'], 'readability-audit'],
+        ['/(?:meta|meta tags).*?(?:seo|checker|audit)/i',
+            ['accept_url','audit_meta_seo'], 'meta-seo-audit'],
+    ];
+
+    foreach ($rules as [$pattern, $capabilities, $intent]) {
+        if (preg_match($pattern, $query)) {
+            return ['required_capabilities' => $capabilities, 'intent' => $intent];
         }
     }
+
+    return $profile;
+}
+
+function tool_capabilities(array $tool): array {
+    $profiles = [
+        'word_counter' => ['accept_text','analyze_text','count_text'],
+        'case_converter' => ['accept_text','transform_text','change_letter_case'],
+        'clean_text_tool' => ['accept_text','transform_text','clean_text'],
+        'json_formatter' => ['accept_json','parse_json','format_json'],
+        'base64_converter' => ['accept_text','encode_decode_base64'],
+        'regex_tester' => ['accept_pattern','accept_text','test_regex'],
+        'timestamp_converter' => ['accept_timestamp_or_date','convert_timestamp'],
+        'qr_code_generator' => ['accept_text_or_url','generate_qr_code','download_png'],
+        'age_calculator' => ['accept_birth_date','calculate_age'],
+        'discount_calculator' => ['accept_price','accept_percentage','calculate_discount'],
+        'invoice_generator' => ['accept_invoice_data','generate_invoice_document'],
+        'uuid_generator' => ['generate_uuid'],
+        'sha256_hash' => ['accept_text','generate_sha256_hash'],
+        'px_to_rem' => ['accept_dimensions','convert_px_to_rem'],
+        'whatsapp_link' => ['accept_phone_and_message','generate_whatsapp_url'],
+        'color_palette_generator' => ['accept_color','generate_color_palette'],
+        'aspect_ratio_calculator' => ['accept_dimensions','calculate_aspect_ratio'],
+        'contrast_checker' => ['accept_url','evaluate_color_contrast'],
+        'readability_evaluator' => ['accept_url','evaluate_readability'],
+        'meta_seo_checker' => ['accept_url','audit_meta_seo'],
+    ];
+
+    $id = (string)($tool['id'] ?? '');
+    return $profiles[$id] ?? [];
+}
+
+function find_existing_tool(string $query, array $tools): ?array {
+    $demand = demand_profile($query);
+    $required = $demand['required_capabilities'];
+
+    // Capability matching is the authoritative duplicate/overlap check.
+    // Name/slug similarity is deliberately not used to create an enhancement match.
+    if (!$required) {
+        return null;
+    }
+
+    $best = null;
+    foreach ($tools as $tool) {
+        if (!is_array($tool)) continue;
+        $capabilities = tool_capabilities($tool);
+        if (!$capabilities) continue;
+
+        $missing = array_values(array_diff($required, $capabilities));
+        if ($missing) continue;
+
+        $best = [
+            'tool' => $tool,
+            'match_type' => 'capability',
+            'score' => 1.0,
+            'intent' => $demand['intent'],
+            'required_capabilities' => $required,
+            'matched_capabilities' => $required,
+        ];
+        break;
+    }
+
     return $best;
 }
 
