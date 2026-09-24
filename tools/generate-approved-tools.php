@@ -90,8 +90,8 @@ function nav_new_tools(array $specs, array $approved): array {
         if (!is_array($spec)) continue;
         $slug = strtolower(trim((string)($spec['tool']['slug'] ?? '')));
         if ($slug === '' || !isset($approved[$slug])) continue;
-        $category = strtolower(trim((string)($spec['tool']['category'] ?? '')));
-        if ($category === '') throw new RuntimeException('New tool is missing a category: '.$slug);
+        $category = strtolower(trim((string)($spec['tool']['category'] ?? 'utility')));
+        if ($category === '') $category = 'utility';
         $tools[$slug] = [
             'slug' => $slug,
             'name' => (string)($spec['tool']['name'] ?? ucwords(str_replace('-', ' ', $slug))),
