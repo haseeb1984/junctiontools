@@ -39,6 +39,7 @@ $expected = [
     'approved-existing-tool-enhancement-staging',
     'approved-generation',
     'runtime-validation',
+    'adsense-publication-gate',
     'deployment-plan',
     'site-navigation-sync',
     'search-console-feedback',
