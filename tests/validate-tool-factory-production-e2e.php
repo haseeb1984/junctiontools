@@ -250,6 +250,11 @@ try {
     if (stripos($stagedIndexHtml, 'Access 39 completely free online tools') === false) {
         throw new RuntimeException('Staged index tool count was not updated from 38 to 39.');
     }
+    foreach (['age-calculator','timestamp-converter','qr-code-generator'] as $existingPublishedTool) {
+        if (stripos($stagedIndexHtml, $existingPublishedTool) === false) {
+            throw new RuntimeException('Staged index lost existing newly-published tool: ' . $existingPublishedTool);
+        }
+    }
     $stagedHeaderHtml = (string) file_get_contents($generatedDir . '/header.html');
     if (stripos($stagedHeaderHtml, 'All 39 Tools') === false) {
         throw new RuntimeException('Staged header tool count was not updated from 38 to 39.');
