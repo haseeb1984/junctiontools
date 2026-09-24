@@ -237,6 +237,13 @@ try {
     ]);
     $generated = $generatedDir . '/parking-fee-calculator.html';
     if (!is_file($generated)) throw new RuntimeException('Approved new-tool generation did not create parking-fee-calculator.html.');
+    // The generated shell references the production-shared favicon. Copy that
+    // static deployment asset into the isolated browser fixture so the
+    // production-like browser test does not manufacture a local 404.
+    $favicon = $root . '/favicon.ico';
+    if (is_file($favicon) && !copy($favicon, $generatedDir . '/favicon.ico')) {
+        throw new RuntimeException('Unable to copy shared favicon into browser E2E fixture.');
+    }
 
     // 5. Runtime validation of the actual generated artifact.
     $html = (string) file_get_contents($generated);
