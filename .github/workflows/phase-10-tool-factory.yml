@@ -90,7 +90,15 @@ jobs:
         run: php tests/validate-tool-factory-e2e.php
 
       - name: Validate production-like Tool Factory E2E
+        env:
+          JT_E2E_KEEP_WORKSPACE: '1'
         run: php tests/validate-tool-factory-production-e2e.php
+
+      - name: Install Chromium for browser runtime E2E
+        run: npx --yes playwright@1.55.0 install --with-deps chromium
+
+      - name: Validate generated tool in a real browser
+        run: npm exec --yes --package=playwright@1.55.0 -- node tests/validate-tool-factory-browser-e2e.js
 
       - name: Validate approved image resizer enhancement
         run: php tests/validate-tool-enhancement-approval.php
