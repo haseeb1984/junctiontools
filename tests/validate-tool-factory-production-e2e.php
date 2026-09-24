@@ -139,8 +139,8 @@ try {
         $decision = [
             'schema_version' => '1.0.0',
             'policy_version' => (string) ($policy['policy_version'] ?? ''),
-            'generated_at' => gmdate('Y-m-d\\TH:i:s\\Z'),
-            'evaluated_at' => gmdate('Y-m-d\\TH:i:s\\Z'),
+            'generated_at' => gmdate('Y-m-d\TH:i:s\Z'),
+            'evaluated_at' => gmdate('Y-m-d\TH:i:s\Z'),
             'evaluator_id' => BUILD_SECURITY_GATE_EVALUATOR,
             'source' => [
                 'opportunity_id' => 'production-like-e2e-' . $slug,
@@ -225,9 +225,8 @@ try {
     foreach (['<title>Free Online Word Counter | JunctionTools</title>', 'JT-SEO-ENHANCEMENT-START:word-counter', 'free online word counter'] as $needle) {
         if (stripos($stagedHtml, $needle) === false) throw new RuntimeException('Staged enhancement missing: ' . $needle);
     }
-    // Runtime regression check: existing JavaScript must remain identical.
-    preg_match_all('/<script\\b[^>]*>(.*?)<\\/script>/is', (string) file_get_contents($sourceEnhancementPage), $m1);
-    preg_match_all('/<script\\b[^>]*>(.*?)<\\/script>/is', $stagedHtml, $m2);
+    preg_match_all('/<script\b[^>]*>(.*?)<\/script>/is', (string) file_get_contents($sourceEnhancementPage), $m1);
+    preg_match_all('/<script\b[^>]*>(.*?)<\/script>/is', $stagedHtml, $m2);
     if (($m1[1] ?? []) !== ($m2[1] ?? [])) throw new RuntimeException('Enhancement changed existing JavaScript runtime.');
 
     // 4B. New-tool path: approved generation.
@@ -237,12 +236,20 @@ try {
     ]);
     $generated = $generatedDir . '/parking-fee-calculator.html';
     if (!is_file($generated)) throw new RuntimeException('Approved new-tool generation did not create parking-fee-calculator.html.');
-    // The generated shell references the production-shared favicon. Copy that
-    // static deployment asset into the isolated browser fixture so the
-    // production-like browser test does not manufacture a local 404.
-    $favicon = $root . '/favicon.ico';
-    if (is_file($favicon) && !copy($favicon, $generatedDir . '/favicon.ico')) {
-        throw new RuntimeException('Unable to copy shared favicon into browser E2E fixture.');
+
+    // Generated pages reuse the shared header, which references this image,
+    // and the generated shell references the shared favicon. Copy both static
+    // deployment assets into the isolated browser fixture so browser E2E
+    // observes the same local asset contract as production.
+    foreach (['favicon.ico', 'junction-favicon.png'] as $asset) {
+        $sourceAsset = $root . '/' . $asset;
+        $targetAsset = $generatedDir . '/' . $asset;
+        if (!is_file($sourceAsset)) {
+            throw new RuntimeException('Required shared browser asset missing from repository: ' . $asset);
+        }
+        if (!copy($sourceAsset, $targetAsset)) {
+            throw new RuntimeException('Unable to copy shared browser asset into E2E fixture: ' . $asset);
+        }
     }
 
     // 5. Runtime validation of the actual generated artifact.
