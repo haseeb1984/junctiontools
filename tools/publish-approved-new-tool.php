@@ -137,7 +137,7 @@ function pub_bucket(string $category): string {
         'ecommerce-conversion', 'business' => 'ecommerce',
         'design', 'social-media', 'content', 'text' => 'design-content',
         'developer', 'communication' => 'developer',
-        'calculators', 'generators' => 'utilities',
+        'calculators', 'generators', 'utility' => 'utilities',
         default => throw new RuntimeException("Unsupported new-tool category for site navigation: {$category}"),
     };
 }
