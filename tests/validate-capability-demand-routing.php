@@ -97,7 +97,7 @@ if (($existing['decision'] ?? '') !== 'enhancement' ||
 $unmatched = $queue[1];
 if (($unmatched['decision'] ?? '') !== 'candidate' ||
     ($unmatched['match_type'] ?? '') !== 'none' ||
-    ($unmatched['existing_tool_match'] ?? 'unexpected') !== null ||
+    (!array_key_exists('existing_tool_match', $unmatched) || $unmatched['existing_tool_match'] !== null) ||
     ($unmatched['recommended_slug'] ?? '') !== 'production-string-formatter') {
     fwrite(STDERR, "Unmatched demand was not kept as a new-tool candidate.\n");
     exit(1);
