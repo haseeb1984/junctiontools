@@ -71,7 +71,7 @@ $candidateSpec = null;
 foreach ($specs['specifications'] as $specification) {
     if (($specification['spec_type'] ?? '') === 'enhancement') {
         $enhancementSpec = $specification;
-    } elseif (($specification['spec_type'] ?? '') === 'new_tool') {
+    } else {
         $candidateSpec = $specification;
     }
 }
