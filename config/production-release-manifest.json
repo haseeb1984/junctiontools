@@ -3,7 +3,7 @@
   "manifest_type": "junctiontools-production-release",
   "release": {
     "repository": "haseeb1984/junctiontools",
-    "commit_sha": "786e88735dc8c5701a4d1ca661022027b2e6398a",
+    "commit_sha": "87c74ce03cd5dbfb90d9d9d6a0e5a3a5a3acdc81",
     "target": "hostinger-shared-hosting",
     "document_root": "public_html/",
     "php": {
@@ -15,8 +15,8 @@
     "cron_required": false
   },
   "artifact": {
-    "name": "junctiontools-786e8873-hostinger",
-    "source_commit": "786e88735dc8c5701a4d1ca661022027b2e6398a",
+    "name": "junctiontools-87c74ce0-hostinger",
+    "source_commit": "87c74ce03cd5dbfb90d9d9d6a0e5a3a5a3acdc81",
     "manifest_path": "config/production-release-manifest.json",
     "artifact_format": "zip",
     "include_git_metadata": false,
@@ -55,7 +55,7 @@
     "runtime_storage": {"storage_source_directory_forbidden": true,"no_fallback_to_tmp": true,"no_fallback_to_public_root": true,"no_fallback_to_config": true,"no_fallback_to_tools": true,"required_runtime_directory_failure_mode": "fail_closed","optional_cache_failure_must_not_block_runtime": true},
     "network": {"arbitrary_external_network_dependency_forbidden": true,"generator_network_access_forbidden": true,"runtime_scanners_must_use_approved_safe_http_layer": true},
     "web_security": {".env_http_access_forbidden": true,"source_control_metadata_http_access_forbidden": true,"CI_files_http_access_forbidden": true,"test_files_http_access_forbidden": true,"directory_listing_forbidden": true},
-    "release_gate": {"final_release_gate_commit_must_be_exact": "786e88735dc8c5701a4d1ca661022027b2e6398a","final_release_gate_must_be_success": true,"release_allowed_must_be_true": true,"required_checks_must_all_be_success": true,"required_checks": ["Phase 0 verification gate","Generated tool runtime sandbox validation","Deployment approval gate validation","Search Console feedback validation","Automatic publishing gate validation","Tool factory contract validation","SSRF hardening contract validation","Generator path traversal validation","PHP 8.3 Hostinger acceptance","PHP 8.4 Hostinger acceptance"],"php_8_5_hostinger_acceptance": "optional"},
+    "release_gate": {"final_release_gate_commit_must_be_exact": "87c74ce03cd5dbfb90d9d9d6a0e5a3a5a3acdc81","final_release_gate_must_be_success": true,"release_allowed_must_be_true": true,"required_checks_must_all_be_success": true,"required_checks": ["Phase 0 verification gate","Generated tool runtime sandbox validation","Deployment approval gate validation","Search Console feedback validation","Automatic publishing gate validation","Tool factory contract validation","SSRF hardening contract validation","Generator path traversal validation","PHP 8.3 Hostinger acceptance","PHP 8.4 Hostinger acceptance"],"php_8_5_hostinger_acceptance": "optional"},
     "integrity": {"generate_sha256_manifest": true,"hash_every_included_file": true,"hash_algorithm": "sha256","record_source_commit": true,"record_artifact_digest": true,"release_manifest_must_be_immutable_after_build": true},
     "deployment": {"upload_only_approved_artifact": true,"deploy_to": "public_html/","backup_current_release_before_replace": true,"atomic_or_staged_replace_preferred": true,"post_deploy_smoke_tests_required": true,"rollback_to_previous_verified_release_required": true}
   },
