@@ -37,22 +37,17 @@ if (!is_array($data)) {
 $site = rtrim((string)($data['site'] ?? 'https://junctiontools.com'), '/');
 $expectedUrls = [];
 foreach (($data['tools'] ?? []) as $tool) {
-    if (($tool['status'] ?? '') !== 'active' || ($tool['seo']['indexable'] ?? false) !== true) {
-        continue;
-    }
-
+    if (($tool['status'] ?? '') !== 'active' || ($tool['seo']['indexable'] ?? false) !== true) continue;
     $slug = trim((string)($tool['slug'] ?? ''));
     $frontend = trim((string)($tool['frontend'] ?? ''));
     if ($slug === '' || $frontend === '') {
         fwrite(STDERR, "Active indexable tool is missing slug/frontend mapping.\n");
         exit(1);
     }
-
     if (!is_file($root . '/' . $frontend)) {
         fwrite(STDERR, "Registry frontend file missing: {$frontend}\n");
         exit(1);
     }
-
     $expectedUrls[$site . '/' . $slug] = true;
 }
 ksort($expectedUrls, SORT_STRING);
@@ -108,11 +103,16 @@ if (!is_file($htaccessPath)) {
 }
 
 $htaccess = (string)file_get_contents($htaccessPath);
-if (!str_contains($htaccess, 'RewriteCond %{THE_REQUEST} /([^.]+)\\.html [NC]') ||
-    !str_contains($htaccess, 'RewriteCond %{REQUEST_FILENAME}\\.html -f') ||
-    !str_contains($htaccess, 'RewriteRule ^(.*)$ $1.html [L]')) {
-    fwrite(STDERR, "Canonical clean-URL rewrite rules are missing from .htaccess.\n");
+$hasSafeRedirect =
+    str_contains($htaccess, 'RewriteCond %{THE_REQUEST}') &&
+    str_contains($htaccess, 'RewriteRule ^(.+)\\.html$ $1 [R=301,L,NE]');
+$hasSafeInternalRewrite =
+    str_contains($htaccess, 'RewriteCond %{REQUEST_FILENAME}\\.html -f') &&
+    str_contains($htaccess, 'RewriteRule ^(.+?)/?$ $1.html [L]');
+
+if (!$hasSafeRedirect || !$hasSafeInternalRewrite) {
+    fwrite(STDERR, "Canonical clean-URL rewrite rules are missing or not using the subdirectory-safe form.\n");
     exit(1);
 }
 
-echo 'Sitemap validation passed: ' . count($urls) . ' registry-aligned tool URLs, robots.txt, and clean-URL routing verified.' . PHP_EOL;
+echo 'Sitemap validation passed: ' . count($urls) . ' registry-aligned tool URLs, robots.txt, and subdirectory-safe clean-URL routing verified.' . PHP_EOL;
