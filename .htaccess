@@ -45,16 +45,21 @@ Options -Indexes
 # non-legacy-local cases to scanner-secure.php.
 RewriteRule ^scanner\.php$ scanner-compat.php [END]
 
-# Redirect direct .html requests to their clean URL without using a captured
-# absolute/root path. A relative substitution preserves the current Apache
-# per-directory prefix, so it works both at the Hostinger document root and
-# when the package is served from an XAMPP subdirectory such as
-# /junctiontools-hostinger/.
-RewriteCond %{THE_REQUEST} \s/+[^\s?]*\.html(?:[?\s]) [NC]
-RewriteRule ^(.+)\.html$ $1 [R=301,L,NE]
+# Never canonical-redirect the shared component files. Pages fetch these
+# files directly and they must remain real .html resources in both the
+# Hostinger document root and an XAMPP subdirectory.
+RewriteRule ^(?:header|footer)\.html$ - [END]
 
-# Serve /tool from /tool.html. This is intentionally relative so Apache keeps
-# the current per-directory prefix in both root and subdirectory deployments.
+# Redirect direct .html requests using REQUEST_URI rather than REQUEST_FILENAME.
+# REQUEST_URI is URL space, so this cannot turn a Windows filesystem path such
+# as D:/xampp/htdocs/... into an HTTP request path. The captured URI also keeps
+# the deployment prefix automatically (for example /junctiontools-hostinger/).
+RewriteCond %{THE_REQUEST} \s/+[^\s?]*\.html(?:[?\s]) [NC]
+RewriteCond %{REQUEST_URI} ^(.+)\.html$ [NC]
+RewriteRule ^ %{REQUEST_SCHEME}://%{HTTP_HOST}%1 [R=301,L,NE]
+
+# Serve /tool from /tool.html. The relative substitution is safe in .htaccess
+# because Apache applies the current directory prefix after the rule matches.
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.html -f
-RewriteRule ^(.+?)/?$ $1.html [L]
+RewriteRule ^(.+?)/?$ $1.html [END]
