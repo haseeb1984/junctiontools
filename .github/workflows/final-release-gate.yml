@@ -1,18 +1,8 @@
 name: Final Release Gate
 
 on:
-  workflow_run:
-    workflows:
-      - Phase 0 Security Verification
-      - Phase 6 Generated Runtime Validation
-      - Phase 7 Approval Gate Validation
-      - Phase 8 Search Console Feedback
-      - Phase 9 Automatic Publishing Gate
-      - Phase 10 Continuous Tool Factory
-      - Phase 11 SSRF Hardening Verification
-      - Phase 12 Generator Path Safety Verification
-      - Hostinger Compatibility Acceptance
-    types: [completed]
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       commit_sha:
@@ -34,7 +24,7 @@ jobs:
       - name: Resolve commit
         id: commit
         env:
-          EVENT_SHA: ${{ github.event.workflow_run.head_sha }}
+          EVENT_SHA: ${{ github.event.after }}
           INPUT_SHA: ${{ inputs.commit_sha }}
         run: |
           set -euo pipefail
@@ -84,7 +74,7 @@ jobs:
           sha = os.environ["SHA"]
           url = f"https://api.github.com/repos/${{ github.repository }}/commits/{sha}/check-runs?per_page=100"
 
-          for attempt in range(1, 7):
+          for attempt in range(1, 31):
               raw = subprocess.check_output([
                   "curl", "--fail", "--silent", "--show-error",
                   "-H", "Accept: application/vnd.github+json",
@@ -104,7 +94,7 @@ jobs:
               if not missing and not incomplete:
                   break
 
-              if attempt < 6:
+              if attempt < 30:
                   time.sleep(10)
           else:
               print(json.dumps({
@@ -146,7 +136,7 @@ jobs:
 
           with open("artifacts/final-release-gate.json", "w", encoding="utf-8") as f:
               json.dump(manifest, f, indent=2)
-              f.write("\\n")
+              f.write("\n")
 
           print(json.dumps(manifest, indent=2))
           if failures:
