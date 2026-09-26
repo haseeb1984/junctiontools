@@ -1,8 +1,23 @@
 name: Final Release Gate
 
 on:
+  # Run on main pushes so the current release candidate gets an aggregate gate.
+  # Also run after every required upstream validation workflow so a pinned
+  # release commit receives a Final Release Gate check for that exact SHA.
   push:
     branches: [main]
+  workflow_run:
+    workflows:
+      - Phase 0 Security Verification
+      - Phase 6 Generated Runtime Validation
+      - Phase 7 Approval Gate Validation
+      - Phase 8 Search Console Feedback
+      - Phase 9 Automatic Publishing Gate
+      - Phase 10 Continuous Tool Factory
+      - Phase 11 SSRF Hardening Verification
+      - Phase 12 Generator Path Safety Verification
+      - Hostinger Compatibility Acceptance
+    types: [completed]
   workflow_dispatch:
     inputs:
       commit_sha:
@@ -24,7 +39,8 @@ jobs:
       - name: Resolve commit
         id: commit
         env:
-          EVENT_SHA: ${{ github.event.after }}
+          EVENT_SHA: ${{ github.event.workflow_run.head_sha }}
+          PUSH_SHA: ${{ github.event.after }}
           INPUT_SHA: ${{ inputs.commit_sha }}
         run: |
           set -euo pipefail
@@ -32,6 +48,8 @@ jobs:
             SHA="$INPUT_SHA"
           elif [ -n "${EVENT_SHA:-}" ]; then
             SHA="$EVENT_SHA"
+          elif [ -n "${PUSH_SHA:-}" ]; then
+            SHA="$PUSH_SHA"
           else
             SHA="${{ github.sha }}"
           fi
