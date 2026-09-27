@@ -106,10 +106,7 @@ $htaccess = (string)file_get_contents($htaccessPath);
 $hasComponentBypass =
     str_contains($htaccess, 'RewriteRule ^(?:header|footer)\\.html$ - [END]');
 $hasSafeRedirect =
-    str_contains($htaccess, 'RewriteCond %{REQUEST_URI} ^(.+)\\.html
-
-echo 'Sitemap validation passed: ' . count($urls) . ' registry-aligned tool URLs, robots.txt, and subdirectory-safe clean-URL routing verified.' . PHP_EOL;
-) &&
+    str_contains($htaccess, 'RewriteCond %{REQUEST_URI} ^(.+)\\.html$') &&
     str_contains($htaccess, 'RewriteRule ^ %{REQUEST_SCHEME}://%{HTTP_HOST}%1 [R=301,L,NE]');
 $hasSafeInternalRewrite =
     str_contains($htaccess, 'RewriteCond %{REQUEST_FILENAME}\\.html -f') &&
