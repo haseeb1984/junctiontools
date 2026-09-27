@@ -1,0 +1,144 @@
+name: Temporary Hostinger Package 2106ccb
+
+on:
+  push:
+    branches:
+      - temp/hostinger-package-2106ccb
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+
+      - name: Build requested Hostinger package
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, pathlib, shutil, subprocess, zipfile, fnmatch
+
+          root = pathlib.Path(".").resolve()
+          expected_source = "2106ccb24267d18974e323d25654b6e3a6e18960"
+          parent = subprocess.check_output(["git","rev-parse","HEAD^"], text=True).strip()
+          if parent != expected_source:
+              raise SystemExit(f"Unexpected source parent: {parent}")
+
+          registry = json.loads((root/"config/tools.json").read_text(encoding="utf-8"))
+          active = [t for t in registry.get("tools", []) if t.get("status") == "active" and t.get("frontend")]
+          frontends = sorted({str(t["frontend"]) for t in active})
+          if len(active) != 38 or len(frontends) != 38:
+              raise SystemExit(f"Expected 38 active tools, found {len(active)} records / {len(frontends)} frontends")
+          missing = [f for f in frontends if not (root/f).is_file()]
+          if missing:
+              raise SystemExit("Missing active tool frontends: " + ", ".join(missing))
+
+          required = [
+              ".htaccess", "index.html", "header.html", "footer.html",
+              "process-contact.php", "scanner.php", "scanner-compat.php", "scanner-secure.php",
+              "security/rate-limit.php", "security/safe-http.php", "security/url-validator.php",
+              "config/tools.json", "tools/build-generation-queue.php",
+              "tools/generate-approved-tools.php", "tools/publish-approved-new-tool.php",
+              "vendor/autoload.php"
+          ]
+          for rel in required:
+              if not (root/rel).is_file():
+                  raise SystemExit("Required file missing: " + rel)
+
+          excluded_dirs = {".git", ".github", "tests", "docs", "node_modules", "release", ".idea", ".vscode"}
+          excluded_names = {"composer.json", "composer.lock"}
+          out = root/"release-hostinger"
+          if out.exists(): shutil.rmtree(out)
+          deploy = out/"public_html"
+          deploy.mkdir(parents=True)
+
+          files=[]
+          for p in root.rglob("*"):
+              if not p.is_file() or p.is_symlink():
+                  continue
+              rel=p.relative_to(root).as_posix()
+              parts=pathlib.PurePosixPath(rel).parts
+              if any(x in excluded_dirs for x in parts):
+                  continue
+              name=pathlib.PurePosixPath(rel).name
+              if name in excluded_names:
+                  continue
+              if name == ".env" or name.startswith(".env."):
+                  continue
+              if name in {".DS_Store"} or rel.startswith("release-hostinger/"):
+                  continue
+              if any(part in {".git",".github","tests","docs","node_modules"} for part in parts):
+                  continue
+              files.append(rel)
+
+          # Copy current source, including config/, tools/, and vendor/.
+          for rel in sorted(files):
+              src=root/rel; dst=deploy/rel
+              dst.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(src,dst)
+
+          # Verify no secrets/source-control metadata slipped in.
+          forbidden_parts={".git",".github"}
+          for rel in files:
+              parts=pathlib.PurePosixPath(rel).parts
+              if any(x in forbidden_parts for x in parts) or pathlib.PurePosixPath(rel).name == ".env":
+                  raise SystemExit("Forbidden path: "+rel)
+
+          checks=[]
+          for p in sorted(deploy.rglob("*")):
+              if p.is_file():
+                  rel=p.relative_to(deploy).as_posix()
+                  checks.append(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {rel}")
+          (out/"SHA256SUMS.txt").write_text("\n".join(checks)+"\n", encoding="utf-8")
+
+          metadata={
+              "schema_version":"1.0.0",
+              "artifact":"junctiontools-hostinger-2106ccb",
+              "source_commit":expected_source,
+              "target":"hostinger-shared-hosting",
+              "document_root":"public_html/",
+              "active_tool_count":38,
+              "tool_frontends":frontends,
+              "includes":["config/","tools/","vendor/","latest .htaccess"],
+              "excludes":[".git/",".github/","tests/","docs/",".env","composer.json","composer.lock"],
+              "publication_allowed":False,
+              "file_count":len(checks),
+              "sha256_manifest":"SHA256SUMS.txt"
+          }
+          (out/"release-metadata.json").write_text(json.dumps(metadata,indent=2)+"\n",encoding="utf-8")
+
+          deploy_manifest={
+              "source_commit":expected_source,
+              "upload":"Upload contents of public_html/ to Hostinger public_html/",
+              "do_not_upload":[".git",".github",".env","composer.json","composer.lock","tests","docs"],
+              "includes":["config","tools","vendor"],
+              "active_tool_count":38,
+              "publication_allowed":False
+          }
+          (out/"HOSTINGER-DEPLOYMENT-MANIFEST.json").write_text(json.dumps(deploy_manifest,indent=2)+"\n",encoding="utf-8")
+
+          zip_path=out/"junctiontools-hostinger-2106ccb.zip"
+          with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as z:
+              for p in sorted(deploy.rglob("*")):
+                  if p.is_file():
+                      z.write(p,p.relative_to(deploy).as_posix())
+
+          print(json.dumps(metadata,indent=2))
+          print(f"ZIP={zip_path}")
+          PY
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: junctiontools-hostinger-2106ccb
+          path: |
+            release-hostinger/junctiontools-hostinger-2106ccb.zip
+            release-hostinger/SHA256SUMS.txt
+            release-hostinger/release-metadata.json
+            release-hostinger/HOSTINGER-DEPLOYMENT-MANIFEST.json
+          retention-days: 7
