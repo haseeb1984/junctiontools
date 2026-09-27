@@ -50,13 +50,12 @@ RewriteRule ^scanner\.php$ scanner-compat.php [END]
 # Hostinger document root and an XAMPP subdirectory.
 RewriteRule ^(?:header|footer)\.html$ - [END]
 
-# Redirect direct .html requests using REQUEST_URI rather than REQUEST_FILENAME.
-# REQUEST_URI is URL space, so this cannot turn a Windows filesystem path such
-# as D:/xampp/htdocs/... into an HTTP request path. The captured URI also keeps
-# the deployment prefix automatically (for example /junctiontools-hostinger/).
+# Redirect direct .html requests with a relative substitution.
+# This preserves the current deployment directory (including an XAMPP
+# subdirectory such as /junctiontools-hostinger/) and never constructs a URL
+# from REQUEST_FILENAME, so a Windows path can never leak into Location.
 RewriteCond %{THE_REQUEST} \s/+[^\s?]*\.html(?:[?\s]) [NC]
-RewriteCond %{REQUEST_URI} ^(.+)\.html$ [NC]
-RewriteRule ^ %{REQUEST_SCHEME}://%{HTTP_HOST}%1 [R=301,L,NE]
+RewriteRule ^(.+)\.html$ $1 [R=301,L,NE]
 
 # Serve /tool from /tool.html. The relative substitution is safe in .htaccess
 # because Apache applies the current directory prefix after the rule matches.
