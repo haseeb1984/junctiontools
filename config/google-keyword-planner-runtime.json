@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "enabled": true,
+  "provider": "google-ads-keyword-planner",
+  "customer_id_env": "GOOGLE_ADS_CUSTOMER_ID",
+  "login_customer_id_env": "GOOGLE_ADS_LOGIN_CUSTOMER_ID",
+  "developer_token_env": "GOOGLE_ADS_DEVELOPER_TOKEN",
+  "client_id_env": "GOOGLE_ADS_CLIENT_ID",
+  "client_secret_env": "GOOGLE_ADS_CLIENT_SECRET",
+  "refresh_token_env": "GOOGLE_ADS_REFRESH_TOKEN",
+  "api_version": "v24",
+  "language_constant": "1000",
+  "geo_target_constants": ["2840"],
+  "keyword_plan_network": "GOOGLE_SEARCH",
+  "include_adult_keywords": false,
+  "seed_keywords": [
+    "online calculator",
+    "free online tool",
+    "image resizer",
+    "pdf tool",
+    "text converter",
+    "json formatter",
+    "seo tool",
+    "qr code generator",
+    "unit converter"
+  ],
+  "max_results": 1000,
+  "output_schema": "google-keyword-planner-runtime-v1"
+}
