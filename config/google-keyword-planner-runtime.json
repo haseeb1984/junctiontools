@@ -8,7 +8,7 @@
   "client_id_env": "GOOGLE_ADS_CLIENT_ID",
   "client_secret_env": "GOOGLE_ADS_CLIENT_SECRET",
   "refresh_token_env": "GOOGLE_ADS_REFRESH_TOKEN",
-  "api_version": "v24",
+  "api_version": "v25",
   "language_constant": "1000",
   "geo_target_constants": ["2840"],
   "keyword_plan_network": "GOOGLE_SEARCH",
