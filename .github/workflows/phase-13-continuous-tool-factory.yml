@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       demand_file:
-        description: 'Google Keyword Planner JSON already available in the repository'
+        description: 'Demand registry JSON already available in the repository'
         required: true
-        default: 'config/google-keyword-planner.json'
+        default: 'config/search-demand.json'
   push:
     branches: [main]
     paths:
@@ -44,7 +44,7 @@ jobs:
           FILE="${INPUT_FILE:-config/google-keyword-planner.json}"
           if [ ! -f "$FILE" ]; then
             echo "Demand input missing: $FILE"
-            echo "Phase 13 requires a real Google Keyword Planner export/API-produced JSON; it will not invent demand."
+            echo "Phase 13 requires a real The input must contain real demand evidence; the workflow will not invent search volume."
             exit 1
           fi
           echo "file=$FILE" >> "$GITHUB_OUTPUT"
@@ -81,11 +81,11 @@ jobs:
         run: |
           mkdir -p artifacts/generated-tools
           php tools/generate-approved-tools.php \
-            config/generated-tool-specs.json \
+            artifacts/tool-factory/workspace/tool-specs.json \
             config/tool-generation-approvals.json \
             artifacts/generated-tools \
             config/build-security-gate.json \
-            config/build-security-gate-decisions.json \
+            artifacts/tool-factory/workspace/security-decisions.json \
             config/tools.json
 
       - name: Verify generated output and production remains blocked
