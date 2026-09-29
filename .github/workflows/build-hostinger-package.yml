@@ -1,0 +1,61 @@
+name: Build Hostinger Deployment Package
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, openssl, curl, json
+          tools: composer
+          coverage: none
+
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - name: Validate sitemap
+        run: php tests/validate-sitemap.php
+
+      - name: Build Hostinger ZIP
+        run: |
+          rm -rf package junctiontools-hostinger.zip
+          mkdir package
+          rsync -a ./ package/ \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='tests/' \
+            --exclude='package/' \
+            --exclude='junctiontools-hostinger.zip' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='*.log' \
+            --exclude='*.bak' \
+            --exclude='*.old' \
+            --exclude='*.orig'
+          cd package
+          zip -qr ../junctiontools-hostinger.zip .
+          cd ..
+          unzip -t junctiontools-hostinger.zip
+
+      - name: Upload Hostinger package
+        uses: actions/upload-artifact@v4
+        with:
+          name: junctiontools-hostinger-ready
+          path: junctiontools-hostinger.zip
+          if-no-files-found: error
+          retention-days: 14
