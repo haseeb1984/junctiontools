@@ -10,12 +10,17 @@ $files = glob($root.'/*.html') ?: [];
 $errors = [];
 $checked = 0;
 $toolSlugs = [];
+foreach ($files as $file) {
+    $name = basename($file);
+    if (in_array($name, $excluded, true)) continue;
+    $toolSlugs[] = preg_replace('/\\.html$/', '', $name);
+}
+sort($toolSlugs);
 
 foreach ($files as $file) {
     $name = basename($file);
     if (in_array($name, $excluded, true)) continue;
     $slug = preg_replace('/\.html$/', '', $name);
-    $toolSlugs[] = $slug;
     $html = (string) file_get_contents($file);
     $checked++;
 
@@ -61,7 +66,6 @@ foreach ($files as $file) {
     }
 }
 
-sort($toolSlugs);
 if (count($toolSlugs) !== 38) {
     $errors[] = 'Expected 38 published tool pages, found '.count($toolSlugs);
 }
