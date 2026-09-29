@@ -41,10 +41,10 @@ jobs:
           INPUT_FILE: ${{ inputs.demand_file }}
         run: |
           set -euo pipefail
-          FILE="${INPUT_FILE:-config/google-keyword-planner.json}"
+          FILE="${INPUT_FILE:-config/search-demand.json}"
           if [ ! -f "$FILE" ]; then
             echo "Demand input missing: $FILE"
-            echo "Phase 13 requires a real The input must contain real demand evidence; the workflow will not invent search volume."
+            echo "Phase 13 requires real demand evidence; the workflow will not invent search volume."
             exit 1
           fi
           echo "file=$FILE" >> "$GITHUB_OUTPUT"
@@ -89,6 +89,17 @@ jobs:
             artifacts/tool-factory/workspace/tool-specs.json \
             config/tool-generation-approvals.json \
             artifacts/generated-tools \
+            config/build-security-gate.json \
+            artifacts/tool-factory/workspace/security-decisions.json \
+            config/tools.json
+
+      - name: Stage explicitly approved existing-tool enhancements
+        run: |
+          mkdir -p artifacts/enhancements
+          php tools/apply-approved-tool-enhancements.php \
+            artifacts/tool-factory/workspace/tool-specs.json \
+            config/tool-enhancement-approvals.json \
+            artifacts/enhancements \
             config/build-security-gate.json \
             artifacts/tool-factory/workspace/security-decisions.json \
             config/tools.json
