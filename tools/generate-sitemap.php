@@ -30,6 +30,12 @@ if ($site === '' || !filter_var($site, FILTER_VALIDATE_URL)) {
 }
 
 $urls = [];
+
+// Always include the homepage and indexable site-information pages.
+$staticPages = ['', 'about', 'contact', 'terms', 'privacy-policy', 'disclaimer'];
+foreach ($staticPages as $page) {
+    $urls[$site . ($page === '' ? '/' : '/' . $page)] = true;
+}
 foreach (($data['tools'] ?? []) as $tool) {
     if (($tool['status'] ?? '') !== 'active') {
         continue;
@@ -68,4 +74,4 @@ if ($dom->save($outputPath) === false) {
     exit(1);
 }
 
-echo 'Sitemap generated: ' . count($urls) . ' active indexable tool URLs.' . PHP_EOL;
+echo 'Sitemap generated: ' . count($urls) . ' indexable site and tool URLs.' . PHP_EOL;
