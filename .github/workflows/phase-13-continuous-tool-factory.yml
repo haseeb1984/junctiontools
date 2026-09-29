@@ -1,0 +1,102 @@
+name: Phase 13 Continuous Automated Tool Factory
+
+on:
+  schedule:
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+    inputs:
+      demand_file:
+        description: 'Google Keyword Planner JSON already available in the repository'
+        required: true
+        default: 'config/google-keyword-planner.json'
+  push:
+    branches: [main]
+    paths:
+      - 'config/tool-generation-approvals.json'
+      - 'config/tool-enhancement-approvals.json'
+      - 'tools/run-continuous-tool-factory.php'
+
+permissions:
+  contents: read
+
+jobs:
+  discover-and-security-gate:
+    name: Discover, route, specify and security-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Resolve demand input
+        id: input
+        shell: bash
+        env:
+          INPUT_FILE: ${{ inputs.demand_file }}
+        run: |
+          set -euo pipefail
+          FILE="${INPUT_FILE:-config/google-keyword-planner.json}"
+          if [ ! -f "$FILE" ]; then
+            echo "Demand input missing: $FILE"
+            echo "Phase 13 requires a real Google Keyword Planner export/API-produced JSON; it will not invent demand."
+            exit 1
+          fi
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Run continuous factory through Security Gate
+        run: |
+          mkdir -p artifacts/tool-factory
+          php tools/run-continuous-tool-factory.php "${{ steps.input.outputs.file }}" artifacts/tool-factory/workspace
+
+      - name: Upload factory queue for human review
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase13-tool-factory-${{ github.sha }}
+          path: artifacts/tool-factory/workspace/
+          retention-days: 14
+
+  approved-build:
+    name: Generate only explicitly approved candidates
+    if: github.event_name == 'push'
+    needs: discover-and-security-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Generate approved new tools
+        run: |
+          mkdir -p artifacts/generated-tools
+          php tools/generate-approved-tools.php \
+            config/generated-tool-specs.json \
+            config/tool-generation-approvals.json \
+            artifacts/generated-tools \
+            config/build-security-gate.json \
+            config/build-security-gate-decisions.json \
+            config/tools.json
+
+      - name: Verify generated output and production remains blocked
+        run: |
+          test ! -f artifacts/generated-tools/.production-publish
+          php -r '$p=json_decode(file_get_contents("config/tool-factory-pipeline.json"), true); if (($p["automatic_production_publish"] ?? true) !== false) exit(1); echo "Production publication remains disabled.\n";'
+
+      - name: Upload approved generation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase13-approved-generation-${{ github.sha }}
+          path: artifacts/generated-tools/
+          if-no-files-found: ignore
+          retention-days: 14
