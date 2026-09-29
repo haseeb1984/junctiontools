@@ -1,0 +1,27 @@
+name: Tool Content & SEO Quality Guard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.html'
+      - 'tools/validate-tool-content-seo.php'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Validate tool content and SEO
+        run: php tools/validate-tool-content-seo.php
