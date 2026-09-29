@@ -1,4 +1,5 @@
 name: Build Hostinger Deployment Package
+# Hostinger-ready production artifact builder
 
 on:
   push:
