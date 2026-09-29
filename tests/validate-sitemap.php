@@ -35,7 +35,14 @@ if (!is_array($data)) {
 }
 
 $site = rtrim((string)($data['site'] ?? 'https://junctiontools.com'), '/');
-$expectedUrls = [];
+$expectedUrls = [
+    $site . '/' => true,
+    $site . '/about' => true,
+    $site . '/contact' => true,
+    $site . '/terms' => true,
+    $site . '/privacy-policy' => true,
+    $site . '/disclaimer' => true,
+];
 foreach (($data['tools'] ?? []) as $tool) {
     if (($tool['status'] ?? '') !== 'active' || ($tool['seo']['indexable'] ?? false) !== true) continue;
     $slug = trim((string)($tool['slug'] ?? ''));
@@ -117,4 +124,4 @@ if (!$hasComponentBypass || !$hasSafeRedirect || !$hasSafeInternalRewrite) {
     exit(1);
 }
 
-echo 'Sitemap validation passed: ' . count($urls) . ' registry-aligned tool URLs, robots.txt, and subdirectory-safe clean-URL routing verified.' . PHP_EOL;
+echo 'Sitemap validation passed: ' . count($urls) . ' site/tool URLs, robots.txt, and subdirectory-safe clean-URL routing verified.' . PHP_EOL;
