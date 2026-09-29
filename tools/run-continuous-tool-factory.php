@@ -33,13 +33,44 @@ $run = static function(string $script, array $args) use ($root): void {
     if ($code !== 0) throw new RuntimeException("Stage failed: {$script} (exit {$code})");
 };
 
+$normalizedInput = $workspace.'/keyword-planner-input.json';
+$rawInput = json_decode((string)file_get_contents($input), true);
+if (!is_array($rawInput)) {
+    throw new RuntimeException('Demand input is not valid JSON.');
+}
+if (!isset($rawInput['keywords']) && isset($rawInput['clusters']) && is_array($rawInput['clusters'])) {
+    $keywords = [];
+    foreach ($rawInput['clusters'] as $cluster) {
+        if (!is_array($cluster)) continue;
+        foreach (($cluster['signals'] ?? []) as $signal) {
+            if (!is_array($signal)) continue;
+            $query = trim((string)($signal['query'] ?? $cluster['core_query'] ?? ''));
+            $volume = $signal['search_volume'] ?? null;
+            if ($query === '' || !is_numeric($volume)) continue;
+            $keywords[] = [
+                'query'=>$query,
+                'country'=>(string)($signal['country'] ?? 'unspecified'),
+                'language'=>$signal['language'] ?? null,
+                'search_volume'=>(int)$volume,
+                'competition'=>$signal['competition'] ?? null,
+                'competition_index'=>$signal['competition_index'] ?? null
+            ];
+        }
+    }
+    $rawInput = ['keywords'=>$keywords];
+}
+if (!isset($rawInput['keywords']) || !is_array($rawInput['keywords'])) {
+    throw new RuntimeException('Demand input must contain keywords or search-demand clusters.');
+}
+file_put_contents($normalizedInput, json_encode($rawInput, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL, LOCK_EX);
+
 $demand = $workspace.'/google-demand-opportunities.json';
 $queue = $workspace.'/generation-queue.json';
 $specs = $workspace.'/tool-specs.json';
 $decisions = $workspace.'/security-decisions.json';
 
 try {
-    $run('tools/build-demand-opportunities.php', [$input, $demand]);
+    $run('tools/build-demand-opportunities.php', [$normalizedInput, $demand]);
     $run('tools/build-generation-queue.php', [$demand, $root.'/config/tools.json', $queue]);
     $run('tools/build-tool-specs.php', [$queue, $specs]);
 
