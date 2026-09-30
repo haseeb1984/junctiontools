@@ -4,7 +4,6 @@
   "provider": "google-ads-keyword-planner",
   "customer_id_env": "GOOGLE_ADS_CUSTOMER_ID",
   "login_customer_id_env": "GOOGLE_ADS_LOGIN_CUSTOMER_ID",
-  "developer_token_env": "GOOGLE_ADS_DEVELOPER_TOKEN",
   "client_id_env": "GOOGLE_ADS_CLIENT_ID",
   "client_secret_env": "GOOGLE_ADS_CLIENT_SECRET",
   "refresh_token_env": "GOOGLE_ADS_REFRESH_TOKEN",
