@@ -21,6 +21,9 @@ on:
       - 'tools/merge-demand-signals.php'
       - 'config/google-trends-runtime.json'
       - 'tools/apply-approved-tool-enhancements.php'
+      - 'tools/build-tool-factory-review-manifest.php'
+      - 'tools/validate-tool-factory-approvals.php'
+      - 'tests/validate-tool-factory-approval-layer.php'
       - '.github/workflows/phase-13-continuous-tool-factory.yml'
 
 permissions:
@@ -195,6 +198,16 @@ jobs:
         run: |
           mkdir -p artifacts/tool-factory
           php tools/run-continuous-tool-factory.php             artifacts/tool-factory/daily-demand-input.json             artifacts/tool-factory/workspace
+
+      - name: Validate human approvals against current factory candidate hashes
+        run: |
+          set -euo pipefail
+          php tools/validate-tool-factory-approvals.php             artifacts/tool-factory/workspace/tool-specs.json             artifacts/tool-factory/workspace/security-decisions.json             config/tool-generation-approvals.json             config/tool-enhancement-approvals.json             config/build-security-gate.json
+
+      - name: Run approval-layer regression test
+        run: |
+          set -euo pipefail
+          php tests/validate-tool-factory-approval-layer.php
 
       - name: Generate approved new tools
         run: |
