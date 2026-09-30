@@ -21,7 +21,7 @@ if (!is_array($approval) || ($approval['policy']['default'] ?? null) !== 'deny')
 
 $match = null;
 foreach ($approval['approvals'] ?? [] as $item) {
-    if (($item['cluster_id'] ?? null) === 'image-resizing' && ($item['target_tool_slug'] ?? null) === 'image-compressor') {
+    if (($item['cluster_id'] ?? null) === 'image-resizing' && ($item['target_tool_slug'] ?? null) === 'asset-optimizer') {
         $match = $item;
         break;
     }
@@ -39,14 +39,14 @@ if (($match['automatic_publication_allowed'] ?? true) !== false || ($match['regi
 
 $tool = null;
 foreach ($registry['tools'] ?? [] as $candidate) {
-    if (($candidate['slug'] ?? null) === 'image-compressor') {
+    if (($candidate['slug'] ?? null) === 'asset-optimizer') {
         $tool = $candidate;
         break;
     }
 }
 
 if (!$tool || ($tool['generation_eligibility'] ?? null) !== 'eligible') {
-    fwrite(STDERR, "FAIL: image-compressor must remain an existing eligible tool\n");
+    fwrite(STDERR, "FAIL: asset-optimizer must remain an existing eligible tool\n");
     exit(1);
 }
 
