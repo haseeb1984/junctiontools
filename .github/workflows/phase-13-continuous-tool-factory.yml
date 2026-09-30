@@ -18,6 +18,7 @@ on:
       - 'tools/fetch-google-keyword-planner-demand.php'
       - 'config/google-keyword-planner-runtime.json'
       - 'tools/fetch-google-trends-demand.php'
+      - 'tools/merge-demand-signals.php'
       - 'config/google-trends-runtime.json'
       - 'tools/apply-approved-tool-enhancements.php'
       - '.github/workflows/phase-13-continuous-tool-factory.yml'
@@ -49,12 +50,41 @@ jobs:
           php tools/fetch-google-trends-demand.php             config/google-trends-runtime.json             artifacts/tool-factory/google-trends-live.json
           echo "file=artifacts/tool-factory/google-trends-live.json" >> "$GITHUB_OUTPUT"
 
+      - name: Acquire optional Google Ads historical demand
+        id: google-ads-demand
+        shell: bash
+        env:
+          GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
+          GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
+          GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
+          GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/tool-factory
+          if [ -n "${GOOGLE_ADS_CUSTOMER_ID:-}" ] &&              [ -n "${GOOGLE_ADS_DEVELOPER_TOKEN:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_SECRET:-}" ] &&              [ -n "${GOOGLE_ADS_REFRESH_TOKEN:-}" ]; then
+            php tools/fetch-google-keyword-planner-demand.php               config/google-keyword-planner-runtime.json               artifacts/tool-factory/google-ads-live.json
+            echo "file=artifacts/tool-factory/google-ads-live.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "Google Ads enrichment skipped: required Ads credentials are not all configured."
+            echo "Trends remains the primary daily demand source."
+            echo "file=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Merge Trends discovery with optional Ads enrichment
+        id: merged-demand
+        run: |
+          set -euo pipefail
+          php tools/merge-demand-signals.php             artifacts/tool-factory/google-trends-live.json             "${{ steps.google-ads-demand.outputs.file }}"             artifacts/tool-factory/daily-demand-input.json
+          echo "file=artifacts/tool-factory/daily-demand-input.json" >> "$GITHUB_OUTPUT"
+
       - name: Resolve demand input
         id: input
         shell: bash
         env:
           INPUT_FILE: ${{ inputs.demand_file }}
-          LIVE_FILE: ${{ steps.google-trends-demand.outputs.file }}
+          LIVE_FILE: ${{ steps.merged-demand.outputs.file }}
         run: |
           set -euo pipefail
           if [ -n "$LIVE_FILE" ] && [ -f "$LIVE_FILE" ]; then
@@ -74,15 +104,17 @@ jobs:
           mkdir -p artifacts/tool-factory
           php tools/run-continuous-tool-factory.php "${{ steps.input.outputs.file }}" artifacts/tool-factory/workspace
 
-      - name: Validate live-demand provenance
-        if: steps.google-trends-demand.outputs.file != ''
+      - name: Validate daily demand provenance
         run: |
           set -euo pipefail
           php -r '
-            $p=json_decode(file_get_contents("artifacts/tool-factory/google-trends-live.json"), true);
-            if (($p["source"] ?? "") !== "google-trends-trending-now-rss") exit(1);
-            if (count($p["keywords"] ?? []) < 1) exit(1);
-            echo "Verified live Google demand provenance and non-empty keyword set.\n";
+            $trends=json_decode(file_get_contents("artifacts/tool-factory/google-trends-live.json"), true);
+            $merged=json_decode(file_get_contents("artifacts/tool-factory/daily-demand-input.json"), true);
+            if (($trends["source"] ?? "") !== "google-trends-trending-now-rss") exit(1);
+            if (count($trends["keywords"] ?? []) < 1) exit(1);
+            if (($merged["source"] ?? "") !== "junctiontools-daily-demand-merge") exit(1);
+            if (count($merged["keywords"] ?? []) < 1) exit(1);
+            echo "Verified daily demand provenance: Trends primary discovery with optional Ads enrichment.\n";
           '
 
       - name: Upload factory queue for human review
@@ -115,10 +147,35 @@ jobs:
           mkdir -p artifacts/tool-factory
           php tools/fetch-google-trends-demand.php             config/google-trends-runtime.json             artifacts/tool-factory/google-trends-live.json
 
+      - name: Acquire optional Google Ads historical demand
+        id: google-ads-demand-approved
+        shell: bash
+        env:
+          GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
+          GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
+          GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
+          GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${GOOGLE_ADS_CUSTOMER_ID:-}" ] &&              [ -n "${GOOGLE_ADS_DEVELOPER_TOKEN:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_SECRET:-}" ] &&              [ -n "${GOOGLE_ADS_REFRESH_TOKEN:-}" ]; then
+            php tools/fetch-google-keyword-planner-demand.php               config/google-keyword-planner-runtime.json               artifacts/tool-factory/google-ads-live.json
+            echo "file=artifacts/tool-factory/google-ads-live.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "Google Ads enrichment skipped: required Ads credentials are not all configured."
+            echo "file=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Merge daily demand signals
+        run: |
+          set -euo pipefail
+          php tools/merge-demand-signals.php             artifacts/tool-factory/google-trends-live.json             "${{ steps.google-ads-demand-approved.outputs.file }}"             artifacts/tool-factory/daily-demand-input.json
+
       - name: Re-run factory for the approved commit
         run: |
           mkdir -p artifacts/tool-factory
-          php tools/run-continuous-tool-factory.php             artifacts/tool-factory/google-trends-live.json             artifacts/tool-factory/workspace
+          php tools/run-continuous-tool-factory.php             artifacts/tool-factory/daily-demand-input.json             artifacts/tool-factory/workspace
 
       - name: Generate approved new tools
         run: |
