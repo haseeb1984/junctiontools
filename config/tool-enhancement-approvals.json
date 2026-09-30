@@ -1,9 +1,13 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "policy": {
     "description": "Only explicitly approved existing-tool enhancements may enter implementation and validation.",
     "default": "deny",
-    "publication_requires_separate_review": true
+    "publication_requires_separate_review": true,
+    "approval_schema_version": "1.1",
+    "hash_binding_required_for_new_approvals": true,
+    "implementation_does_not_authorize_publication": true,
+    "legacy_explicit_approvals_allowed": true
   },
   "approvals": [
     {
