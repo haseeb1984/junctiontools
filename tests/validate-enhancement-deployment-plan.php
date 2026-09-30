@@ -23,7 +23,7 @@ if (!is_array($data) || ($data['plan_status'] ?? '') !== 'pending_publication_re
 }
 
 $enhancements = $data['enhancements'] ?? [];
-if (count($enhancements) !== 1 || ($enhancements[0]['target_tool_slug'] ?? '') !== 'image-compressor') {
+if (count($enhancements) !== 1 || ($enhancements[0]['target_tool_slug'] ?? '') !== 'asset-optimizer') {
     fwrite(STDERR, "FAIL: expected exactly the approved image-compressor enhancement\n");
     exit(1);
 }
