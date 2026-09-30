@@ -170,11 +170,14 @@ foreach ($opportunities['opportunities'] as $candidate) {
         'matched_capabilities' => $match['matched_capabilities'] ?? [],
         'intent' => $match['intent'] ?? demand_profile($query)['intent'],
         'priority_score' => (int)($candidate['score'] ?? 1),
-        'demand_signal' => (int)($candidate['search_volume'] ?? 0),
+        'demand_signal' => (int)($candidate['search_volume'] ?? $candidate['trend_traffic_lower_bound'] ?? 0),
         'country' => $candidate['country'] ?? 'unspecified',
         'language' => $candidate['language'] ?? null,
         'competition' => $candidate['competition'] ?? null,
         'competition_index' => $candidate['competition_index'] ?? null,
+        'trend_traffic_label' => $candidate['trend_traffic_label'] ?? null,
+        'trend_traffic_lower_bound' => $candidate['trend_traffic_lower_bound'] ?? null,
+        'trend_signal' => $candidate['trend_signal'] ?? null,
         'existing_tool_match' => $tool['id'] ?? null,
         'target_tool_slug' => $tool['slug'] ?? null,
         'recommended_slug' => $isExisting ? null : $normalized,
@@ -187,7 +190,7 @@ foreach ($opportunities['opportunities'] as $candidate) {
             'preserve_existing_functionality' => true
         ] : null,
         'confidence' => $candidate['confidence'] ?? 'low',
-        'source' => 'google-ads-keyword-planner',
+        'source' => (string)($candidate['source'] ?? 'unknown'),
         'status' => $isExisting ? 'enhancement-review' : 'candidate'
     ];
 }
