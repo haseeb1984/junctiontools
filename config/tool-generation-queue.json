@@ -72,7 +72,7 @@
       "priority_score": 94,
       "demand_signal": 290000,
       "signal_count": 4,
-      "existing_tool_match": "asset-optimizer",
+      "existing_tool_match": "image_compressor",
       "target_tool_slug": "asset-optimizer",
       "implementation": "enhance-existing-image-tool",
       "recommended_slug": "asset-optimizer",
