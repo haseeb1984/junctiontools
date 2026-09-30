@@ -26,6 +26,11 @@ on:
 permissions:
   contents: read
 
+# Never cancel a daily demand run; a queued manual/push run must not erase the scheduled evidence.
+concurrency:
+  group: phase-13-demand-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   discover-and-security-gate:
     name: Discover, route, specify and security-gate
