@@ -118,7 +118,7 @@ jobs:
       - name: Re-run factory for the approved commit
         run: |
           mkdir -p artifacts/tool-factory
-          php tools/run-continuous-tool-factory.php             artifacts/tool-factory/google-google-trends-live.json             artifacts/tool-factory/workspace
+          php tools/run-continuous-tool-factory.php             artifacts/tool-factory/google-trends-live.json             artifacts/tool-factory/workspace
 
       - name: Generate approved new tools
         run: |
