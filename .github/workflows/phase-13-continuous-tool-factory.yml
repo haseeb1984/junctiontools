@@ -56,14 +56,13 @@ jobs:
         env:
           GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
           GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
-          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
           GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
           GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
           GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p artifacts/tool-factory
-          if [ -n "${GOOGLE_ADS_CUSTOMER_ID:-}" ] &&              [ -n "${GOOGLE_ADS_DEVELOPER_TOKEN:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_SECRET:-}" ] &&              [ -n "${GOOGLE_ADS_REFRESH_TOKEN:-}" ]; then
+          if [ -n "${GOOGLE_ADS_CUSTOMER_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_SECRET:-}" ] &&              [ -n "${GOOGLE_ADS_REFRESH_TOKEN:-}" ]; then
             php tools/fetch-google-keyword-planner-demand.php               config/google-keyword-planner-runtime.json               artifacts/tool-factory/google-ads-live.json
             echo "file=artifacts/tool-factory/google-ads-live.json" >> "$GITHUB_OUTPUT"
           else
@@ -153,13 +152,12 @@ jobs:
         env:
           GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
           GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
-          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
           GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
           GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
           GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
         run: |
           set -euo pipefail
-          if [ -n "${GOOGLE_ADS_CUSTOMER_ID:-}" ] &&              [ -n "${GOOGLE_ADS_DEVELOPER_TOKEN:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_SECRET:-}" ] &&              [ -n "${GOOGLE_ADS_REFRESH_TOKEN:-}" ]; then
+          if [ -n "${GOOGLE_ADS_CUSTOMER_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_SECRET:-}" ] &&              [ -n "${GOOGLE_ADS_REFRESH_TOKEN:-}" ]; then
             php tools/fetch-google-keyword-planner-demand.php               config/google-keyword-planner-runtime.json               artifacts/tool-factory/google-ads-live.json
             echo "file=artifacts/tool-factory/google-ads-live.json" >> "$GITHUB_OUTPUT"
           else
