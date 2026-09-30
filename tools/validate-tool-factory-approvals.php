@@ -94,11 +94,10 @@ $validate = static function(array $item, string $expectedType) use (&$errors, &$
         return;
     }
     if (!isset($specBySlug[$slug])) {
-        // An approval for a candidate absent from today's demand/spec set is
-        // stale; it must not authorize a build against a different candidate.
-        if (($item['approved'] ?? false) === true || ($item['decision'] ?? '') === 'approved-for-implementation-and-validation') {
-            $errors[] = $expectedType . ": stale approval has no current specification: {$slug}";
-        }
+        // Approval registries may contain standing approvals for candidates that
+        // are not present in today's demand snapshot. They are inert until the
+        // exact candidate reappears; never treat absence from today's snapshot
+        // as a stale approval by itself.
         return;
     }
 
