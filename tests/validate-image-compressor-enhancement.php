@@ -33,7 +33,7 @@ $required = [
     'fitTargetSize',
     'FileReader',
     'toBlob',
-    'https://junctiontools.com/image-compressor',
+    'https://junctiontools.com/asset-optimizer',
 ];
 
 foreach ($required as $needle) {
@@ -50,7 +50,7 @@ if (preg_match('/<form[^>]*action=["\'][^"\']*scanner|fetch\([^)]*scanner/i', $h
 
 $tool = null;
 foreach ($data['tools'] ?? [] as $candidate) {
-    if (($candidate['slug'] ?? '') === 'image-compressor') {
+    if (($candidate['slug'] ?? '') === 'asset-optimizer') {
         $tool = $candidate;
         break;
     }
@@ -69,7 +69,7 @@ foreach ($generation['enhancements'] ?? [] as $candidate) {
     }
 }
 
-if (!$enhancement || ($enhancement['target_tool_slug'] ?? '') !== 'image-compressor') {
+if (!$enhancement || ($enhancement['target_tool_slug'] ?? '') !== 'asset-optimizer') {
     fwrite(STDERR, "Image resizing enhancement queue entry is missing or mis-targeted.\n");
     exit(1);
 }
