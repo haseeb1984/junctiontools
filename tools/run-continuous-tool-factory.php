@@ -114,7 +114,7 @@ try {
             $scope = is_array($enh['scope'] ?? null) ? $enh['scope'] : [];
             $decision['enhancement'] = [
                 'target_tool_slug' => (string)($enh['target_tool_slug'] ?? $slug),
-                'scope' => array_merge($scope, ['preserve_existing_functionality' => true])
+                'scope' => array_merge(['type' => (string)($enh['type'] ?? 'seo')], $scope, ['preserve_existing_functionality' => true])
             ];
         }
         $check = bsg_evaluate($spec, $decision, $policy);
