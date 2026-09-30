@@ -110,10 +110,65 @@ try {
     }
 
     $apiVersion = preg_replace('/[^a-z0-9]/i', '', (string)($config['api_version'] ?? 'v24'));
-    $endpoint = "https://googleads.googleapis.com/{$apiVersion}/customers/{$customerId}:generateKeywordIdeas";
+    $apiBase = "https://googleads.googleapis.com/{$apiVersion}";
+    $baseHeaders = [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $accessToken,
+    ];
+    if ($loginCustomerId !== null && $loginCustomerId !== '') {
+        $baseHeaders[] = 'login-customer-id: ' . $loginCustomerId;
+    }
+
+    // Preflight the OAuth identity against Google Ads before requesting keyword ideas.
+    // This produces a precise diagnostic for wrong-account or wrong-scope refresh tokens.
+    $preflight = curl_init($apiBase . '/customers:listAccessibleCustomers');
+    curl_setopt_array($preflight, [
+        CURLOPT_POST => false,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => $baseHeaders,
+        CURLOPT_TIMEOUT => 45,
+    ]);
+    $preflightBody = curl_exec($preflight);
+    $preflightError = curl_error($preflight);
+    $preflightStatus = (int) curl_getinfo($preflight, CURLINFO_HTTP_CODE);
+    curl_close($preflight);
+    if ($preflightBody === false) {
+        throw new RuntimeException("Google Ads access preflight failed: {$preflightError}");
+    }
+    $preflightDecoded = json_decode($preflightBody, true);
+    if (!is_array($preflightDecoded)) {
+        throw new RuntimeException("Google Ads access preflight returned invalid JSON (HTTP {$preflightStatus}).");
+    }
+    if ($preflightStatus < 200 || $preflightStatus >= 300 || isset($preflightDecoded['error'])) {
+        $error = $preflightDecoded['error'] ?? [];
+        $details = is_array($error['details'] ?? null) ? $error['details'] : [];
+        $codes = [];
+        foreach ($details as $detail) {
+            if (is_array($detail) && isset($detail['errors']) && is_array($detail['errors'])) {
+                foreach ($detail['errors'] as $item) {
+                    if (is_array($item) && isset($item['errorCode'])) {
+                        $codes[] = json_encode($item['errorCode'], JSON_UNESCAPED_SLASHES);
+                    }
+                }
+            }
+        }
+        $message = (string)($error['message'] ?? 'Google Ads access preflight rejected');
+        $suffix = $codes ? ' Error codes: ' . implode(', ', $codes) : '';
+        throw new RuntimeException("Google Ads access preflight error (HTTP {$preflightStatus}): {$message}{$suffix}");
+    }
+    $accessible = is_array($preflightDecoded['resourceNames'] ?? null) ? $preflightDecoded['resourceNames'] : [];
+    if (!in_array('customers/' . $customerId, $accessible, true)) {
+        throw new RuntimeException(
+            "OAuth user does not have access to Google Ads customer {$customerId}. " .
+            "The token can access " . count($accessible) . " Google Ads customer(s); " .
+            "verify the refresh token was authorized by a user who has access to this customer."
+        );
+    }
+
+    $endpoint = "{$apiBase}/customers/{$customerId}:generateKeywordIdeas";
 
     $request = [
-        'language' => 'customers/' . $customerId . '/languageConstants/' . (string)($config['language_constant'] ?? '1000'),
+        'language' => 'languageConstants/' . (string)($config['language_constant'] ?? '1000'),
         'geoTargetConstants' => array_map(
             static fn(string $id): string => 'geoTargetConstants/' . $id,
             $geoTargets
@@ -161,8 +216,21 @@ try {
             throw new RuntimeException("Google Ads API returned invalid JSON (HTTP {$status}).");
         }
         if ($status < 200 || $status >= 300 || isset($decoded['error'])) {
-            $message = (string)($decoded['error']['message'] ?? 'Google Ads API request rejected');
-            throw new RuntimeException("Google Ads API error (HTTP {$status}): {$message}");
+            $error = $decoded['error'] ?? [];
+            $details = is_array($error['details'] ?? null) ? $error['details'] : [];
+            $codes = [];
+            foreach ($details as $detail) {
+                if (is_array($detail) && isset($detail['errors']) && is_array($detail['errors'])) {
+                    foreach ($detail['errors'] as $item) {
+                        if (is_array($item) && isset($item['errorCode'])) {
+                            $codes[] = json_encode($item['errorCode'], JSON_UNESCAPED_SLASHES);
+                        }
+                    }
+                }
+            }
+            $message = (string)($error['message'] ?? 'Google Ads API request rejected');
+            $suffix = $codes ? ' Error codes: ' . implode(', ', $codes) : '';
+            throw new RuntimeException("Google Ads API error (HTTP {$status}): {$message}{$suffix}");
         }
 
         foreach (($decoded['results'] ?? []) as $result) {
