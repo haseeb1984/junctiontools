@@ -55,7 +55,7 @@ foreach ($keywords as $row) {
 $keywords = array_values($best);
 usort($keywords, static fn(array $a, array $b): int => ($b['search_volume'] <=> $a['search_volume']) ?: strcasecmp($a['query'], $b['query']));
 
-$maxVolume = max(1, ...array_map(static fn(array $r): int => $r['search_volume'], $keywords));
+$maxSignal = max(1, ...array_map(static fn(array $r): int => (int)($r['search_volume'] ?? $r['trend_traffic_lower_bound'] ?? 0), $keywords));
 $opportunities = [];
 foreach ($keywords as $row) {
     $ratio = $row['search_volume'] / $maxVolume;
