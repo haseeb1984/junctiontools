@@ -38,14 +38,35 @@ jobs:
           php-version: '8.3'
           coverage: none
 
+      - name: Acquire live Google demand
+        id: google-demand
+        shell: bash
+        env:
+          GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
+          GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
+          GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
+          GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/tool-factory
+          php tools/fetch-google-keyword-planner-demand.php             config/google-keyword-planner-runtime.json             artifacts/tool-factory/google-keyword-planner-live.json
+          echo "file=artifacts/tool-factory/google-keyword-planner-live.json" >> "$GITHUB_OUTPUT"
+
       - name: Resolve demand input
         id: input
         shell: bash
         env:
           INPUT_FILE: ${{ inputs.demand_file }}
+          LIVE_FILE: ${{ steps.google-demand.outputs.file }}
         run: |
           set -euo pipefail
-          FILE="${INPUT_FILE:-config/search-demand.json}"
+          if [ -n "$LIVE_FILE" ] && [ -f "$LIVE_FILE" ]; then
+            FILE="$LIVE_FILE"
+          else
+            FILE="${INPUT_FILE:-config/search-demand.json}"
+          fi
           if [ ! -f "$FILE" ]; then
             echo "Demand input missing: $FILE"
             echo "Phase 13 requires real demand evidence; the workflow will not invent search volume."
@@ -92,10 +113,24 @@ jobs:
           php-version: '8.3'
           coverage: none
 
+      - name: Acquire live Google demand
+        shell: bash
+        env:
+          GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
+          GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
+          GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
+          GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/tool-factory
+          php tools/fetch-google-keyword-planner-demand.php             config/google-keyword-planner-runtime.json             artifacts/tool-factory/google-keyword-planner-live.json
+
       - name: Re-run factory for the approved commit
         run: |
           mkdir -p artifacts/tool-factory
-          php tools/run-continuous-tool-factory.php config/search-demand.json artifacts/tool-factory/workspace
+          php tools/run-continuous-tool-factory.php             artifacts/tool-factory/google-keyword-planner-live.json             artifacts/tool-factory/workspace
 
       - name: Generate approved new tools
         run: |
