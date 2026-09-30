@@ -58,8 +58,9 @@ usort($keywords, static fn(array $a, array $b): int => ($b['search_volume'] <=> 
 $maxSignal = max(1, ...array_map(static fn(array $r): int => (int)($r['search_volume'] ?? $r['trend_traffic_lower_bound'] ?? 0), $keywords));
 $opportunities = [];
 foreach ($keywords as $row) {
-    $ratio = $row['search_volume'] / $maxVolume;
-    $demand = $row['search_volume'] >= 100000 ? 5 : ($row['search_volume'] >= 25000 ? 4 : ($row['search_volume'] >= 5000 ? 3 : ($row['search_volume'] >= 1000 ? 2 : 1)));
+    $signal = (int)($row['search_volume'] ?? $row['trend_traffic_lower_bound'] ?? 0);
+    $ratio = $signal / $maxSignal;
+    $demand = $signal >= 100000 ? 5 : ($signal >= 25000 ? 4 : ($signal >= 5000 ? 3 : ($signal >= 1000 ? 2 : 1)));
     $competition = strtolower((string)($row['competition'] ?? ''));
     $competitionScore = str_contains($competition, 'high') ? 5 : (str_contains($competition, 'medium') ? 3 : (str_contains($competition, 'low') ? 1 : 3));
 
