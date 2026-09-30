@@ -48,7 +48,9 @@ foreach ($data['keywords'] as $row) {
 $best = [];
 foreach ($keywords as $row) {
     $key = $row['normalized_query'] . '|' . strtolower($row['country']) . '|' . strtolower((string)($row['language'] ?? ''));
-    if (!isset($best[$key]) || $row['search_volume'] > $best[$key]['search_volume']) $best[$key] = $row;
+    $rowSignal = (int)($row['search_volume'] ?? $row['trend_traffic_lower_bound'] ?? 0);
+    $bestSignal = isset($best[$key]) ? (int)($best[$key]['search_volume'] ?? $best[$key]['trend_traffic_lower_bound'] ?? 0) : -1;
+    if (!isset($best[$key]) || $rowSignal > $bestSignal) $best[$key] = $row;
 }
 $keywords = array_values($best);
 usort($keywords, static fn(array $a, array $b): int => ($b['search_volume'] <=> $a['search_volume']) ?: strcasecmp($a['query'], $b['query']));
