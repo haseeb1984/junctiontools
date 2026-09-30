@@ -38,21 +38,14 @@ jobs:
           php-version: '8.3'
           coverage: none
 
-      - name: Acquire live Google demand
-        id: google-demand
+      - name: Acquire live Google Trends demand
+        id: google-trends-demand
         shell: bash
-        env:
-          GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
-          GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
-          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
-          GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
-          GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
-          GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p artifacts/tool-factory
-          php tools/fetch-google-keyword-planner-demand.php             config/google-keyword-planner-runtime.json             artifacts/tool-factory/google-keyword-planner-live.json
-          echo "file=artifacts/tool-factory/google-keyword-planner-live.json" >> "$GITHUB_OUTPUT"
+          php tools/fetch-google-trends-demand.php             config/google-trends-runtime.json             artifacts/tool-factory/google-trends-live.json
+          echo "file=artifacts/tool-factory/google-trends-live.json" >> "$GITHUB_OUTPUT"
 
       - name: Resolve demand input
         id: input
