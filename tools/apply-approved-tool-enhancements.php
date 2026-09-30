@@ -161,8 +161,8 @@ foreach ($specs['specifications'] as $spec) {
     }
 
     if (!is_array($approval) || ($approval['decision'] ?? '') !== 'approved-for-implementation-and-validation') {
-        fwrite(STDERR, "No explicit implementation approval for {$slug} / {$clusterId}.\n");
-        exit(1);
+        echo "Skipping unapproved enhancement for human review: {$slug} / {$clusterId}.\n";
+        continue;
     }
 
     if (($approval['automatic_publication_allowed'] ?? true) !== false ||
