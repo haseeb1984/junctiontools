@@ -17,6 +17,8 @@ on:
       - 'tools/run-continuous-tool-factory.php'
       - 'tools/fetch-google-keyword-planner-demand.php'
       - 'config/google-keyword-planner-runtime.json'
+      - 'tools/apply-approved-tool-enhancements.php'
+      - '.github/workflows/phase-13-continuous-tool-factory.yml'
 
 permissions:
   contents: read
