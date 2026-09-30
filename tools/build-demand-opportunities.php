@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Convert imported Google Keyword Planner metrics into a ranked opportunity
+ * Convert imported Google demand metrics into a ranked opportunity
  * registry without claiming that search volume equals guaranteed traffic.
  */
 
