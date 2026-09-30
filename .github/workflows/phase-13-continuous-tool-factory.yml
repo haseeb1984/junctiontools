@@ -63,8 +63,16 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts/tool-factory
           if [ -n "${GOOGLE_ADS_CUSTOMER_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_SECRET:-}" ] &&              [ -n "${GOOGLE_ADS_REFRESH_TOKEN:-}" ]; then
-            php tools/fetch-google-keyword-planner-demand.php               config/google-keyword-planner-runtime.json               artifacts/tool-factory/google-ads-live.json
-            echo "file=artifacts/tool-factory/google-ads-live.json" >> "$GITHUB_OUTPUT"
+            if php tools/fetch-google-keyword-planner-demand.php \
+              config/google-keyword-planner-runtime.json \
+              artifacts/tool-factory/google-ads-live.json; then
+              echo "Google Ads historical enrichment acquired."
+              echo "file=artifacts/tool-factory/google-ads-live.json" >> "$GITHUB_OUTPUT"
+            else
+              echo "Google Ads enrichment unavailable; continuing with Google Trends only."
+              echo "Ads failure is non-fatal because Ads is an optional enrichment source."
+              echo "file=" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "Google Ads enrichment skipped: required Ads credentials are not all configured."
             echo "Trends remains the primary daily demand source."
@@ -158,8 +166,16 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${GOOGLE_ADS_CUSTOMER_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_ID:-}" ] &&              [ -n "${GOOGLE_ADS_CLIENT_SECRET:-}" ] &&              [ -n "${GOOGLE_ADS_REFRESH_TOKEN:-}" ]; then
-            php tools/fetch-google-keyword-planner-demand.php               config/google-keyword-planner-runtime.json               artifacts/tool-factory/google-ads-live.json
-            echo "file=artifacts/tool-factory/google-ads-live.json" >> "$GITHUB_OUTPUT"
+            if php tools/fetch-google-keyword-planner-demand.php \
+              config/google-keyword-planner-runtime.json \
+              artifacts/tool-factory/google-ads-live.json; then
+              echo "Google Ads historical enrichment acquired."
+              echo "file=artifacts/tool-factory/google-ads-live.json" >> "$GITHUB_OUTPUT"
+            else
+              echo "Google Ads enrichment unavailable; continuing with Google Trends only."
+              echo "Ads failure is non-fatal because Ads is an optional enrichment source."
+              echo "file=" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "Google Ads enrichment skipped: required Ads credentials are not all configured."
             echo "file=" >> "$GITHUB_OUTPUT"
