@@ -13,7 +13,20 @@ $root=dirname(__DIR__);
 if(!is_file($specFile)||!is_file($approvalFile)||!is_file($registryFile)){fwrite(STDERR,"Input file missing.\n");exit(1);}
 $specs=json_decode((string)file_get_contents($specFile),true);$approvals=json_decode((string)file_get_contents($approvalFile),true);$registry=json_decode((string)file_get_contents($registryFile),true);
 if(!is_array($specs)||!is_array($specs['specifications']??null)||!is_array($approvals)||!is_array($approvals['approvals']??null)||!is_array($registry)||!is_array($registry['tools']??null)){fwrite(STDERR,"Invalid generator input.\n");exit(1);}
-$approved=[];foreach($approvals['approvals'] as $item){if(!is_array($item))continue;$slug=strtolower(trim((string)($item['slug']??'')));if($slug!==''&&($item['approved']??false)===true)$approved[$slug]=true;}
+$approved=[];foreach($approvals['approvals'] as $item){if(!is_array($item))continue;$slug=strtolower(trim((string)($item['slug']??'')));if($slug!==''&&($item['approved']??false)===true)$approved[$slug]=$item;}
+function generator_canonical(mixed $value): mixed {
+ if(!is_array($value)) return $value;
+ if(array_is_list($value)) return array_map('generator_canonical',$value);
+ ksort($value,SORT_STRING);
+ foreach($value as $key=>$item) $value[$key]=generator_canonical($item);
+ return $value;
+}
+function generator_spec_hash(array $spec): string {
+ return hash('sha256',json_encode(generator_canonical($spec),JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRESERVE_ZERO_FRACTION));
+}
+function generator_policy_hash(array $policy): string {
+ return hash('sha256',json_encode(generator_canonical($policy),JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRESERVE_ZERO_FRACTION));
+}
 $header=is_file($root.'/header.html')?(string)file_get_contents($root.'/header.html'):'';
 $footer=is_file($root.'/footer.html')?(string)file_get_contents($root.'/footer.html'):'';
 if($header===''||$footer===''){fwrite(STDERR,"Shared JunctionTools header/footer are required.\n");exit(1);}
@@ -30,6 +43,22 @@ foreach($specs['specifications'] as $spec){
  $tool=$spec['tool']??[];
  $slug=strtolower(trim((string)($tool['slug']??'')));
  if($slug===''||!isset($approved[$slug]))continue;
+ $approval=$approved[$slug];
+ $specHash=generator_spec_hash($spec);
+ $policy=json_decode((string)file_get_contents($securityPolicyFile),true);
+ if(!is_array($policy)){fwrite(STDERR,"Invalid security policy.\n");exit(1);}
+ $policyHash=generator_policy_hash($policy);
+ if(($approval['approval_version']??null)!=='1.1'){
+   fwrite(STDERR,"Refusing unversioned/legacy new-tool approval: {$slug}\n"); exit(1);
+ }
+ $expectedCandidate=hash('sha256','new_tool|'.$slug.'|'.$specHash);
+ if((string)($approval['candidate_id']??'')!==$expectedCandidate ||
+    !hash_equals($specHash,(string)($approval['spec_sha256']??'')) ||
+    !hash_equals($policyHash,(string)($approval['policy_sha256']??'')) ||
+    trim((string)($approval['reviewer']??''))==='' ||
+    strtotime((string)($approval['approved_at']??''))===false){
+   fwrite(STDERR,"Refusing stale or incomplete hash-bound approval: {$slug}\n"); exit(1);
+ }
  if(($spec['spec_status']??'')!=='draft'||($spec['generation_eligible']??true)!==false){fwrite(STDERR,"Refusing non-draft or generation-authorized spec: {$slug}\n");exit(1);}
  if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) { fwrite(STDERR,"Invalid tool slug: {$slug}\n"); exit(1); }
  $duplicate=null; foreach($registry['tools'] as $registeredTool){ if(!is_array($registeredTool)) continue; $registeredSlug=strtolower(trim((string)($registeredTool['slug']??''))); $registeredName=strtolower(trim(preg_replace('/[^a-z0-9]+/i','-',(string)($registeredTool['name']??''))??'')); if($registeredSlug===$slug||$registeredName===$slug){$duplicate=$registeredTool;break;} } if($duplicate!==null){ fwrite(STDERR,"Duplicate existing tool rejected: {$slug} (existing slug: ".((string)($duplicate['slug']??$slug)).")\n"); exit(1); }
