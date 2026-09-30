@@ -72,10 +72,10 @@
       "priority_score": 94,
       "demand_signal": 290000,
       "signal_count": 4,
-      "existing_tool_match": "image_compressor",
-      "target_tool_slug": "image-compressor",
+      "existing_tool_match": "asset-optimizer",
+      "target_tool_slug": "asset-optimizer",
       "implementation": "enhance-existing-image-tool",
-      "recommended_slug": "image-compressor",
+      "recommended_slug": "asset-optimizer",
       "seo_page_cluster": [
         "image-resizer",
         "resize-image-online",
