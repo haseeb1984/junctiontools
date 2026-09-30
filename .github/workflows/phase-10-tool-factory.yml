@@ -44,6 +44,9 @@ jobs:
           php -l tools/build-deployment-plan.php
           php -l tools/build-enhancement-deployment-plan.php
           php -l tools/apply-approved-tool-enhancements.php
+          php -l tools/build-tool-factory-review-manifest.php
+          php -l tools/validate-tool-factory-approvals.php
+          php -l tests/validate-tool-factory-approval-layer.php
           php -l tests/validate-tool-factory-pipeline.php
           php -l tests/validate-demand-refresh.php
           php -l tests/validate-tool-factory-e2e.php
@@ -105,6 +108,9 @@ jobs:
 
       - name: Validate generated tool in a real browser
         run: node tests/validate-tool-factory-browser-e2e.js
+
+      - name: Validate hash-bound human approval layer
+        run: php tests/validate-tool-factory-approval-layer.php
 
       - name: Validate approved image resizer enhancement
         run: php tests/validate-tool-enhancement-approval.php
