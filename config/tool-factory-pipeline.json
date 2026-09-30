@@ -58,6 +58,19 @@
       "enabled": true
     },
     {
+      "id": "human-review-approval",
+      "phase": 5,
+      "script": "tools/validate-tool-factory-approvals.php",
+      "required_files": [
+        "tools/build-tool-factory-review-manifest.php",
+        "tools/validate-tool-factory-approvals.php",
+        "config/tool-generation-approvals.json",
+        "config/tool-enhancement-approvals.json",
+        "config/build-security-gate.json"
+      ],
+      "execution_policy": "explicit-human-review-of-hash-bound-candidate"
+    },
+    {
       "id": "approved-generation",
       "phase": 5,
       "script": "tools/generate-approved-tools.php",
