@@ -24,7 +24,10 @@ foreach ($data['keywords'] as $row) {
     if (!is_array($row)) continue;
     $query = trim((string)($row['query'] ?? ''));
     $volume = $row['search_volume'] ?? null;
-    if ($query === '' || !is_int($volume) || $volume < 0) continue;
+    $trendTraffic = $row['trend_traffic_lower_bound'] ?? null;
+    $isVolume = is_int($volume) && $volume >= 0;
+    $isTrend = is_int($trendTraffic) && $trendTraffic > 0;
+    if ($query === '' || (!$isVolume && !$isTrend)) continue;
     $normalized = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $query) ?? '', '-'));
     if ($normalized === '') continue;
     $keywords[] = [
@@ -32,7 +35,10 @@ foreach ($data['keywords'] as $row) {
         'normalized_query' => $normalized,
         'country' => (string)($row['country'] ?? 'unspecified'),
         'language' => $row['language'] ?? null,
-        'search_volume' => $volume,
+        'search_volume' => $isVolume ? $volume : null,
+        'trend_traffic_label' => $row['trend_traffic_label'] ?? null,
+        'trend_traffic_lower_bound' => $isTrend ? $trendTraffic : null,
+        'trend_signal' => $row['trend_signal'] ?? null,
         'competition' => $row['competition'] ?? null,
         'competition_index' => $row['competition_index'] ?? null,
         'source' => 'google-ads-keyword-planner'
