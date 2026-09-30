@@ -47,7 +47,6 @@ try {
         $loginCustomerId = preg_replace('/\D+/', '', $loginCustomerId);
     }
 
-    $developerToken = $getEnv((string)($config['developer_token_env'] ?? 'GOOGLE_ADS_DEVELOPER_TOKEN'));
     $clientId = $getEnv((string)($config['client_id_env'] ?? 'GOOGLE_ADS_CLIENT_ID'));
     $clientSecret = $getEnv((string)($config['client_secret_env'] ?? 'GOOGLE_ADS_CLIENT_SECRET'));
     $refreshToken = $getEnv((string)($config['refresh_token_env'] ?? 'GOOGLE_ADS_REFRESH_TOKEN'));
@@ -136,7 +135,6 @@ try {
         $headers = [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $accessToken,
-            'developer-token: ' . $developerToken,
         ];
         if ($loginCustomerId !== null && $loginCustomerId !== '') {
             $headers[] = 'login-customer-id: ' . $loginCustomerId;
@@ -221,7 +219,7 @@ try {
         'methodology' => [
             'authority' => 'Google Ads Keyword Planner KeywordPlanIdeaService.GenerateKeywordIdeas',
             'policy' => 'Only metrics returned by Google are stored; no search volume is inferred or invented.',
-            'credentials_policy' => 'OAuth credentials and developer token are runtime secrets and are never written to repository artifacts.',
+            'credentials_policy' => 'OAuth credentials are runtime secrets and are never written to repository artifacts. Google Ads API access is authorized by the Google Cloud project access level; developer tokens are no longer required for current API calls.',
         ],
         'keywords' => $keywords,
     ];
