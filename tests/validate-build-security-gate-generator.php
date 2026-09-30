@@ -69,7 +69,13 @@ $policy=json_decode((string)file_get_contents($policyFile),true,512,JSON_THROW_O
 $spec=validSpec();
 $specFile=$base.'/spec.json'; $approvalFile=$base.'/approval.json'; $decisionFile=$base.'/decision.json';
 writeJson($specFile,['specifications'=>[$spec]]);
-writeJson($approvalFile,['schema_version'=>'1.0.0','policy'=>['default'=>'deny'],'approvals'=>[['slug'=>'security-test','approved'=>true,'approved_by'=>'ci-test','approved_at'=>'2026-09-20T00:00:00Z']]]);
+$specHash=bsg_sha256($spec);
+$policyHash=bsg_sha256($policy);
+$candidateId=hash('sha256','new_tool|security-test|'.$specHash);
+writeJson($approvalFile,['schema_version'=>'1.1.0','policy'=>['default'=>'deny','publication_requires_separate_review'=>true],'approvals'=>[[
+    'approval_version'=>'1.1','slug'=>'security-test','approved'=>true,'reviewer'=>'ci-test','approved_at'=>'2026-09-20T00:00:00Z',
+    'candidate_id'=>$candidateId,'spec_sha256'=>$specHash,'policy_sha256'=>$policyHash
+]]]);
 writeJson($decisionFile,['schema_version'=>'1.0.0','policy_version'=>$policy['policy_version'],'decisions'=>[validDecision($spec,$policy)]]);
 [$status]=$okRun=runGenerator($generator,$specFile,$approvalFile,$base.'/positive',$policyFile,$decisionFile);
 assertTrue($status===0,'Valid security-gated generation did not pass.');
