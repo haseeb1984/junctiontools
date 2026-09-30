@@ -131,6 +131,15 @@ try {
         'decisions'=>$out
     ], JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL, LOCK_EX);
 
+    $reviewManifest = $workspace.'/approval-review-manifest.json';
+    $manifestCmd = escapeshellarg(PHP_BINARY).' '.escapeshellarg($root.'/tools/build-tool-factory-review-manifest.php')
+        .' '.escapeshellarg($specs).' '.escapeshellarg($decisions).' '.escapeshellarg($reviewManifest)
+        .' '.escapeshellarg($root.'/config/build-security-gate.json');
+    passthru($manifestCmd, $manifestCode);
+    if ($manifestCode !== 0) {
+        throw new RuntimeException('Stage failed: tools/build-tool-factory-review-manifest.php (exit '.$manifestCode.')');
+    }
+
     file_put_contents($workspace.'/factory-report.json', json_encode([
         'schema_version'=>'1.0.0',
         'status'=>'ready-for-human-approval',
@@ -141,7 +150,8 @@ try {
             'demand'=>$demand,
             'queue'=>$queue,
             'specifications'=>$specs,
-            'security_decisions'=>$decisions
+            'security_decisions'=>$decisions,
+            'approval_review_manifest'=>$reviewManifest
         ],
         'approval_sources'=>[
             'new_tools'=>$root.'/config/tool-generation-approvals.json',
