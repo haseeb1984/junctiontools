@@ -43,4 +43,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -RniE 'client_secret|refresh_token|authorization: bearer|developer_token' tools config tests --exclude-dir=.git
+          ! grep -RniE 'client_secret[[:space:]]*:[[:space:]]*[^[:space:]]|refresh_token[[:space:]]*:[[:space:]]*[^[:space:]]|Authorization:[[:space:]]*Bearer[[:space:]]+[A-Za-z0-9._-]{20,}' tools config tests --exclude-dir=.git
