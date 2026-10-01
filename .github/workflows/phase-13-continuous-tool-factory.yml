@@ -9,23 +9,6 @@ on:
         description: 'Demand registry JSON already available in the repository'
         required: true
         default: 'config/search-demand.json'
-  push:
-    branches: [main]
-    paths:
-      - 'config/tool-generation-approvals.json'
-      - 'config/tool-enhancement-approvals.json'
-      - 'tools/run-continuous-tool-factory.php'
-      - 'tools/fetch-google-keyword-planner-demand.php'
-      - 'config/google-keyword-planner-runtime.json'
-      - 'tools/fetch-google-trends-demand.php'
-      - 'tools/merge-demand-signals.php'
-      - 'config/google-trends-runtime.json'
-      - 'tools/apply-approved-tool-enhancements.php'
-      - 'tools/build-tool-factory-review-manifest.php'
-      - 'tools/validate-tool-factory-approvals.php'
-      - 'tests/validate-tool-factory-approval-layer.php'
-      - '.github/workflows/phase-13-continuous-tool-factory.yml'
-
 permissions:
   contents: read
 
