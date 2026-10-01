@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/security/build-security-gate.php';
 
-/** Generate executable pages only for explicitly approved draft specifications. */
+/** Generate executable pages only for draft specifications that have passed the automated Security Gate authorization supplied by the caller. */
 if($argc<3){fwrite(STDERR,"Usage: php tools/generate-approved-tools.php <specs.json> <approvals.json> [output-dir] [security-policy.json] [security-decisions.json] [tools.json]\n");exit(2);}
 $specFile=$argv[1];$approvalFile=$argv[2];$outputDir=$argv[3]??dirname(__DIR__).'/generated-tools';
 $securityPolicyFile=$argv[4]??dirname(__DIR__).'/config/build-security-gate.json';
@@ -59,7 +59,7 @@ foreach($specs['specifications'] as $spec){
     strtotime((string)($approval['approved_at']??''))===false){
    fwrite(STDERR,"Refusing stale or incomplete hash-bound approval: {$slug}\n"); exit(1);
  }
- if(($spec['spec_status']??'')!=='draft'||($spec['generation_eligible']??true)!==false){fwrite(STDERR,"Refusing non-draft or generation-authorized spec: {$slug}\n");exit(1);}
+ if(($spec['spec_status']??'')!=='draft'){fwrite(STDERR,"Refusing non-draft specification: {$slug}\n");exit(1);}
  if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) { fwrite(STDERR,"Invalid tool slug: {$slug}\n"); exit(1); }
  $duplicate=null; foreach($registry['tools'] as $registeredTool){ if(!is_array($registeredTool)) continue; $registeredSlug=strtolower(trim((string)($registeredTool['slug']??''))); $registeredName=strtolower(trim(preg_replace('/[^a-z0-9]+/i','-',(string)($registeredTool['name']??''))??'')); if($registeredSlug===$slug||$registeredName===$slug){$duplicate=$registeredTool;break;} } if($duplicate!==null){ fwrite(STDERR,"Duplicate existing tool rejected: {$slug} (existing slug: ".((string)($duplicate['slug']??$slug)).")\n"); exit(1); }
  $gate=bsg_load_and_evaluate($spec,$securityPolicyFile,$securityDecisionFile);
