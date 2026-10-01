@@ -1,10 +1,6 @@
 name: Phase 6 Generated Runtime Validation
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [phase-3/search-demand-discovery, main]
   workflow_dispatch:
 
 permissions:
