@@ -41,7 +41,7 @@ $requiredInjector = [
     'ob_start',
     'adsbygoogle.js?client=ca-pub-2009027605349204',
     'crossorigin="anonymous"',
-    'stripos(\$buffer, \'</head>\')',
+    "stripos(\$buffer, '</head>')",
 ];
 
 foreach ($requiredInjector as $needle) {
