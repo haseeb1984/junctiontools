@@ -13,6 +13,11 @@ file_put_contents($spec,json_encode(['specifications'=>[[
  'content'=>['how_to_use'=>['Enter your birth date.','Choose the calculation date.','Click Calculate Age.']],
  'privacy_security'=>['processing'=>'browser_only','network_requests'=>false,'external_dependencies'=>false,'security_requirements'=>['No network access.','No server-side storage.']]
 ]]],JSON_PRETTY_PRINT));
+
+$securityDecision=tempnam(sys_get_temp_dir(),'jt-security-decision-');
+$testRegistry=tempnam(sys_get_temp_dir(),'jt-registry-');
+file_put_contents($testRegistry,json_encode(['tools'=>[]],JSON_PRETTY_PRINT));
+$specData=json_decode((string)file_get_contents($spec),true);
 $specHash=bsg_sha256($specData['specifications'][0]);
 $policyDataForApproval=json_decode((string)file_get_contents($root.'/config/build-security-gate.json'),true,512,JSON_THROW_ON_ERROR);
 $policyHash=bsg_sha256($policyDataForApproval);
@@ -21,10 +26,6 @@ file_put_contents($approval,json_encode(['schema_version'=>'2.0.0','policy'=>['d
  'authorization_type'=>'automated-security-gate','slug'=>'age-calculator','approved'=>true,'human_approval'=>false,'publication_authorized'=>false,
  'candidate_id'=>$candidateId,'spec_sha256'=>$specHash,'policy_sha256'=>$policyHash
 ]]],JSON_PRETTY_PRINT));
-$securityDecision=tempnam(sys_get_temp_dir(),'jt-security-decision-');
-$testRegistry=tempnam(sys_get_temp_dir(),'jt-registry-');
-file_put_contents($testRegistry,json_encode(['tools'=>[]],JSON_PRETTY_PRINT));
-$specData=json_decode((string)file_get_contents($spec),true);
 $policy=(string)file_get_contents($root.'/config/build-security-gate.json');
 $policyData=json_decode($policy,true);
 $conditions=$policyData['required_conditions'];
