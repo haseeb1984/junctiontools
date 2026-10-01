@@ -47,6 +47,7 @@ foreach ($specs['specifications'] as $spec) {
         exit(1);
     }
     $type = (($spec['spec_type'] ?? '') === 'enhancement') ? 'enhancement' : 'new_tool';
+    if ($type !== 'new_tool') continue;
     $approvals[] = [
         'slug' => $slug,
         'approved' => true,
