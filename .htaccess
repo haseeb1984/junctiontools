@@ -62,3 +62,6 @@ RewriteRule ^(.+)\.html$ $1 [R=301,L,NE]
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.html -f
 RewriteRule ^(.+?)/?$ $1.html [END]
+
+AddHandler application/x-httpd-lsphp .html .htm
+php_value auto_prepend_file "/home/u805331253/domains/junctiontools.com/public_html/inject_ads.php"
