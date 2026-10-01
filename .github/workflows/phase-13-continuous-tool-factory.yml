@@ -218,18 +218,29 @@ jobs:
             artifacts/tool-factory/workspace/security-decisions.json \
             config/tools.json
 
+      - name: Build enhancement auto-authorization
+        run: |
+          set -euo pipefail
+          php -r '
+            $s=json_decode(file_get_contents("artifacts/tool-factory/workspace/tool-specs.json"),true);
+            $d=json_decode(file_get_contents("artifacts/tool-factory/workspace/security-decisions.json"),true);
+            $a=["schema_version"=>"2.0.0","policy"=>["default"=>"deny","automatic_publication_allowed"=>false,"human_approval_required_for_generation"=>false,"publication_requires_separate_human_review"=>true],"approvals"=>[]];
+            $dm=[];
+            foreach(($d["decisions"]??[]) as $x){$sl=strtolower(trim((string)($x["source"]["specification_slug"]??"")));if($sl!=="")$dm[$sl]=$x;}
+            foreach(($s["specifications"]??[]) as $x){if(($x["spec_type"]??"")!=="enhancement")continue;$sl=strtolower(trim((string)($x["tool"]["slug"]??"")));$z=$dm[$sl]??null;if(!is_array($z)||($z["decision"]??"")!=="allow"||($z["safe_to_build"]??false)!==true)continue;$a["approvals"][]=["target_tool_slug"=>$sl,"cluster_id"=>(string)($x["source"]["cluster_id"]??""),"decision"=>"approved-for-implementation-and-validation","authorization_type"=>"automated-security-gate","automatic_publication_allowed"=>false,"registry_or_sitemap_modification_allowed"=>false];}
+            file_put_contents("artifacts/tool-factory/workspace/tool-enhancement-auto-authorization.json",json_encode($a,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL);
+          '
+
       - name: Stage Security-Gate-approved existing-tool enhancements
         run: |
           mkdir -p artifacts/enhancements
           php tools/apply-approved-tool-enhancements.php \
             artifacts/tool-factory/workspace/tool-specs.json \
-            artifacts/tool-enhancement-auto-authorization.json \
+            artifacts/tool-factory/workspace/tool-enhancement-auto-authorization.json \
             artifacts/enhancements \
             config/build-security-gate.json \
             artifacts/tool-factory/workspace/security-decisions.json \
             config/tools.json
-
-      - name: Build enhancement auto-authorization
         run: |
           set -euo pipefail
           php -r '
