@@ -1,12 +1,13 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "2.0.0",
   "policy": {
-    "description": "Only explicitly approved draft specifications may enter executable code generation.",
+    "description": "Human approval is not required for generation. Security Gate allow/safe_to_build is the only build authorization; publication always requires separate human review.",
     "default": "deny",
-    "publication_requires_separate_review": true,
-    "approval_schema_version": "1.1",
-    "hash_binding_required_for_new_approvals": true,
-    "implementation_does_not_authorize_publication": true
+    "human_approval_required_for_generation": false,
+    "automated_generation_authorization": "build-security-gate-allow",
+    "publication_requires_separate_human_review": true,
+    "automatic_production_publish": false,
+    "legacy_human_generation_approvals_accepted": false
   },
   "approvals": []
 }
