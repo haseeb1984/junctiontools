@@ -1,12 +1,6 @@
 name: Phase 10 Continuous Tool Factory
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches:
-      - phase-10/continuous-tool-factory
-      - main
   workflow_dispatch:
 
 permissions:
