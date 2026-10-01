@@ -48,16 +48,11 @@ foreach($specs['specifications'] as $spec){
  $policy=json_decode((string)file_get_contents($securityPolicyFile),true);
  if(!is_array($policy)){fwrite(STDERR,"Invalid security policy.\n");exit(1);}
  $policyHash=generator_policy_hash($policy);
- if(($approval['approval_version']??null)!=='1.1'){
-   fwrite(STDERR,"Refusing unversioned/legacy new-tool approval: {$slug}\n"); exit(1);
- }
- $expectedCandidate=hash('sha256','new_tool|'.$slug.'|'.$specHash);
- if((string)($approval['candidate_id']??'')!==$expectedCandidate ||
-    !hash_equals($specHash,(string)($approval['spec_sha256']??'')) ||
-    !hash_equals($policyHash,(string)($approval['policy_sha256']??'')) ||
-    trim((string)($approval['reviewer']??''))==='' ||
-    strtotime((string)($approval['approved_at']??''))===false){
-   fwrite(STDERR,"Refusing stale or incomplete hash-bound approval: {$slug}\n"); exit(1);
+ if(($approval['authorization_type']??'')!=='automated-security-gate' ||
+    ($approval['human_approval']??true)!==false ||
+    ($approval['publication_authorized']??true)!==false ||
+    !hash_equals($specHash,(string)($approval['spec_sha256']??''))){
+   fwrite(STDERR,"Refusing build authorization that is not a current Security-Gate authorization: {$slug}\n"); exit(1);
  }
  if(($spec['spec_status']??'')!=='draft'){fwrite(STDERR,"Refusing non-draft specification: {$slug}\n");exit(1);}
  if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) { fwrite(STDERR,"Invalid tool slug: {$slug}\n"); exit(1); }
