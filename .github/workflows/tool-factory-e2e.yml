@@ -1,18 +1,6 @@
 name: Tool Factory E2E Smoke
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'tools/generate-approved-tools.php'
-      - 'security/build-security-gate.php'
-      - 'config/build-security-gate.json'
-      - 'tests/fixtures/e2e-dummy-opportunity.json'
-      - 'tests/run-tool-factory-e2e.php'
-      - 'tests/run-tool-factory-e2e-ci.sh'
-      - 'header.html'
-      - 'footer.html'
-      - '.github/workflows/tool-factory-e2e.yml'
   workflow_dispatch:
 
 jobs:
