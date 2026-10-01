@@ -1,12 +1,6 @@
 name: Phase 11 SSRF Hardening Verification
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches:
-      - phase-11/ssrf-hardening
-      - main
   workflow_dispatch:
 
 permissions:
