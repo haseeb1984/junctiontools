@@ -13,7 +13,7 @@ foreach ([$configPath, $runner] as $path) {
 }
 
 $config = json_decode((string) file_get_contents($configPath), true);
-if (!is_array($config) || ($config['schema_version'] ?? null) !== '1.0.0') {
+if (!is_array($config) || !in_array(($config['schema_version'] ?? null), ['1.0.0', '1.1.0'], true)) {
     fwrite(STDERR, "Invalid pipeline schema.\n");
     exit(1);
 }
