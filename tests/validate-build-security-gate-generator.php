@@ -52,7 +52,7 @@ function validDecision(array $spec,array $policy):array {
             'bounded_resource_usage'=>true,'privacy_contract_present'=>true
         ],
         'blocked_conditions'=>[],
-        'approval_requirements'=>['generation_approval'=>false,'enhancement_approval'=>false],
+        'approval_requirements'=>['generation_approval'=>true,'enhancement_approval'=>false],
         'evidence'=>['spec_sha256'=>bsg_sha256($spec),'policy_sha256'=>bsg_sha256($policy)]
     ];
 }
