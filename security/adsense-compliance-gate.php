@@ -9,33 +9,50 @@ function adsense_compliance_evaluate(?string $root = null): array
 {
     $root = $root ?? dirname(__DIR__);
     $htaccess = $root . '/.htaccess';
+    $injector = $root . '/inject_ads.php';
 
     if (!is_file($htaccess)) {
         return ['allowed' => false, 'error_code' => 'adsense_integration_missing', 'message' => 'Missing .htaccess.'];
     }
+    if (!is_file($injector)) {
+        return ['allowed' => false, 'error_code' => 'adsense_injector_missing', 'message' => 'Missing inject_ads.php.'];
+    }
 
     $source = (string) file_get_contents($htaccess);
+    $injectorSource = (string) file_get_contents($injector);
     $publisher = 'ca-pub-2009027605349204';
-    $scriptNeedle = 'pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' . $publisher;
+    $scriptNeedle = 'adsbygoogle.js?client=' . $publisher;
+
+    // AdSense must use the single PHP auto-prepend injector. Legacy
+    // mod_substitute response rewriting is intentionally forbidden.
+    if (strpos($source, 'mod_substitute') !== false || strpos($source, 'SUBSTITUTE') !== false) {
+        return ['allowed' => false, 'error_code' => 'adsense_legacy_integration_present', 'message' => 'Legacy mod_substitute AdSense integration is not allowed.'];
+    }
 
     foreach ([
-        '<IfModule mod_substitute.c>',
-        'AddOutputFilterByType SUBSTITUTE text/html',
-        'SubstituteMaxLineLength 10m',
-        $scriptNeedle,
-        's|</head>|',
+        'AddHandler application/x-httpd-lsphp .html .htm',
+        'php_value auto_prepend_file',
+        'inject_ads.php',
     ] as $needle) {
         if (strpos($source, $needle) === false) {
             return ['allowed' => false, 'error_code' => 'adsense_contract_missing', 'message' => 'Missing AdSense integration contract: ' . $needle];
         }
     }
 
-    if (!preg_match('/adsbygoogle\.js\?client=' . preg_quote($publisher, '/') . '[^\r\n]*crossorigin=\\\\?"anonymous\\\\?"/', $source)) {
-        return ['allowed' => false, 'error_code' => 'adsense_script_malformed', 'message' => 'AdSense script tag contract is malformed.'];
+    foreach (['ob_start', $scriptNeedle, 'crossorigin="anonymous"', "stripos(\$buffer, '</head>')"] as $needle) {
+        if (strpos($injectorSource, $needle) === false) {
+            return ['allowed' => false, 'error_code' => 'adsense_injector_contract_missing', 'message' => 'Missing AdSense injector contract: ' . $needle];
+        }
     }
 
-    if (substr_count($source, $publisher) !== 1) {
-        return ['allowed' => false, 'error_code' => 'adsense_publisher_duplicate', 'message' => 'AdSense publisher ID must appear exactly once in .htaccess.'];
+    if (substr_count($injectorSource, $scriptNeedle) !== 1) {
+        return ['allowed' => false, 'error_code' => 'adsense_script_duplicate', 'message' => 'AdSense script URL must appear exactly once in inject_ads.php.'];
+    }
+
+    foreach (['/privacy-policy', '/terms', '/disclaimer', '/contact'] as $excluded) {
+        if (strpos($injectorSource, "'" . $excluded . "'") === false) {
+            return ['allowed' => false, 'error_code' => 'adsense_exclusion_missing', 'message' => 'Missing AdSense exclusion: ' . $excluded];
+        }
     }
 
     foreach (glob($root . '/*.html') ?: [] as $file) {
@@ -50,6 +67,6 @@ function adsense_compliance_evaluate(?string $root = null): array
         'error_code' => null,
         'message' => 'Centralized AdSense integration contract passed.',
         'publisher_id' => $publisher,
-        'mode' => 'centralized-response-injection',
+        'mode' => 'php-auto-prepend-output-buffer',
     ];
 }
