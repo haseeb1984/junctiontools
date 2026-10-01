@@ -3,12 +3,7 @@ name: Final Release Gate
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      commit_sha:
-        description: "Commit SHA to evaluate (defaults to current main SHA)"
-        required: false
-        type: string
+  workflow_dispatch: {}
 
 permissions:
   contents: read
