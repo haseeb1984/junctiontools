@@ -52,7 +52,7 @@ function validDecision(array $spec,array $policy):array {
             'bounded_resource_usage'=>true,'privacy_contract_present'=>true
         ],
         'blocked_conditions'=>[],
-        'approval_requirements'=>['generation_approval'=>true,'enhancement_approval'=>false],
+        'approval_requirements'=>['generation_approval'=>false,'enhancement_approval'=>false],
         'evidence'=>['spec_sha256'=>bsg_sha256($spec),'policy_sha256'=>bsg_sha256($policy)]
     ];
 }
@@ -72,8 +72,8 @@ writeJson($specFile,['specifications'=>[$spec]]);
 $specHash=bsg_sha256($spec);
 $policyHash=bsg_sha256($policy);
 $candidateId=hash('sha256','new_tool|security-test|'.$specHash);
-writeJson($approvalFile,['schema_version'=>'1.1.0','policy'=>['default'=>'deny','publication_requires_separate_review'=>true],'approvals'=>[[
-    'approval_version'=>'1.1','slug'=>'security-test','approved'=>true,'reviewer'=>'ci-test','approved_at'=>'2026-09-20T00:00:00Z',
+writeJson($approvalFile,['schema_version'=>'2.0.0','policy'=>['default'=>'deny','human_approval_required_for_generation'=>false,'publication_requires_separate_human_review'=>true,'automatic_production_publish'=>false],'approvals'=>[[
+    'authorization_type'=>'automated-security-gate','slug'=>'security-test','approved'=>true,'human_approval'=>false,'publication_authorized'=>false,
     'candidate_id'=>$candidateId,'spec_sha256'=>$specHash,'policy_sha256'=>$policyHash
 ]]]);
 writeJson($decisionFile,['schema_version'=>'1.0.0','policy_version'=>$policy['policy_version'],'decisions'=>[validDecision($spec,$policy)]]);
