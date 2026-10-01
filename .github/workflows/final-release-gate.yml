@@ -2,8 +2,9 @@ name: Final Release Gate
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch: {}
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,9 +17,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.commit_sha || github.sha }}
-          fetch-depth: 1
 
       - name: Set up PHP 8.3
         uses: shivammathur/setup-php@v2
@@ -31,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
 
-      - name: Validate core Tool Factory contracts
+      - name: Core release quality checks
         shell: bash
         run: |
           set -euo pipefail
@@ -40,34 +38,14 @@ jobs:
           php tests/validate-demand-refresh.php
           php tests/validate-demand-routing.php
           php tests/validate-capability-demand-routing.php
-
-      - name: Validate security and generation boundaries
-        shell: bash
-        run: |
-          set -euo pipefail
           php tests/validate-build-security-gate-generator.php
           php tests/validate-approved-tool-generator.php
           php tests/validate-generated-runtime.php
           php tests/validate-ssrf-hardening.php
-
-      - name: Validate every published tool SEO/content contract
-        shell: bash
-        run: |
-          set -euo pipefail
           php tools/validate-tool-content-seo.php
-
-      - name: Validate publication and site contracts
-        shell: bash
-        run: |
-          set -euo pipefail
           php tests/validate-adsense-integration.php
           php tests/validate-site-navigation-sync.php
           php tests/validate-enhancement-deployment-plan.php
-
-      - name: Verify production remains human-gated
-        shell: bash
-        run: |
-          set -euo pipefail
           php -r '
           $p=json_decode(file_get_contents("config/tool-generation-approvals.json"), true);
           if (($p["policy"]["human_approval_required_for_generation"] ?? true) !== false) exit(1);
@@ -75,6 +53,4 @@ jobs:
           if (($p["policy"]["automatic_production_publish"] ?? true) !== false) exit(1);
           echo "Generation is automatic after Security Gate; production publication remains human-gated.\n";
           '
-
-      - name: Release gate passed
-        run: echo "Core release quality gate: PASS"
+          echo "Core release quality gate: PASS"
