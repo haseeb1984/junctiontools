@@ -10,6 +10,7 @@ if ($argc < 4) {
     exit(2);
 }
 $specFile=$argv[1]; $decisionFile=$argv[2]; $generatedDir=rtrim($argv[3], '/\\');
+$enhancementDir=$generatedDir===' ' ? '' : dirname($generatedDir).'/enhancements';
 $outputFile=$argv[4] ?? dirname(__DIR__).'/config/tool-factory-publication-review.json';
 foreach([$specFile,$decisionFile] as $file) if(!is_file($file)){fwrite(STDERR,"Input missing: {$file}\n");exit(1);}
 $specs=json_decode((string)file_get_contents($specFile),true);
