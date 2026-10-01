@@ -124,7 +124,6 @@ jobs:
 
   approved-build:
     name: Generate Security-Gate-approved candidates and prepare publication review
-    if: github.event_name == 'push'
     needs: discover-and-security-gate
     runs-on: ubuntu-latest
     timeout-minutes: 20
