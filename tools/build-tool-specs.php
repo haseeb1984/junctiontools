@@ -84,14 +84,14 @@ foreach($data['queue'] as $entry){
    ],
    'quality_gates'=>[
     'target_tool_exists',
-    'enhancement_approval',
     'security_gate_validation',
+    'automated_build_authorization',
     'seo_validation',
     'content_validation',
     'functional_regression_test',
-    'manual_review_before_publish'
+    'publication_review_before_publish'
    ],
-   'publication_policy'=>'Draft enhancement only. Applying changes and publication require separate approval gates; this specification never authorizes duplicate tool generation or production publication.'
+   'publication_policy'=>'SEO enhancement implementation may be automated after Security Gate; production publication requires separate human publication review.'
   ];
   continue;
  }
