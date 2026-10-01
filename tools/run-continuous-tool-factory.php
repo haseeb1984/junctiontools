@@ -5,7 +5,7 @@ declare(strict_types=1);
  * Continuous Tool Factory orchestrator.
  *
  * Runs the non-publishing factory stages in an isolated workspace.
- * Human approvals remain the only authorization for code generation.
+ * Security Gate authorization permits automated generation; human review is reserved for final publication.
  *
  * Usage:
  * php tools/run-continuous-tool-factory.php <google-keyword-planner.json> [workspace]
@@ -131,35 +131,34 @@ try {
         'decisions'=>$out
     ], JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL, LOCK_EX);
 
-    $reviewManifest = $workspace.'/approval-review-manifest.json';
-    $manifestCmd = escapeshellarg(PHP_BINARY).' '.escapeshellarg($root.'/tools/build-tool-factory-review-manifest.php')
-        .' '.escapeshellarg($specs).' '.escapeshellarg($decisions).' '.escapeshellarg($reviewManifest)
-        .' '.escapeshellarg($root.'/config/build-security-gate.json');
-    passthru($manifestCmd, $manifestCode);
-    if ($manifestCode !== 0) {
-        throw new RuntimeException('Stage failed: tools/build-tool-factory-review-manifest.php (exit '.$manifestCode.')');
+    $buildAuthorization = $workspace.'/build-authorization.json';
+    $authorizationCmd = escapeshellarg(PHP_BINARY).' '.escapeshellarg($root.'/tools/build-automatic-generation-authorization.php')
+        .' '.escapeshellarg($specs).' '.escapeshellarg($decisions).' '.escapeshellarg($buildAuthorization);
+    passthru($authorizationCmd, $authorizationCode);
+    if ($authorizationCode !== 0) {
+        throw new RuntimeException('Stage failed: tools/build-automatic-generation-authorization.php (exit '.$authorizationCode.')');
     }
 
     file_put_contents($workspace.'/factory-report.json', json_encode([
         'schema_version'=>'1.0.0',
-        'status'=>'ready-for-human-approval',
+        'status'=>'security-approved-ready-for-automated-build',
+        'automatic_generation_allowed'=>true,
         'automatic_production_publish'=>false,
-        'human_approval_required'=>true,
+        'human_approval_scope'=>'publication-only',
         'generated_at'=>gmdate('c'),
         'artifacts'=>[
             'demand'=>$demand,
             'queue'=>$queue,
             'specifications'=>$specs,
             'security_decisions'=>$decisions,
-            'approval_review_manifest'=>$reviewManifest
+            'build_authorization'=>$buildAuthorization
         ],
         'approval_sources'=>[
-            'new_tools'=>$root.'/config/tool-generation-approvals.json',
-            'enhancements'=>$root.'/config/tool-enhancement-approvals.json'
+            'publication_review'=>'generated after automated generation and validation'
         ]
     ], JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL, LOCK_EX);
 
-    echo "Continuous Tool Factory: ready-for-human-approval\n";
+    echo "Continuous Tool Factory: Security Gate passed; automated build authorized; publication remains human-gated\n";
     echo "Workspace: {$workspace}\n";
 } catch (Throwable $e) {
     fwrite(STDERR, $e->getMessage()."\n");
