@@ -51,8 +51,8 @@ foreach ($requiredInjector as $needle) {
     }
 }
 
-if (substr_count($injectorSource, 'ca-pub-2009027605349204') !== 1) {
-    fwrite(STDERR, "AdSense publisher ID must appear exactly once in inject_ads.php.\n");
+if (substr_count($injectorSource, 'adsbygoogle.js?client=ca-pub-2009027605349204') !== 1) {
+    fwrite(STDERR, "AdSense script URL must appear exactly once in inject_ads.php.\n");
     exit(1);
 }
 
