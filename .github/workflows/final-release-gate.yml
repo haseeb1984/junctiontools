@@ -55,6 +55,12 @@ jobs:
           php tests/validate-generated-runtime.php
           php tests/validate-ssrf-hardening.php
 
+      - name: Validate every published tool SEO/content contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          php tools/validate-tool-content-seo.php
+
       - name: Validate publication and site contracts
         shell: bash
         run: |
