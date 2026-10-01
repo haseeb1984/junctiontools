@@ -13,7 +13,14 @@ file_put_contents($spec,json_encode(['specifications'=>[[
  'content'=>['how_to_use'=>['Enter your birth date.','Choose the calculation date.','Click Calculate Age.']],
  'privacy_security'=>['processing'=>'browser_only','network_requests'=>false,'external_dependencies'=>false,'security_requirements'=>['No network access.','No server-side storage.']]
 ]]],JSON_PRETTY_PRINT));
-file_put_contents($approval,json_encode(['approvals'=>[['slug'=>'age-calculator','approved'=>true,'approved_by'=>'ci-test','approved_at'=>'2026-09-15T00:00:00Z']]],JSON_PRETTY_PRINT));
+$specHash=bsg_sha256($specData['specifications'][0]);
+$policyDataForApproval=json_decode((string)file_get_contents($root.'/config/build-security-gate.json'),true,512,JSON_THROW_ON_ERROR);
+$policyHash=bsg_sha256($policyDataForApproval);
+$candidateId=hash('sha256','new_tool|age-calculator|'.$specHash);
+file_put_contents($approval,json_encode(['schema_version'=>'2.0.0','policy'=>['default'=>'deny','human_approval_required_for_generation'=>false,'publication_requires_separate_human_review'=>true,'automatic_production_publish'=>false],'approvals'=>[[
+ 'authorization_type'=>'automated-security-gate','slug'=>'age-calculator','approved'=>true,'human_approval'=>false,'publication_authorized'=>false,
+ 'candidate_id'=>$candidateId,'spec_sha256'=>$specHash,'policy_sha256'=>$policyHash
+]]],JSON_PRETTY_PRINT));
 $securityDecision=tempnam(sys_get_temp_dir(),'jt-security-decision-');
 $testRegistry=tempnam(sys_get_temp_dir(),'jt-registry-');
 file_put_contents($testRegistry,json_encode(['tools'=>[]],JSON_PRETTY_PRINT));
@@ -21,7 +28,7 @@ $specData=json_decode((string)file_get_contents($spec),true);
 $policy=(string)file_get_contents($root.'/config/build-security-gate.json');
 $policyData=json_decode($policy,true);
 $conditions=$policyData['required_conditions'];
-$decision=['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'evaluated_at'=>gmdate('Y-m-d\\TH:i:s\\Z'),'evaluator_id'=>BUILD_SECURITY_GATE_EVALUATOR,'source'=>['opportunity_id'=>'ci-test','specification_slug'=>'age-calculator'],'decision'=>'allow','type'=>'new_tool','conditions'=>$conditions,'blocked_conditions'=>[],'safe_to_build'=>true,'approval_requirements'=>['generation_approval'=>true,'enhancement_approval'=>false],'evidence'=>['spec_sha256'=>bsg_sha256($specData['specifications'][0]),'policy_sha256'=>bsg_sha256($policyData)]];
+$decision=['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'evaluated_at'=>gmdate('Y-m-d\\TH:i:s\\Z'),'evaluator_id'=>BUILD_SECURITY_GATE_EVALUATOR,'source'=>['opportunity_id'=>'ci-test','specification_slug'=>'age-calculator'],'decision'=>'allow','type'=>'new_tool','conditions'=>$conditions,'blocked_conditions'=>[],'safe_to_build'=>true,'approval_requirements'=>['generation_approval'=>false,'enhancement_approval'=>false],'evidence'=>['spec_sha256'=>bsg_sha256($specData['specifications'][0]),'policy_sha256'=>bsg_sha256($policyData)]];
 file_put_contents($securityDecision,json_encode(['schema_version'=>'1.0.0','policy_version'=>$policyData['policy_version'],'decisions'=>[$decision]],JSON_PRETTY_PRINT));
 $cmd=escapeshellarg(PHP_BINARY).' '.escapeshellarg($tool).' '.escapeshellarg($spec).' '.escapeshellarg($approval).' '.escapeshellarg($dir).' '.escapeshellarg($root.'/config/build-security-gate.json').' '.escapeshellarg($securityDecision).' '.escapeshellarg($testRegistry); exec($cmd,$lines,$status);
 $file=$dir.'/age-calculator.html';
