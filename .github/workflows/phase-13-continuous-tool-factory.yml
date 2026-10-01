@@ -199,42 +199,62 @@ jobs:
           mkdir -p artifacts/tool-factory
           php tools/run-continuous-tool-factory.php             artifacts/tool-factory/daily-demand-input.json             artifacts/tool-factory/workspace
 
-      - name: Validate human approvals against current factory candidate hashes
+      - name: Build automated generation authorization from Security Gate
         run: |
           set -euo pipefail
-          php tools/validate-tool-factory-approvals.php             artifacts/tool-factory/workspace/tool-specs.json             artifacts/tool-factory/workspace/security-decisions.json             config/tool-generation-approvals.json             config/tool-enhancement-approvals.json             config/build-security-gate.json
+          php tools/build-automatic-generation-authorization.php \
+            artifacts/tool-factory/workspace/tool-specs.json \
+            artifacts/tool-factory/workspace/security-decisions.json \
+            artifacts/tool-factory/workspace/build-authorization.json
 
-      - name: Run approval-layer regression test
-        run: |
-          set -euo pipefail
-          php tests/validate-tool-factory-approval-layer.php
-
-      - name: Generate approved new tools
+      - name: Generate Security-Gate-approved new tools
         run: |
           mkdir -p artifacts/generated-tools
           php tools/generate-approved-tools.php \
             artifacts/tool-factory/workspace/tool-specs.json \
-            config/tool-generation-approvals.json \
+            artifacts/tool-factory/workspace/build-authorization.json \
             artifacts/generated-tools \
             config/build-security-gate.json \
             artifacts/tool-factory/workspace/security-decisions.json \
             config/tools.json
 
-      - name: Stage explicitly approved existing-tool enhancements
+      - name: Stage Security-Gate-approved existing-tool enhancements
         run: |
           mkdir -p artifacts/enhancements
           php tools/apply-approved-tool-enhancements.php \
             artifacts/tool-factory/workspace/tool-specs.json \
-            config/tool-enhancement-approvals.json \
+            artifacts/tool-enhancement-auto-authorization.json \
             artifacts/enhancements \
             config/build-security-gate.json \
             artifacts/tool-factory/workspace/security-decisions.json \
             config/tools.json
 
+      - name: Build enhancement auto-authorization
+        run: |
+          set -euo pipefail
+          php -r '
+            $s=json_decode(file_get_contents("artifacts/tool-factory/workspace/tool-specs.json"),true);
+            $d=json_decode(file_get_contents("artifacts/tool-factory/workspace/security-decisions.json"),true);
+            $a=["schema_version"=>"2.0.0","policy"=>["default"=>"deny","automatic_publication_allowed"=>false,"human_approval_required_for_generation"=>false,"publication_requires_separate_human_review"=>true],"approvals"=>[]];
+            $dm=[];
+            foreach(($d["decisions"]??[]) as $x){$sl=strtolower(trim((string)($x["source"]["specification_slug"]??"")));if($sl!=="")$dm[$sl]=$x;}
+            foreach(($s["specifications"]??[]) as $x){if(($x["spec_type"]??"")!=="enhancement")continue;$sl=strtolower(trim((string)($x["tool"]["slug"]??"")));$z=$dm[$sl]??null;if(!is_array($z)||($z["decision"]??"")!=="allow"||($z["safe_to_build"]??false)!==true)continue;$a["approvals"][]=["target_tool_slug"=>$sl,"cluster_id"=>(string)($x["source"]["cluster_id"]??""),"decision"=>"approved-for-implementation-and-validation","authorization_type"=>"automated-security-gate","automatic_publication_allowed"=>false,"registry_or_sitemap_modification_allowed"=>false];}
+            file_put_contents("artifacts/tool-factory/workspace/tool-enhancement-auto-authorization.json",json_encode($a,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL);
+          '
+
+      - name: Build final human publication-review manifest
+        run: |
+          set -euo pipefail
+          php tools/build-publication-review-manifest.php \
+            artifacts/tool-factory/workspace/tool-specs.json \
+            artifacts/tool-factory/workspace/security-decisions.json \
+            artifacts/generated-tools \
+            artifacts/tool-factory/workspace/tool-factory-publication-review.json
+
       - name: Verify generated output and production remains blocked
         run: |
           test ! -f artifacts/generated-tools/.production-publish
-          php -r '$p=json_decode(file_get_contents("config/tool-factory-pipeline.json"), true); if (($p["automatic_production_publish"] ?? true) !== false) exit(1); echo "Production publication remains disabled.\n";'
+          php -r '$p=json_decode(file_get_contents("config/tool-factory-pipeline.json"), true); if (($p["automatic_production_publish"] ?? true) !== false) exit(1); echo "Generation completed automatically after Security Gate; production publication remains disabled pending human review.\n";'
 
       - name: Upload approved generation artifact
         uses: actions/upload-artifact@v4
