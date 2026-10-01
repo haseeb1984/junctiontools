@@ -1,11 +1,6 @@
 name: Build Hostinger Deployment Package
-# Hostinger-ready production artifact builder
 
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - '**.md'
   workflow_dispatch:
 
 permissions:
