@@ -1,11 +1,6 @@
 name: Tool Content & SEO Quality Guard
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '*.html'
-      - 'tools/validate-tool-content-seo.php'
   workflow_dispatch:
 
 permissions:
