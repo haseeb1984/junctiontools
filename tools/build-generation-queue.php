@@ -114,6 +114,18 @@ function tool_capabilities(array $tool): array {
     return $profiles[$id] ?? [];
 }
 
+function tool_intent(string $query): array {
+    $q = strtolower(trim($query));
+    $toolPatterns = [
+        '~(?:calculator|converter|convert|generator|generate|formatter|format|checker|check|tester|test|counter|compress|compressor|resizer|resize|optimizer|optimizer|validator|validate|encoder|decoder|encode|decode|parser|parse|creator|maker|builder|analyzer|analyser|audit|scanner|inspector)~i',
+        '~(?:online tool|free tool|online calculator|online converter)~i'
+    ];
+    foreach ($toolPatterns as $pattern) {
+        if (preg_match($pattern, $q)) return ['is_tool_intent'=>true,'reason'=>'explicit-utility-language'];
+    }
+    return ['is_tool_intent'=>false,'reason'=>'no-utility-intent-signal'];
+}
+
 function find_existing_tool(string $query, array $tools): ?array {
     $demand = demand_profile($query);
     $required = $demand['required_capabilities'];
@@ -155,6 +167,11 @@ foreach ($opportunities['opportunities'] as $candidate) {
     $normalized = trim((string)($candidate['normalized_query'] ?? ''));
     if ($query === '' || $normalized === '') continue;
 
+    $intent = tool_intent($query);
+    if (($intent['is_tool_intent'] ?? false) !== true) {
+        echo "Rejected non-tool demand: {$query} ({$intent['reason']})\n";
+        continue;
+    }
     $match = find_existing_tool($query, $registry['tools']);
     $tool = $match['tool'] ?? null;
     $isExisting = is_array($tool);
@@ -199,10 +216,11 @@ $result = [
     'schema_version' => '1.0.0',
     'generated_at' => gmdate('Y-m-d'),
     'methodology' => [
-        'purpose' => 'Route Google demand into existing-tool SEO/content enhancements or genuinely new-tool candidates.',
+        'purpose' => 'Route only explicit tool-intent demand into existing-tool enhancements or genuinely new-tool candidates.',
         'existing_tool_policy' => 'Exact or sufficiently strong capability matches target the existing tool. They must never enter new-tool generation.',
         'duplicate_policy' => 'A matching existing capability is an enhancement or review candidate; no duplicate tool is generated.',
-        'automation_policy' => 'Enhancements and new candidates remain non-publishable until specification, security, functional, SEO, and approval gates pass.'
+        'tool_intent_policy' => 'Non-tool searches such as news, sports, people, politics, comparisons, and general information are rejected unless explicit utility intent is present.',
+        'automation_policy' => 'Qualified candidates may be generated after Security Gate; human approval is reserved for final publication.'
     ],
     'queue' => $queue
 ];
