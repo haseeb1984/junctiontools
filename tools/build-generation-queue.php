@@ -30,6 +30,14 @@ function demand_tokens(string $value): array {
     $tokens = array_map(static fn(string $t): string => $aliases[$t] ?? $t, $tokens);
     return array_values(array_unique(array_filter($tokens, static fn(string $t): bool => strlen($t) > 1 && !in_array($t, $stop, true))));
 }
+function requested_options(string $query, string $intent): array {
+    if ($intent !== 'image-format-conversion') return [];
+    if (preg_match('~\b(heic|heif|webp|avif|png|jpg|jpeg|gif)\s*(?:to|->)\s*(heic|heif|webp|avif|png|jpg|jpeg|gif)\b~i', $query, $m)) {
+        return ['input_format' => strtolower($m[1]), 'output_format' => strtolower($m[2])];
+    }
+    return [];
+}
+
 function demand_profile(string $query): array {
     $normalized = normalize_demand_term($query);
     $profile = ['required_capabilities' => [], 'intent' => 'unknown'];
@@ -155,9 +163,11 @@ function find_existing_tool(string $query, array $tools, array $capabilityRegist
             'match_type' => 'capability',
             'score' => 1.0,
             'intent' => $demand['intent'],
+            'requested_options' => requested_options($query, $demand['intent']),
             'required_capabilities' => $required,
             'matched_capabilities' => $required,
             'supported_options' => $toolCapability['supported_options'] ?? [],
+            'missing_options' => array_values(array_diff(requested_options($query, $demand['intent']), $toolCapability['supported_options'] ?? [])),
         ];
         break;
     }
@@ -193,6 +203,8 @@ foreach ($opportunities['opportunities'] as $candidate) {
         'required_capabilities' => $match['required_capabilities'] ?? demand_profile($query)['required_capabilities'],
         'matched_capabilities' => $match['matched_capabilities'] ?? [],
         'supported_options' => $match['supported_options'] ?? [],
+        'requested_options' => $match['requested_options'] ?? requested_options($query, demand_profile($query)['intent']),
+        'missing_options' => $match['missing_options'] ?? [],
         'intent' => $match['intent'] ?? demand_profile($query)['intent'],
         'priority_score' => (int)($candidate['score'] ?? 1),
         'demand_signal' => (int)($candidate['search_volume'] ?? $candidate['trend_traffic_lower_bound'] ?? 0),
@@ -211,6 +223,8 @@ foreach ($opportunities['opportunities'] as $candidate) {
             'type' => 'seo',
             'description' => 'Improve the existing tool page for the discovered search intent without changing its core functionality.',
             'requested_capabilities' => ['search-intent-aligned-title', 'meta-description', 'on-page-content', 'how-to-use-content'],
+            'requested_options' => $match['requested_options'] ?? [],
+            'missing_options' => $match['missing_options'] ?? [],
             'affected_components' => ['content', 'seo'],
             'preserve_existing_functionality' => true
         ] : null,
