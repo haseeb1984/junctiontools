@@ -119,7 +119,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: phase13-tool-factory-${{ github.sha }}
-          path: artifacts/tool-factory/workspace/
+          path: |
+            artifacts/tool-factory/workspace/
+            artifacts/generated-tools/
+            artifacts/enhancements/
           retention-days: 14
 
   approved-build:
@@ -208,6 +211,41 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts/enhancements
           php tools/apply-approved-tool-enhancements.php artifacts/tool-factory/workspace/tool-specs.json artifacts/tool-factory/workspace/tool-enhancement-auto-authorization.json artifacts/enhancements config/build-security-gate.json artifacts/tool-factory/workspace/security-decisions.json config/tools.json
+
+      - name: Run automated generated-runtime contract validation
+        run: |
+          set -euo pipefail
+          php tests/validate-generated-runtime.php
+
+      - name: Run published-tool SEO/content/indexing gate
+        run: |
+          set -euo pipefail
+          php tools/validate-tool-content-seo.php
+
+      - name: Run AdSense publication compliance gate
+        run: |
+          set -euo pipefail
+          php -r 'require "security/adsense-compliance-gate.php"; $r=adsense_compliance_evaluate(getcwd()); if (($r["allowed"] ?? false)!==true) { fwrite(STDERR, ($r["message"] ?? "AdSense gate failed")."\n"); exit(1); } echo "AdSense publication compliance gate: PASS\n";'
+
+      - name: Validate generated and staged artifact contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -r '
+            $dirs=["artifacts/generated-tools","artifacts/enhancements"];
+            $count=0;
+            foreach($dirs as $dir){
+              foreach(glob($dir."/*.html") ?: [] as $file){
+                $h=(string)file_get_contents($file);
+                if (substr_count(strtolower($h), "<html") !== 1 || substr_count(strtolower($h), "<h1") !== 1) { throw new RuntimeException("Invalid generated HTML structure: ".$file); }
+                if (stripos($h,"noindex")!==false) { throw new RuntimeException("Generated artifact contains noindex: ".$file); }
+                if (!preg_match("/<title[^>]*>\\s*.+?\\s*<\\/title>/is",$h)) { throw new RuntimeException("Generated artifact missing title: ".$file); }
+                if (!str_contains($h,"https://junctiontools.com/")) { throw new RuntimeException("Generated artifact missing JunctionTools canonical/domain marker: ".$file); }
+                $count++;
+              }
+            }
+            echo "Validated {$count} generated/staged artifact(s) before publication review.\n";
+          '
 
       - name: Build final human publication-review manifest
         run: |
