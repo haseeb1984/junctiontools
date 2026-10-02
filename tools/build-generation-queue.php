@@ -153,7 +153,7 @@ function find_existing_tool(string $query, array $tools, array $capabilityRegist
     foreach ($tools as $tool) {
         if (!is_array($tool)) continue;
         $toolCapability = tool_capabilities($tool, $capabilityRegistry);
-        if (!$capabilities) continue;
+        if (!$toolCapability) continue;
 
         [$missing, $available] = capability_match($required, $toolCapability);
         if ($missing) continue;
