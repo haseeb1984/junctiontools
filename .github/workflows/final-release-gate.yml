@@ -38,6 +38,7 @@ jobs:
           php tests/validate-demand-refresh.php
           php tests/validate-demand-routing.php
           php tests/validate-capability-demand-routing.php
+          php tests/validate-tool-capability-registry.php
           php tests/validate-build-security-gate-generator.php
           php tests/validate-approved-tool-generator.php
           php tests/validate-generated-runtime.php
