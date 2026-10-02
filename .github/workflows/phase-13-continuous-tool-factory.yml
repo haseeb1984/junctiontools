@@ -2,7 +2,7 @@ name: Phase 13 Continuous Automated Tool Factory
 
 on:
   schedule:
-    - cron: '17 1 * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
     inputs:
       demand_file:
