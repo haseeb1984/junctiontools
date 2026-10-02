@@ -35,6 +35,9 @@ function demand_profile(string $query): array {
     $profile = ['required_capabilities' => [], 'intent' => 'unknown'];
 
     $rules = [
+        ['~(?:image|photo|picture).*(?:convert|conversion|converter)|(?:convert|conversion|converter).*(?:image|photo|picture)|(?:heic|heif|webp|avif|png|jpg|jpeg|gif)\s*(?:to|->)\s*(?:heic|heif|webp|avif|png|jpg|jpeg|gif)~i',
+            ['image-format-conversion'], 'image-format-conversion'],
+
         ['~(?:word|character|line|sentence)\\s+(?:counter|count)|count\\s+(?:words|characters|lines|sentences)~i',
             ['accept_text','analyze_text','count_text'], 'text-counting'],
         ['~(?:uppercase|lowercase|title case|sentence case|capitalize|case)\\s+(?:converter|convert|changer|change)~i',
@@ -86,33 +89,35 @@ function demand_profile(string $query): array {
     return $profile;
 }
 
-function tool_capabilities(array $tool): array {
-    $profiles = [
-        'word_counter' => ['accept_text','analyze_text','count_text'],
-        'case_converter' => ['accept_text','transform_text','change_letter_case'],
-        'clean_text_tool' => ['accept_text','transform_text','clean_text'],
-        'json_formatter' => ['accept_json','parse_json','format_json'],
-        'base64_converter' => ['accept_text','encode_decode_base64'],
-        'regex_tester' => ['accept_pattern','accept_text','test_regex'],
-        'timestamp_converter' => ['accept_timestamp_or_date','convert_timestamp'],
-        'qr_code_generator' => ['accept_text_or_url','generate_qr_code','download_png'],
-        'age_calculator' => ['accept_birth_date','calculate_age'],
-        'discount_calculator' => ['accept_price','accept_percentage','calculate_discount'],
-        'invoice_generator' => ['accept_invoice_data','generate_invoice_document'],
-        'uuid_generator' => ['generate_uuid'],
-        'sha256_hash' => ['accept_text','generate_sha256_hash'],
-        'px_to_rem' => ['accept_dimensions','convert_px_to_rem'],
-        'whatsapp_link' => ['accept_phone_and_message','generate_whatsapp_url'],
-        'color_palette_generator' => ['accept_color','generate_color_palette'],
-        'aspect_ratio_calculator' => ['accept_dimensions','calculate_aspect_ratio'],
-        'contrast_checker' => ['accept_url','evaluate_color_contrast'],
-        'readability_evaluator' => ['accept_url','evaluate_readability'],
-        'meta_seo_checker' => ['accept_url','audit_meta_seo'],
-    ];
-
-    $id = (string)($tool['id'] ?? '');
-    return $profiles[$id] ?? [];
+function load_capability_registry(string $root): array {
+    $path = $root . '/config/tool-capabilities.json';
+    if (!is_file($path)) {
+        throw new RuntimeException('Capability registry is missing.');
+    }
+    $data = json_decode((string) file_get_contents($path), true);
+    if (!is_array($data) || !is_array($data['tools'] ?? null)) {
+        throw new RuntimeException('Capability registry is invalid.');
+    }
+    $byId = [];
+    foreach ($data['tools'] as $entry) {
+        if (!is_array($entry) || trim((string)($entry['tool_id'] ?? '')) === '') continue;
+        $byId[(string)$entry['tool_id']] = $entry;
+    }
+    return $byId;
 }
+
+function tool_capabilities(array $tool, array $capabilityRegistry): array {
+    $id = (string)($tool['id'] ?? '');
+    $entry = $capabilityRegistry[$id] ?? null;
+    return is_array($entry) ? $entry : [];
+}
+
+function capability_match(array $required, array $toolCapability): array {
+    $available = array_values(array_unique(array_map('strval', $toolCapability['capabilities'] ?? [])));
+    $missing = array_values(array_diff($required, $available));
+    return [$missing, $available];
+}
+
 
 function tool_intent(string $query): array {
     $q = strtolower(trim($query));
@@ -126,7 +131,7 @@ function tool_intent(string $query): array {
     return ['is_tool_intent'=>false,'reason'=>'no-utility-intent-signal'];
 }
 
-function find_existing_tool(string $query, array $tools): ?array {
+function find_existing_tool(string $query, array $tools, array $capabilityRegistry): ?array {
     $demand = demand_profile($query);
     $required = $demand['required_capabilities'];
 
@@ -139,10 +144,10 @@ function find_existing_tool(string $query, array $tools): ?array {
     $best = null;
     foreach ($tools as $tool) {
         if (!is_array($tool)) continue;
-        $capabilities = tool_capabilities($tool);
+        $toolCapability = tool_capabilities($tool, $capabilityRegistry);
         if (!$capabilities) continue;
 
-        $missing = array_values(array_diff($required, $capabilities));
+        [$missing, $available] = capability_match($required, $toolCapability);
         if ($missing) continue;
 
         $best = [
@@ -152,6 +157,7 @@ function find_existing_tool(string $query, array $tools): ?array {
             'intent' => $demand['intent'],
             'required_capabilities' => $required,
             'matched_capabilities' => $required,
+            'supported_options' => $toolCapability['supported_options'] ?? [],
         ];
         break;
     }
@@ -159,6 +165,7 @@ function find_existing_tool(string $query, array $tools): ?array {
     return $best;
 }
 
+$capabilityRegistry = load_capability_registry(dirname(__DIR__));
 $queue = [];
 $rank = 1;
 foreach ($opportunities['opportunities'] as $candidate) {
@@ -172,7 +179,7 @@ foreach ($opportunities['opportunities'] as $candidate) {
         echo "Rejected non-tool demand: {$query} ({$intent['reason']})\n";
         continue;
     }
-    $match = find_existing_tool($query, $registry['tools']);
+    $match = find_existing_tool($query, $registry['tools'], $capabilityRegistry);
     $tool = $match['tool'] ?? null;
     $isExisting = is_array($tool);
 
@@ -185,6 +192,7 @@ foreach ($opportunities['opportunities'] as $candidate) {
         'match_score' => $match['score'] ?? 0.0,
         'required_capabilities' => $match['required_capabilities'] ?? demand_profile($query)['required_capabilities'],
         'matched_capabilities' => $match['matched_capabilities'] ?? [],
+        'supported_options' => $match['supported_options'] ?? [],
         'intent' => $match['intent'] ?? demand_profile($query)['intent'],
         'priority_score' => (int)($candidate['score'] ?? 1),
         'demand_signal' => (int)($candidate['search_volume'] ?? $candidate['trend_traffic_lower_bound'] ?? 0),
@@ -217,7 +225,7 @@ $result = [
     'generated_at' => gmdate('Y-m-d'),
     'methodology' => [
         'purpose' => 'Route only explicit tool-intent demand into existing-tool enhancements or genuinely new-tool candidates.',
-        'existing_tool_policy' => 'Exact or sufficiently strong capability matches target the existing tool. They must never enter new-tool generation.',
+        'existing_tool_policy' => 'Capability registry is authoritative for overlap detection. Exact capability matches target the existing tool; missing requested options/formats are enhancement scope; only absent capabilities may become new-tool candidates.',
         'duplicate_policy' => 'A matching existing capability is an enhancement or review candidate; no duplicate tool is generated.',
         'tool_intent_policy' => 'Non-tool searches such as news, sports, people, politics, comparisons, and general information are rejected unless explicit utility intent is present.',
         'automation_policy' => 'Qualified candidates may be generated after Security Gate; human approval is reserved for final publication.'
