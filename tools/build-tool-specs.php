@@ -45,7 +45,7 @@ foreach($data['queue'] as $entry){
     'page'=>'/'.$targetSlug,
     'frontend'=>null
    ],
-   'purpose'=>'Improve the existing JunctionTools page for the discovered search intent without creating a duplicate tool or changing core functionality.',
+   'purpose'=>'Improve the existing JunctionTools page and, where the requested operation already exists but a requested option or format is missing, stage that option enhancement without creating a duplicate tool or changing unrelated functionality.',
    'enhancement'=>[
     'type'=>'seo',
     'target_tool_slug'=>$targetSlug,
@@ -53,6 +53,8 @@ foreach($data['queue'] as $entry){
      'description'=>(string)($scope['description']??'Improve the existing tool page for the discovered search intent without changing its core functionality.'),
      'requested_capabilities'=>array_values($scope['requested_capabilities']??['search-intent-aligned-title','meta-description','on-page-content','how-to-use-content']),
      'affected_components'=>array_values($scope['affected_components']??['content','seo']),
+     'requested_options'=>array_values($scope['requested_options']??[]),
+     'missing_options'=>array_values($scope['missing_options']??[]),
      'preserve_existing_functionality'=>true
     ],
     'content_requirements'=>[
