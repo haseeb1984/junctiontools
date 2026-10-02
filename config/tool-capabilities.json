@@ -128,7 +128,9 @@
       "tool_id": "meta_seo_checker",
       "capabilities": [
         "meta-seo-audit",
-        "meta-tag-audit"
+        "meta-tag-audit",
+        "accept_url",
+        "audit_meta_seo"
       ],
       "inputs": [
         "url"
@@ -215,7 +217,9 @@
     {
       "tool_id": "invoice_generator",
       "capabilities": [
-        "invoice-generation"
+        "invoice-generation",
+        "accept_invoice_data",
+        "generate_invoice_document"
       ],
       "inputs": [
         "invoice_data"
@@ -230,7 +234,10 @@
       "tool_id": "discount_calculator",
       "capabilities": [
         "discount-calculation",
-        "percentage-discount-calculation"
+        "percentage-discount-calculation",
+        "accept_price",
+        "accept_percentage",
+        "calculate_discount"
       ],
       "inputs": [
         "price",
@@ -243,7 +250,9 @@
       "tool_id": "aspect_ratio_calculator",
       "capabilities": [
         "aspect-ratio-calculation",
-        "dimension-calculation"
+        "dimension-calculation",
+        "accept_dimensions",
+        "calculate_aspect_ratio"
       ],
       "inputs": [
         "dimensions"
@@ -256,7 +265,9 @@
       "capabilities": [
         "color-picking",
         "color-code-extraction",
-        "color-palette-generation"
+        "color-palette-generation",
+        "accept_color",
+        "generate_color_palette"
       ],
       "inputs": [
         "color"
@@ -271,7 +282,9 @@
       "tool_id": "contrast_checker",
       "capabilities": [
         "color-contrast-check",
-        "wcag-contrast-audit"
+        "wcag-contrast-audit",
+        "accept_url",
+        "evaluate_color_contrast"
       ],
       "inputs": [
         "url"
@@ -308,7 +321,9 @@
       "tool_id": "readability_evaluator",
       "capabilities": [
         "readability-analysis",
-        "flesch-readability-analysis"
+        "flesch-readability-analysis",
+        "accept_url",
+        "evaluate_readability"
       ],
       "inputs": [
         "url"
@@ -332,7 +347,10 @@
       "tool_id": "clean_text_tool",
       "capabilities": [
         "text-cleaning",
-        "whitespace-cleaning"
+        "whitespace-cleaning",
+        "accept_text",
+        "transform_text",
+        "clean_text"
       ],
       "inputs": [
         "text"
@@ -344,7 +362,10 @@
       "tool_id": "case_converter",
       "capabilities": [
         "text-case-conversion",
-        "letter-case-conversion"
+        "letter-case-conversion",
+        "accept_text",
+        "transform_text",
+        "change_letter_case"
       ],
       "inputs": [
         "text"
@@ -364,7 +385,10 @@
         "character-count",
         "line-count",
         "sentence-count",
-        "text-statistics"
+        "text-statistics",
+        "accept_text",
+        "analyze_text",
+        "count_text"
       ],
       "inputs": [
         "text"
@@ -375,7 +399,9 @@
     {
       "tool_id": "px_to_rem",
       "capabilities": [
-        "px-to-rem-conversion"
+        "px-to-rem-conversion",
+        "accept_dimensions",
+        "convert_px_to_rem"
       ],
       "inputs": [
         "dimensions"
@@ -387,7 +413,9 @@
       "tool_id": "base64_converter",
       "capabilities": [
         "base64-encode",
-        "base64-decode"
+        "base64-decode",
+        "accept_text",
+        "encode_decode_base64"
       ],
       "inputs": [
         "text"
@@ -400,7 +428,10 @@
       "capabilities": [
         "json-formatting",
         "json-parsing",
-        "json-validation"
+        "json-validation",
+        "accept_json",
+        "parse_json",
+        "format_json"
       ],
       "inputs": [
         "json"
@@ -412,7 +443,10 @@
       "tool_id": "regex_tester",
       "capabilities": [
         "regex-testing",
-        "regular-expression-testing"
+        "regular-expression-testing",
+        "accept_pattern",
+        "accept_text",
+        "test_regex"
       ],
       "inputs": [
         "pattern",
@@ -425,7 +459,9 @@
       "tool_id": "sha256_hash",
       "capabilities": [
         "sha256-hashing",
-        "hash-generation"
+        "hash-generation",
+        "accept_text",
+        "generate_sha256_hash"
       ],
       "inputs": [
         "text"
@@ -436,7 +472,8 @@
     {
       "tool_id": "uuid_generator",
       "capabilities": [
-        "uuid-generation"
+        "uuid-generation",
+        "generate_uuid"
       ],
       "inputs": [
         "count"
@@ -447,7 +484,9 @@
     {
       "tool_id": "whatsapp_link",
       "capabilities": [
-        "whatsapp-link-generation"
+        "whatsapp-link-generation",
+        "accept_phone_and_message",
+        "generate_whatsapp_url"
       ],
       "inputs": [
         "phone",
@@ -461,7 +500,9 @@
       "capabilities": [
         "timestamp-conversion",
         "unix-timestamp-conversion",
-        "date-timestamp-conversion"
+        "date-timestamp-conversion",
+        "accept_timestamp_or_date",
+        "convert_timestamp"
       ],
       "inputs": [
         "timestamp",
@@ -476,7 +517,10 @@
     {
       "tool_id": "qr_code_generator",
       "capabilities": [
-        "qr-code-generation"
+        "qr-code-generation",
+        "accept_text_or_url",
+        "generate_qr_code",
+        "download_png"
       ],
       "inputs": [
         "text",
@@ -491,7 +535,9 @@
       "tool_id": "age_calculator",
       "capabilities": [
         "age-calculation",
-        "date-difference-calculation"
+        "date-difference-calculation",
+        "accept_birth_date",
+        "calculate_age"
       ],
       "inputs": [
         "birth_date",
