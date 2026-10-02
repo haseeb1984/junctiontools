@@ -1,0 +1,504 @@
+{
+  "schema_version": "1.0.0",
+  "methodology": {
+    "purpose": "Machine-readable capability contract used for demand routing. Matching is based on verified tool capabilities and supported operations/options, never on tool names alone.",
+    "source": "config/tools.json plus published tool implementation pages",
+    "policy": "If the requested operation belongs to an existing tool capability, route to enhancement. If the operation exists but a requested option/format is absent, route to enhancement with the missing option recorded. Only genuinely absent capabilities may become new-tool candidates."
+  },
+  "tools": [
+    {
+      "tool_id": "pagespeed_analyzer",
+      "capabilities": [
+        "url-analysis",
+        "pagespeed-analysis",
+        "performance-audit"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "pagespeed.html"
+    },
+    {
+      "tool_id": "image_compressor",
+      "capabilities": [
+        "image-resize",
+        "image-compression",
+        "image-format-conversion",
+        "image-optimization"
+      ],
+      "inputs": [
+        "image"
+      ],
+      "supported_options": [
+        "jpg",
+        "jpeg",
+        "png",
+        "webp",
+        "avif",
+        "gif"
+      ],
+      "source_page": "asset-optimizer.html"
+    },
+    {
+      "tool_id": "pixel_diagnostic",
+      "capabilities": [
+        "pixel-detection",
+        "tracking-pixel-analysis"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "pixel-diagnostic.html"
+    },
+    {
+      "tool_id": "ga4_event_code_generator",
+      "capabilities": [
+        "ga4-event-code-generation"
+      ],
+      "inputs": [
+        "event_configuration"
+      ],
+      "supported_options": [],
+      "source_page": "ga4-verifier.html"
+    },
+    {
+      "tool_id": "css_js_minifier",
+      "capabilities": [
+        "css-minification",
+        "javascript-minification"
+      ],
+      "inputs": [
+        "css",
+        "javascript"
+      ],
+      "supported_options": [],
+      "source_page": "css-js-minifier.html"
+    },
+    {
+      "tool_id": "aria_alt_audit",
+      "capabilities": [
+        "aria-audit",
+        "alt-text-audit",
+        "accessibility-audit"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "aria-audit.html"
+    },
+    {
+      "tool_id": "mobile_viewport_ux",
+      "capabilities": [
+        "mobile-viewport-audit",
+        "mobile-ux-audit"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "mobile-ux.html"
+    },
+    {
+      "tool_id": "ux_layout_evaluator",
+      "capabilities": [
+        "ux-layout-audit",
+        "layout-evaluation"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "ux-evaluator.html"
+    },
+    {
+      "tool_id": "cross_browser_check",
+      "capabilities": [
+        "cross-browser-compatibility-check"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "cross-browser.html"
+    },
+    {
+      "tool_id": "meta_seo_checker",
+      "capabilities": [
+        "meta-seo-audit",
+        "meta-tag-audit"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "meta-seo.html"
+    },
+    {
+      "tool_id": "schema_validator",
+      "capabilities": [
+        "schema-validation",
+        "structured-data-validation"
+      ],
+      "inputs": [
+        "json",
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "schema-validator.html"
+    },
+    {
+      "tool_id": "checkout_funnel_analyzer",
+      "capabilities": [
+        "checkout-funnel-analysis",
+        "conversion-friction-analysis"
+      ],
+      "inputs": [
+        "url",
+        "json"
+      ],
+      "supported_options": [],
+      "source_page": "checkout-funnel.html"
+    },
+    {
+      "tool_id": "cart_loss_calculator",
+      "capabilities": [
+        "cart-abandonment-analysis",
+        "cart-loss-calculation"
+      ],
+      "inputs": [
+        "url",
+        "json"
+      ],
+      "supported_options": [],
+      "source_page": "cart-abandonment.html"
+    },
+    {
+      "tool_id": "cta_headline_analyzer",
+      "capabilities": [
+        "cta-analysis",
+        "headline-analysis"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "cta-analyzer.html"
+    },
+    {
+      "tool_id": "trust_badge_inspector",
+      "capabilities": [
+        "trust-signal-audit",
+        "trust-badge-audit"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "trust-inspector.html"
+    },
+    {
+      "tool_id": "ssl_security_checker",
+      "capabilities": [
+        "ssl-certificate-check",
+        "security-audit",
+        "ssl-audit"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "ssl-checker.html"
+    },
+    {
+      "tool_id": "invoice_generator",
+      "capabilities": [
+        "invoice-generation"
+      ],
+      "inputs": [
+        "invoice_data"
+      ],
+      "supported_options": [
+        "pdf",
+        "document"
+      ],
+      "source_page": "invoice-generator.html"
+    },
+    {
+      "tool_id": "discount_calculator",
+      "capabilities": [
+        "discount-calculation",
+        "percentage-discount-calculation"
+      ],
+      "inputs": [
+        "price",
+        "percentage"
+      ],
+      "supported_options": [],
+      "source_page": "discount-calculator.html"
+    },
+    {
+      "tool_id": "aspect_ratio_calculator",
+      "capabilities": [
+        "aspect-ratio-calculation",
+        "dimension-calculation"
+      ],
+      "inputs": [
+        "dimensions"
+      ],
+      "supported_options": [],
+      "source_page": "aspect-ratio-calculator.html"
+    },
+    {
+      "tool_id": "color_palette_generator",
+      "capabilities": [
+        "color-picking",
+        "color-code-extraction",
+        "color-palette-generation"
+      ],
+      "inputs": [
+        "color"
+      ],
+      "supported_options": [
+        "hex",
+        "rgb"
+      ],
+      "source_page": "color-palette-generator.html"
+    },
+    {
+      "tool_id": "contrast_checker",
+      "capabilities": [
+        "color-contrast-check",
+        "wcag-contrast-audit"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "contrast-checker.html"
+    },
+    {
+      "tool_id": "social_asset_optimizer",
+      "capabilities": [
+        "social-image-resize",
+        "social-image-crop",
+        "social-image-compression"
+      ],
+      "inputs": [
+        "image",
+        "platform"
+      ],
+      "supported_options": [],
+      "source_page": "social-asset-optimizer.html"
+    },
+    {
+      "tool_id": "product_copy_analyzer",
+      "capabilities": [
+        "product-copy-analysis"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "product-copy.html"
+    },
+    {
+      "tool_id": "readability_evaluator",
+      "capabilities": [
+        "readability-analysis",
+        "flesch-readability-analysis"
+      ],
+      "inputs": [
+        "url"
+      ],
+      "supported_options": [],
+      "source_page": "readability.html"
+    },
+    {
+      "tool_id": "bio_font_generator",
+      "capabilities": [
+        "styled-text-generation",
+        "unicode-font-generation"
+      ],
+      "inputs": [
+        "text"
+      ],
+      "supported_options": [],
+      "source_page": "bio-font-generator.html"
+    },
+    {
+      "tool_id": "clean_text_tool",
+      "capabilities": [
+        "text-cleaning",
+        "whitespace-cleaning"
+      ],
+      "inputs": [
+        "text"
+      ],
+      "supported_options": [],
+      "source_page": "clean-text.html"
+    },
+    {
+      "tool_id": "case_converter",
+      "capabilities": [
+        "text-case-conversion",
+        "letter-case-conversion"
+      ],
+      "inputs": [
+        "text"
+      ],
+      "supported_options": [
+        "uppercase",
+        "lowercase",
+        "title-case",
+        "sentence-case"
+      ],
+      "source_page": "case-converter.html"
+    },
+    {
+      "tool_id": "word_counter",
+      "capabilities": [
+        "word-count",
+        "character-count",
+        "line-count",
+        "sentence-count",
+        "text-statistics"
+      ],
+      "inputs": [
+        "text"
+      ],
+      "supported_options": [],
+      "source_page": "word-counter.html"
+    },
+    {
+      "tool_id": "px_to_rem",
+      "capabilities": [
+        "px-to-rem-conversion"
+      ],
+      "inputs": [
+        "dimensions"
+      ],
+      "supported_options": [],
+      "source_page": "px-to-rem.html"
+    },
+    {
+      "tool_id": "base64_converter",
+      "capabilities": [
+        "base64-encode",
+        "base64-decode"
+      ],
+      "inputs": [
+        "text"
+      ],
+      "supported_options": [],
+      "source_page": "base64-converter.html"
+    },
+    {
+      "tool_id": "json_formatter",
+      "capabilities": [
+        "json-formatting",
+        "json-parsing",
+        "json-validation"
+      ],
+      "inputs": [
+        "json"
+      ],
+      "supported_options": [],
+      "source_page": "json-formatter.html"
+    },
+    {
+      "tool_id": "regex_tester",
+      "capabilities": [
+        "regex-testing",
+        "regular-expression-testing"
+      ],
+      "inputs": [
+        "pattern",
+        "text"
+      ],
+      "supported_options": [],
+      "source_page": "regex-tester.html"
+    },
+    {
+      "tool_id": "sha256_hash",
+      "capabilities": [
+        "sha256-hashing",
+        "hash-generation"
+      ],
+      "inputs": [
+        "text"
+      ],
+      "supported_options": [],
+      "source_page": "sha256-hash.html"
+    },
+    {
+      "tool_id": "uuid_generator",
+      "capabilities": [
+        "uuid-generation"
+      ],
+      "inputs": [
+        "count"
+      ],
+      "supported_options": [],
+      "source_page": "uuid-generator.html"
+    },
+    {
+      "tool_id": "whatsapp_link",
+      "capabilities": [
+        "whatsapp-link-generation"
+      ],
+      "inputs": [
+        "phone",
+        "message"
+      ],
+      "supported_options": [],
+      "source_page": "whatsapp-direct.html"
+    },
+    {
+      "tool_id": "timestamp_converter",
+      "capabilities": [
+        "timestamp-conversion",
+        "unix-timestamp-conversion",
+        "date-timestamp-conversion"
+      ],
+      "inputs": [
+        "timestamp",
+        "date"
+      ],
+      "supported_options": [
+        "seconds",
+        "milliseconds"
+      ],
+      "source_page": "timestamp-converter.html"
+    },
+    {
+      "tool_id": "qr_code_generator",
+      "capabilities": [
+        "qr-code-generation"
+      ],
+      "inputs": [
+        "text",
+        "url"
+      ],
+      "supported_options": [
+        "png"
+      ],
+      "source_page": "qr-code-generator.html"
+    },
+    {
+      "tool_id": "age_calculator",
+      "capabilities": [
+        "age-calculation",
+        "date-difference-calculation"
+      ],
+      "inputs": [
+        "birth_date",
+        "date"
+      ],
+      "supported_options": [],
+      "source_page": "age-calculator.html"
+    }
+  ]
+}
