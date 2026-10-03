@@ -258,9 +258,23 @@ try {
             continue;
         }
 
+        $monthlyHistory = [];
+        foreach (($metrics['monthlySearchVolumes'] ?? []) as $point) {
+            if (!is_array($point)) continue;
+            $year = (int)($point['year'] ?? 0);
+            $month = (int)($point['month'] ?? 0);
+            $volume = (int)($point['monthlySearches'] ?? 0);
+            if ($year > 0 && $month >= 1 && $month <= 12) {
+                $monthlyHistory[] = ['year' => $year, 'month' => $month, 'searches' => $volume];
+            }
+        }
+
         $keywords[] = [
             'query' => $text,
+            'country' => 'WORLDWIDE',
             'search_volume' => isset($metrics['avgMonthlySearches']) ? (int)$metrics['avgMonthlySearches'] : 0,
+            'monthly_search_history' => $monthlyHistory,
+            'history_months' => count($monthlyHistory),
             'competition' => $metrics['competition'] ?? null,
             'competition_index' => isset($metrics['competitionIndex']) ? (int)$metrics['competitionIndex'] : null,
             'low_top_of_page_bid_micros' => isset($metrics['lowTopOfPageBidMicros']) ? (int)$metrics['lowTopOfPageBidMicros'] : null,
