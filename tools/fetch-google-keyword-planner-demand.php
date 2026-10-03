@@ -166,14 +166,20 @@ try {
 
     $request = [
         'language' => 'languageConstants/' . (string)($config['language_constant'] ?? '1000'),
-        'geoTargetConstants' => array_map(
-            static fn(string $id): string => 'geoTargetConstants/' . $id,
-            $geoTargets
-        ),
         'includeAdultKeywords' => (bool)($config['include_adult_keywords'] ?? false),
         'keywordPlanNetwork' => (string)($config['keyword_plan_network'] ?? 'GOOGLE_SEARCH'),
-        'keywordSeed' => ['keywords' => $seeds],
+        'keywordAndUrlSeed' => [
+            'keywords' => $seeds,
+            'url' => (string)($config['url_seed'] ?? 'https://junctiontools.com/'),
+        ],
     ];
+
+    if ($geoTargets !== []) {
+        $request['geoTargetConstants'] = array_map(
+            static fn(string $id): string => 'geoTargetConstants/' . $id,
+            $geoTargets
+        );
+    }
 
     $allResults = [];
     $pageToken = null;
