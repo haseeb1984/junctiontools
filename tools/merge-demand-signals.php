@@ -1,19 +1,11 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Merge daily Google Trends discovery with optional Google Ads historical
- * Keyword Planner enrichment. Trends remains the primary discovery source.
- *
- * Usage:
- *   php tools/merge-demand-signals.php <trends.json> [ads.json] [output.json]
- */
-
+/** Merge current Trends discovery with worldwide recurring Google Ads demand. */
 if ($argc < 2) {
     fwrite(STDERR, "Usage: php tools/merge-demand-signals.php <trends.json> [ads.json] [output.json]\n");
     exit(2);
 }
-
 $trendsPath = $argv[1];
 $adsPath = $argv[2] ?? '';
 $outputPath = $argv[3] ?? dirname(__DIR__) . '/config/daily-demand-input.json';
@@ -21,9 +13,7 @@ $outputPath = $argv[3] ?? dirname(__DIR__) . '/config/daily-demand-input.json';
 $read = static function(string $path): array {
     if (!is_file($path)) throw new RuntimeException("Input file not found: {$path}");
     $data = json_decode((string)file_get_contents($path), true);
-    if (!is_array($data) || !is_array($data['keywords'] ?? null)) {
-        throw new RuntimeException("Invalid demand registry: {$path}");
-    }
+    if (!is_array($data) || !is_array($data['keywords'] ?? null)) throw new RuntimeException("Invalid demand registry: {$path}");
     return $data;
 };
 $normalize = static fn(string $q): string => strtolower(trim(preg_replace('/[^a-z0-9]+/i', ' ', $q) ?? ''));
@@ -32,45 +22,46 @@ $ads = ($adsPath !== '' && is_file($adsPath)) ? $read($adsPath) : ['keywords'=>[
 
 $merged = [];
 $index = [];
-$add = static function(array $row) use (&$merged, &$index, $normalize): void {
+$add = static function(array $row, string $sourceType) use (&$merged, &$index, $normalize): void {
     $query = trim((string)($row['query'] ?? ''));
     if ($query === '') return;
-    $country = strtoupper(trim((string)($row['country'] ?? '')));
-    $key = $normalize($query).'|'.$country;
+    $country = strtoupper(trim((string)($row['country'] ?? 'UNSPECIFIED')));
+    $language = strtoupper(trim((string)($row['language'] ?? 'UNSPECIFIED')));
+    $key = $normalize($query).'|'.$country.'|'.$language;
+
     if (!isset($index[$key])) {
+        $row['sources'] = is_array($row['sources'] ?? null) ? $row['sources'] : [$sourceType];
+        $row['source_types'] = [$sourceType];
         $index[$key] = count($merged);
         $merged[] = $row;
         return;
     }
+
     $i = $index[$key];
     $current = $merged[$i];
-    if (isset($row['search_volume']) && is_numeric($row['search_volume'])) {
-        $current['search_volume'] = (int)$row['search_volume'];
-    }
-    foreach (['competition','competition_index','low_top_of_page_bid_micros','high_top_of_page_bid_micros'] as $field) {
+    foreach (['search_volume','monthly_search_history','history_months','history_average_monthly_searches','recent_3_month_average_searches','competition','competition_index','low_top_of_page_bid_micros','high_top_of_page_bid_micros'] as $field) {
         if (array_key_exists($field, $row)) $current[$field] = $row[$field];
     }
-    $sources = array_values(array_unique(array_filter(array_merge(
-        is_array($current['sources'] ?? null) ? $current['sources'] : [$current['source'] ?? null],
-        is_array($row['sources'] ?? null) ? $row['sources'] : [$row['source'] ?? null]
+    $current['sources'] = array_values(array_unique(array_filter(array_merge(
+        is_array($current['sources'] ?? null) ? $current['sources'] : [],
+        is_array($row['sources'] ?? null) ? $row['sources'] : [$sourceType]
     ))));
-    $current['sources'] = $sources;
-    if (($current['source'] ?? '') === 'google-trends-trending-now-rss' && in_array('google-ads-keyword-planner-api', $sources, true)) {
-        $current['source'] = 'google-trends+google-ads-keyword-planner';
-    }
+    $current['source_types'] = array_values(array_unique(array_merge(
+        is_array($current['source_types'] ?? null) ? $current['source_types'] : [],
+        [$sourceType]
+    )));
+    $current['source'] = count($current['source_types']) > 1 ? 'google-trends+google-ads-keyword-planner' : (string)($current['source'] ?? $sourceType);
     $merged[$i] = $current;
 };
 
 foreach ($trends['keywords'] as $row) {
-    if (!is_array($row)) continue;
-    $row['sources'] = ['google-trends-trending-now-rss'];
-    $add($row);
+    if (is_array($row)) $add($row, 'current-trends');
 }
 foreach ($ads['keywords'] as $row) {
-    if (!is_array($row)) continue;
-    $row['country'] = $row['country'] ?? 'US';
-    $row['sources'] = ['google-ads-keyword-planner-api'];
-    $add($row);
+    if (is_array($row)) {
+        $row['country'] = $row['country'] ?? 'WORLDWIDE';
+        $add($row, 'worldwide-recurring');
+    }
 }
 
 usort($merged, static function(array $a, array $b): int {
@@ -80,14 +71,14 @@ usort($merged, static function(array $a, array $b): int {
 });
 
 $result = [
-    'schema_version' => '1.0.0',
-    'source' => 'junctiontools-daily-demand-merge',
+    'schema_version' => '1.1.0',
+    'source' => 'junctiontools-demand-merge',
     'generated_at' => gmdate('c'),
     'methodology' => [
-        'primary_discovery' => 'Google Trends Trending Now RSS',
-        'optional_enrichment' => 'Google Ads Keyword Planner historical metrics',
-        'policy' => 'Google Ads data enriches historical demand where available; Trends remains valid when Ads enrichment is unavailable.',
-        'spend_policy' => 'The enrichment uses KeywordPlanIdeaService.GenerateKeywordIdeas only; it does not create or run advertising campaigns.'
+        'current_demand' => 'Google Trends current/trending discovery feeds.',
+        'recurring_demand' => 'Google Ads Keyword Planner worldwide recurring demand with approximately 12 months of historical monthly search volumes.',
+        'coverage_policy' => 'Current and recurring signals are complementary discovery inputs; neither is a ranking prediction.',
+        'spend_policy' => 'Keyword Planner is used only for demand research; no advertising campaigns are created or run.'
     ],
     'keywords' => $merged
 ];
@@ -95,5 +86,4 @@ $result = [
 if (file_put_contents($outputPath, json_encode($result, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES).PHP_EOL, LOCK_EX) === false) {
     throw new RuntimeException("Unable to write output: {$outputPath}");
 }
-echo "Merged ".count($merged)." daily demand records";
-echo " (Trends=".count($trends['keywords']).", Ads=".count($ads['keywords']).").\n";
+echo "Merged ".count($merged)." demand records (current Trends=".count($trends['keywords']).", worldwide recurring Ads=".count($ads['keywords']).").\n";
