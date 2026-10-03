@@ -63,10 +63,7 @@ try {
         static fn($v): string => preg_replace('/\D+/', '', (string)$v),
         is_array($config['geo_target_constants'] ?? null) ? $config['geo_target_constants'] : []
     ), static fn(string $v): bool => $v !== '')));
-    if ($geoTargets === []) {
-        throw new RuntimeException('At least one geo target constant is required.');
-    }
-
+    // Empty geoTargetConstants means no location restriction: worldwide discovery.
     if (!function_exists('curl_init')) {
         throw new RuntimeException('PHP cURL extension is required for Google Ads API access.');
     }
