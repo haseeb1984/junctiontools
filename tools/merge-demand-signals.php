@@ -72,7 +72,7 @@ usort($merged, static function(array $a, array $b): int {
 
 $result = [
     'schema_version' => '1.1.0',
-    'source' => 'junctiontools-demand-merge',
+    'source' => 'junctiontools-daily-demand-merge',
     'generated_at' => gmdate('c'),
     'methodology' => [
         'current_demand' => 'Google Trends current/trending discovery feeds.',
