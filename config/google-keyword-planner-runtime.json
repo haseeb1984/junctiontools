@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "enabled": true,
   "provider": "google-ads-keyword-planner",
   "customer_id_env": "GOOGLE_ADS_CUSTOMER_ID",
@@ -9,20 +9,29 @@
   "refresh_token_env": "GOOGLE_ADS_REFRESH_TOKEN",
   "api_version": "v25",
   "language_constant": "1000",
-  "geo_target_constants": ["2840"],
+  "geo_target_constants": [],
   "keyword_plan_network": "GOOGLE_SEARCH",
   "include_adult_keywords": false,
   "seed_keywords": [
     "online calculator",
     "free online tool",
+    "image tool",
+    "image converter",
     "image resizer",
+    "image compressor",
     "pdf tool",
+    "pdf converter",
     "text converter",
-    "json formatter",
+    "json tool",
     "seo tool",
     "qr code generator",
-    "unit converter"
+    "unit converter",
+    "time converter",
+    "file converter",
+    "online checker"
   ],
   "max_results": 1000,
-  "output_schema": "google-keyword-planner-runtime-v1"
+  "output_schema": "google-keyword-planner-worldwide-v1",
+  "scope": "worldwide-all-locations",
+  "url_seed": "https://junctiontools.com/"
 }
